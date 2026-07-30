@@ -1,0 +1,29 @@
+name: qr-code-bundle
+
+services:
+  php:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: qr-code-bundle-php
+    working_dir: /app
+    volumes:
+      - .:/app
+      - composer-cache:/root/.composer/cache
+      - coverage-data:/app/coverage
+    environment:
+      - COMPOSER_ALLOW_SUPERUSER=1
+      - XDEBUG_MODE=coverage
+    command: ["tail", "-f", "/dev/null"]
+    networks:
+      - qr-code-bundle-network
+
+volumes:
+  composer-cache:
+    driver: local
+  coverage-data:
+    driver: local
+
+networks:
+  qr-code-bundle-network:
+    driver: bridge

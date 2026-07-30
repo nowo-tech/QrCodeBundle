@@ -1,0 +1,16 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: false
+
+  Nowo\QrCodeBundle\Config\ProfileResolver:
+    arguments:
+      $profiles: '%nowo_qr_code.profiles%'
+      $defaultProfile: '%nowo_qr_code.default_profile%'
+
+  Nowo\QrCodeBundle\Service\QrCodeService:
+    arguments:
+      $profileResolver: '@Nowo\QrCodeBundle\Config\ProfileResolver'
+
+  Nowo\QrCodeBundle\Twig\QrCodeExtension: ~

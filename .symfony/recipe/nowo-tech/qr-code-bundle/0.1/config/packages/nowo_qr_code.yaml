@@ -1,0 +1,8 @@
+nowo_qr_code:
+    default_profile: default
+    profiles:
+        default:
+            size: 300
+            margin: 10
+            error_correction: high
+            url_allowlist: []

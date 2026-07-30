@@ -1,0 +1,6 @@
+  QR Code Bundle is installed.
+
+  Configure size, margin, error_correction, and optional url_allowlist in:
+    config/packages/nowo_qr_code.yaml
+
+  Docs: https://github.com/nowo-tech/QrCodeBundle

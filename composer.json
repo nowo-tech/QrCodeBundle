@@ -1,0 +1,90 @@
+{
+    "name": "nowo-tech/qr-code-bundle",
+    "description": "Symfony bundle to generate PNG QR codes as data URIs with optional URL safety policy.",
+    "type": "symfony-bundle",
+    "license": "MIT",
+    "keywords": [
+        "symfony",
+        "symfony-bundle",
+        "php",
+        "frankenphp",
+        "qr-code",
+        "qr",
+        "data-uri",
+        "twig"
+    ],
+    "homepage": "https://github.com/nowo-tech/QrCodeBundle",
+    "support": {
+        "issues": "https://github.com/nowo-tech/QrCodeBundle/issues",
+        "source": "https://github.com/nowo-tech/QrCodeBundle"
+    },
+    "authors": [
+        {
+            "name": "Héctor Franco Aceituno",
+            "email": "hectorfranco@nowo.tech",
+            "homepage": "https://github.com/HecFranco",
+            "role": "Developer"
+        },
+        {
+            "name": "Nowo.tech",
+            "homepage": "https://nowo.tech"
+        }
+    ],
+    "require": {
+        "php": ">=8.1 <8.6",
+        "endroid/qr-code": "^6.0",
+        "symfony/config": "^7.0 || ^8.0",
+        "symfony/dependency-injection": "^7.0 || ^8.0",
+        "symfony/http-kernel": "^7.0 || ^8.0",
+        "twig/twig": "^3.8 || ^4.0"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.0",
+        "nowo-tech/phpstan-frankenphp": "^1.0",
+        "phpstan/extension-installer": "^1.0",
+        "phpstan/phpstan": "^2.0",
+        "phpstan/phpstan-phpunit": "^2.0",
+        "phpstan/phpstan-symfony": "^2.0",
+        "phpunit/phpunit": "^11.0",
+        "rector/rector": "^2.0",
+        "symfony/framework-bundle": "^7.0 || ^8.0",
+        "symfony/twig-bundle": "^7.0 || ^8.0",
+        "symfony/yaml": "^7.0 || ^8.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Nowo\\QrCodeBundle\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Nowo\\QrCodeBundle\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "phpstan/extension-installer": true,
+            "rector/rector": true
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "archive": {
+        "exclude": ["/demo", "/.cursor"]
+    },
+    "scripts": {
+        "test": "@php vendor/bin/phpunit --color=always",
+        "test-coverage": "@php vendor/bin/phpunit --color=always --coverage-html coverage --coverage-clover coverage.xml --coverage-text",
+        "cs-check": "@php vendor/bin/php-cs-fixer fix --dry-run --diff",
+        "cs-fix": "@php vendor/bin/php-cs-fixer fix",
+        "rector": "@php vendor/bin/rector process",
+        "rector-dry": "@php vendor/bin/rector process --dry-run --no-progress-bar",
+        "phpstan": "@php vendor/bin/phpstan analyse --memory-limit=512M",
+        "qa": ["@cs-check", "@phpstan", "@test"]
+    },
+    "suggest": {
+        "ext-gd": "Required by endroid/qr-code for PNG rendering",
+        "symfony/twig-bundle": "To use Twig helpers qr_code_data_uri and qr_code_for_url"
+    }
+}
