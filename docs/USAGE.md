@@ -44,6 +44,8 @@ $dataUri = $renderer->renderDataUri('payload');
 
 ## Twig
 
+### Functions
+
 ```twig
 <img src="{{ qr_code_data_uri('Hello') }}" alt="QR">
 <img src="{{ qr_code_data_uri('Hello', 'compact') }}" alt="QR">
@@ -51,6 +53,36 @@ $dataUri = $renderer->renderDataUri('payload');
 <img src="{{ qr_code_for_url(passDownloadUrl, 'wallet') }}" alt="QR">
 ```
 
-`qr_code_for_url` applies `QrUrlPolicy` for the selected profile (same as `createDataUriForUrl`). Only `http`/`https` URLs with a host are accepted; optional `url_allowlist` further restricts hosts/paths.
+`qr_code_for_url` applies `QrUrlPolicy` for the selected profile (same as `createDataUriForUrl`).
 
-See [CONFIGURATION.md](CONFIGURATION.md) for the profiles shape.
+### Twig Component (`NowoQrCode`)
+
+Requires `symfony/ux-twig-component` (already a package dependency).
+
+```twig
+<twig:NowoQrCode content="EVENT-42" alt="Ticket QR" class="qr-img" />
+<twig:NowoQrCode url="{{ downloadUrl }}" profile="compact" />
+{{ component('NowoQrCode', { content: 'Hello', profile: 'default' }) }}
+```
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `content` | string | Arbitrary payload (no URL policy) |
+| `url` | string | http(s) URL encoded via URL policy |
+| `profile` | string\|null | Named profile; omit for `default_profile` |
+| `alt` | string | `<img alt>` (default `QR code`) |
+| `class` | string | Optional CSS classes |
+| `forUrl` | bool | Force URL-policy path using `url` or `content` |
+
+### Symfony UX Toolkit
+
+[`symfony/ux-toolkit`](https://symfony.com/bundles/ux-toolkit/current/index.html) is **optional** (PHP **8.4+**, experimental). Install it in the host app to use Shadcn (or other) kit components alongside `NowoQrCode`:
+
+```bash
+composer require symfony/ux-toolkit
+php bin/console ux:install button --kit=shadcn
+```
+
+`NowoQrCode` follows Toolkit-friendly `{# @prop #}` documentation in its Twig template so it fits the same design-system workflow. The toolkit does **not** replace this bundle’s component; it complements layout/UI primitives around the QR image.
+
+See [CONFIGURATION.md](CONFIGURATION.md) for profiles and [Twig overrides](CONFIGURATION.md#twig-template-overrides-req-twig-001).

@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Nowo\QrCodeBundle;
 
+use Nowo\QrCodeBundle\DependencyInjection\Compiler\TwigPathsPass;
 use Nowo\QrCodeBundle\DependencyInjection\NowoQrCodeExtension;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
@@ -13,6 +15,12 @@ use Symfony\Component\HttpKernel\Bundle\Bundle;
  */
 final class NowoQrCodeBundle extends Bundle
 {
+    public function build(ContainerBuilder $container): void
+    {
+        parent::build($container);
+        $container->addCompilerPass(new TwigPathsPass());
+    }
+
     public function getContainerExtension(): ?ExtensionInterface
     {
         if ($this->extension === null) {

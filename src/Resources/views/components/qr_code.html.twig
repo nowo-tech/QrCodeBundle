@@ -1,0 +1,14 @@
+{#
+ # Nowo QR Code Twig Component (Symfony UX Twig Component + Toolkit-friendly docs).
+ #
+ # @prop string $dataUri The PNG QR code encoded as a data URI.
+ # @prop string $alt Alternative text for the image.
+ # @prop string $class Optional CSS classes applied to the img element.
+ #}
+<img
+    src="{{ dataUri }}"
+    alt="{{ alt }}"
+    {% if class is not empty %}class="{{ class }}"{% endif %}
+    loading="lazy"
+    decoding="async"
+>

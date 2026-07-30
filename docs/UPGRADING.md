@@ -1,5 +1,17 @@
 # Upgrading
 
+## [1.1.0] - 2026-07-30
+
+### Twig Component + UX Toolkit
+
+**Breaking for minimal installs:** the package now **requires** `symfony/twig-bundle` and `symfony/ux-twig-component` (`^2.20 || ^3.0`). Run `composer update nowo-tech/qr-code-bundle` so Composer pulls them.
+
+- New component: `<twig:NowoQrCode content="…" />` / `<twig:NowoQrCode url="…" profile="compact" />`.
+- Optional host package: `symfony/ux-toolkit` (PHP 8.4+) for Shadcn/other kit components around the QR image.
+- Twig overrides: `templates/bundles/NowoQrCodeBundle/components/qr_code.html.twig`.
+
+`QrCodeService` and Twig functions (`qr_code_data_uri`, `qr_code_for_url`) are unchanged.
+
 ## From WalletQrBundle-embedded QR helpers
 
 If you previously relied on QR helpers living inside WalletQrBundle and now depend on **nowo-tech/qr-code-bundle**:
@@ -34,6 +46,7 @@ nowo_qr_code:
    - `QrCodeService::createDataUri($content, ?string $profile = null)`
    - `QrCodeService::createDataUriForUrl($url, ?string $profile = null)`
    - Twig: `qr_code_data_uri`, `qr_code_for_url` (optional second argument = profile name)
+   - Component: `<twig:NowoQrCode … />`
 
 WalletQrBundle may still prepend legacy `nowo_wallet_qr.qr_code` onto `nowo_qr_code`; that flat payload remains compatible via the normalization above.
 

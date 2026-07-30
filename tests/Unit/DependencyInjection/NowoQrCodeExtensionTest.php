@@ -7,6 +7,7 @@ namespace Nowo\QrCodeBundle\Tests\Unit\DependencyInjection;
 use Nowo\QrCodeBundle\Config\ProfileResolver;
 use Nowo\QrCodeBundle\DependencyInjection\NowoQrCodeExtension;
 use Nowo\QrCodeBundle\Service\QrCodeService;
+use Nowo\QrCodeBundle\Twig\Component\QrCode;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
@@ -31,6 +32,7 @@ final class NowoQrCodeExtensionTest extends TestCase
 
         $this->assertTrue($container->hasDefinition(QrCodeService::class));
         $this->assertTrue($container->hasDefinition(ProfileResolver::class));
+        $this->assertTrue($container->hasDefinition(QrCode::class));
         $this->assertSame('default', $container->getParameter('nowo_qr_code.default_profile'));
         $this->assertSame(300, $container->getParameter('nowo_qr_code.size'));
         $this->assertSame(10, $container->getParameter('nowo_qr_code.margin'));

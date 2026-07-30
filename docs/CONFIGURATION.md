@@ -84,3 +84,13 @@ Only `http` and `https` schemes are accepted. Schemes such as `javascript:` and 
 | `nowo_qr_code.default_profile` | Default profile name |
 | `nowo_qr_code.profiles` | Full profiles map |
 | `nowo_qr_code.size` / `margin` / `error_correction` / `url_allowlist` | Convenience mirrors of the **default** profile |
+
+## Twig template overrides (REQ-TWIG-001)
+
+Namespace: **`NowoQrCodeBundle`**. Application files under `templates/bundles/NowoQrCodeBundle/` **always win** and freeze that subpath until removed or merged (prefer config / surgical overrides for upgrade-safe customisation).
+
+| Subpath | Purpose |
+| --- | --- |
+| `components/qr_code.html.twig` | Markup for the `NowoQrCode` Twig UX component |
+
+Procedure: copy the vendor file to `templates/bundles/NowoQrCodeBundle/<subpath>`, clear Twig cache if needed.

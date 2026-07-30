@@ -11,7 +11,10 @@
         "qr-code",
         "qr",
         "data-uri",
-        "twig"
+        "twig",
+        "twig-component",
+        "symfony-ux",
+        "ux-toolkit"
     ],
     "homepage": "https://github.com/nowo-tech/QrCodeBundle",
     "support": {
@@ -36,6 +39,8 @@
         "symfony/config": "^7.0 || ^8.0",
         "symfony/dependency-injection": "^7.0 || ^8.0",
         "symfony/http-kernel": "^7.0 || ^8.0",
+        "symfony/twig-bundle": "^7.0 || ^8.0",
+        "symfony/ux-twig-component": "^2.20 || ^3.0",
         "twig/twig": "^3.8 || ^4.0"
     },
     "require-dev": {
@@ -48,7 +53,6 @@
         "phpunit/phpunit": "^11.0",
         "rector/rector": "^2.0",
         "symfony/framework-bundle": "^7.0 || ^8.0",
-        "symfony/twig-bundle": "^7.0 || ^8.0",
         "symfony/yaml": "^7.0 || ^8.0"
     },
     "autoload": {
@@ -85,6 +89,6 @@
     },
     "suggest": {
         "ext-gd": "Required by endroid/qr-code for PNG rendering",
-        "symfony/twig-bundle": "To use Twig helpers qr_code_data_uri and qr_code_for_url"
+        "symfony/ux-toolkit": "Optional design-system toolkit (PHP 8.4+); NowoQrCode follows Toolkit @prop documentation conventions and works alongside Shadcn kit components"
     }
 }

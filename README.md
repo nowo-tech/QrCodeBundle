@@ -20,6 +20,8 @@ This bundle is **FrankenPHP worker mode friendly**.
 - ✅ Optional host/URL allowlist (exact host or subdomain; path substrings; `#regex`)
 - ✅ Typed `QrErrorCorrection` enum (`low` | `medium` | `quartile` | `high`)
 - ✅ Twig helpers `qr_code_data_uri` and `qr_code_for_url` (optional profile argument)
+- ✅ Twig UX component `<twig:NowoQrCode>` (`symfony/ux-twig-component`)
+- ✅ Compatible with Symfony UX Toolkit (optional host dependency, PHP 8.4+)
 - ✅ Symfony configuration under `nowo_qr_code`
 
 ## Quick start
@@ -58,6 +60,8 @@ $safeUri = $qrCodeService->createDataUriForUrl('https://example.com/path', 'comp
 ```twig
 <img src="{{ qr_code_data_uri('Hello') }}" alt="QR">
 <img src="{{ qr_code_for_url(downloadUrl, 'compact') }}" alt="QR">
+<twig:NowoQrCode content="Hello" class="qr" />
+<twig:NowoQrCode url="{{ downloadUrl }}" profile="compact" />
 ```
 
 ## Documentation

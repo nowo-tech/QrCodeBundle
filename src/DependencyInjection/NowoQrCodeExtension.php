@@ -8,6 +8,7 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
+use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 
 /**
  * Dependency injection extension for the QR Code bundle.
@@ -32,6 +33,10 @@ final class NowoQrCodeExtension extends Extension
 
         $loader = new YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load('services.yaml');
+
+        if (class_exists(AsTwigComponent::class)) {
+            $loader->load('services_twig_component.yaml');
+        }
     }
 
     public function getAlias(): string

@@ -1,0 +1,9 @@
+# Loaded when symfony/ux-twig-component is installed.
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: false
+
+  Nowo\QrCodeBundle\Twig\Component\:
+    resource: '../../Twig/Component/*'

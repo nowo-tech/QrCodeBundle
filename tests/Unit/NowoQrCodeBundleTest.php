@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Nowo\QrCodeBundle\Tests\Unit;
 
+use Nowo\QrCodeBundle\DependencyInjection\Compiler\TwigPathsPass;
 use Nowo\QrCodeBundle\DependencyInjection\NowoQrCodeExtension;
 use Nowo\QrCodeBundle\NowoQrCodeBundle;
 use PHPUnit\Framework\TestCase;
@@ -23,9 +24,20 @@ final class NowoQrCodeBundleTest extends TestCase
         $this->assertSame('nowo_qr_code', $extension->getAlias());
     }
 
-    public function testBuild(): void
+    public function testBuildRegistersTwigPathsPass(): void
     {
-        (new NowoQrCodeBundle())->build(new ContainerBuilder());
-        $this->addToAssertionCount(1);
+        $container = new ContainerBuilder();
+        (new NowoQrCodeBundle())->build($container);
+
+        $passes = $container->getCompilerPassConfig()->getBeforeOptimizationPasses();
+        $found  = false;
+        foreach ($passes as $pass) {
+            if ($pass instanceof TwigPathsPass) {
+                $found = true;
+                break;
+            }
+        }
+
+        $this->assertTrue($found);
     }
 }
