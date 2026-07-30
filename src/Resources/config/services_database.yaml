@@ -1,0 +1,26 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: false
+
+  Nowo\QrCodeBundle\Repository\QrCodeProfileConfigRepository: ~
+
+  Nowo\QrCodeBundle\Config\ProfileResolver:
+    arguments:
+      $profiles: '%nowo_qr_code.profiles%'
+      $defaultProfile: '%nowo_qr_code.default_profile%'
+      $useDatabaseConfig: '%nowo_qr_code.use_database_config%'
+      $profileRepository: '@Nowo\QrCodeBundle\Repository\QrCodeProfileConfigRepository'
+
+  Nowo\QrCodeBundle\Service\QrCodeProfileAdminService:
+    arguments:
+      $profiles: '%nowo_qr_code.profiles%'
+      $defaultProfile: '%nowo_qr_code.default_profile%'
+
+  Nowo\QrCodeBundle\Form\QrCodeProfileConfigType: ~
+
+  Nowo\QrCodeBundle\Controller\QrCodeProfileAdminController:
+    arguments:
+      $useDatabaseConfig: '%nowo_qr_code.use_database_config%'
+    tags: ['controller.service_arguments']

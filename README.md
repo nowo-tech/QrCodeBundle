@@ -16,6 +16,8 @@ This bundle is **FrankenPHP worker mode friendly**.
 
 - ✅ PNG QR codes as data URIs (`QrCodeService` / `QrCodeDataUriRenderer`)
 - ✅ Named profiles (`default_profile` + `profiles`) for size, ECC, and allowlists
+- ✅ Optional Doctrine storage: DB profiles override YAML by name (`use_database_config`)
+- ✅ Admin CRUD at `/admin/qr-code-profiles` (when DB storage is enabled)
 - ✅ URL safety policy (`QrUrlPolicy`; blocks `javascript:`, `data:`, etc.)
 - ✅ Optional host/URL allowlist (exact host or subdomain; path substrings; `#regex`)
 - ✅ Typed `QrErrorCorrection` enum (`low` | `medium` | `quartile` | `high`)
@@ -64,6 +66,10 @@ $safeUri = $qrCodeService->createDataUriForUrl('https://example.com/path', 'comp
 <twig:NowoQrCode url="{{ downloadUrl }}" profile="compact" />
 ```
 
+## Related
+
+- [WalletQrBundle](https://github.com/nowo-tech/WalletQrBundle) — Google Wallet / Apple Wallet save links + QR (depends on this bundle)
+
 ## Documentation
 
 - [Installation](docs/INSTALLATION.md)
@@ -92,10 +98,6 @@ $safeUri = $qrCodeService->createDataUriForUrl('https://example.com/path', 'comp
 | Python | N/A | — |
 
 CI enforces PHP coverage at **100%** (Clover elements / line gate via `.scripts/coverage-check-100.php`).
-
-## Related
-
-- [WalletQrBundle](https://github.com/nowo-tech/WalletQrBundle) — Google Wallet / Apple Wallet save links + QR (depends on this bundle)
 
 ## License
 

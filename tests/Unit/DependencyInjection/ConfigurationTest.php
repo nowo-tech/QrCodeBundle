@@ -36,6 +36,30 @@ final class ConfigurationTest extends TestCase
         $this->assertSame(10, $config['profiles']['default']['margin']);
         $this->assertSame('high', $config['profiles']['default']['error_correction']);
         $this->assertSame([], $config['profiles']['default']['url_allowlist']);
+        $this->assertFalse($config['use_database_config']);
+        $this->assertSame('', $config['doctrine']['table_prefix']);
+        $this->assertSame(['ROLE_ADMIN'], $config['security']['access_roles']);
+        $this->assertFalse($config['security']['allow_unauthenticated']);
+    }
+
+    public function testDatabaseConfigOptions(): void
+    {
+        $config = $this->processor->processConfiguration($this->configuration, [[
+            'use_database_config' => true,
+            'doctrine'            => ['table_prefix' => 'nowo_'],
+            'security'            => [
+                'access_roles'          => ['ROLE_SUPER_ADMIN'],
+                'allow_unauthenticated' => true,
+            ],
+            'profiles' => [
+                'default' => [],
+            ],
+        ]]);
+
+        $this->assertTrue($config['use_database_config']);
+        $this->assertSame('nowo_', $config['doctrine']['table_prefix']);
+        $this->assertSame(['ROLE_SUPER_ADMIN'], $config['security']['access_roles']);
+        $this->assertTrue($config['security']['allow_unauthenticated']);
     }
 
     public function testFlatLegacyConfigurationIsNormalizedIntoDefaultProfile(): void

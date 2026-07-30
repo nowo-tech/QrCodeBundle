@@ -9,14 +9,14 @@
 
 After creating the release commit and tag, run `make check-no-cursor-coauthor` again **before** `git push` (REQ-GIT-001). The release commit itself is not covered by an earlier `release-check` run.
 
-## Example for v1.1.0
+## Example for v1.2.0
 
 ```bash
 git add -A
 git status   # review
-git commit -m "Release 1.1.0: Twig NowoQrCode component and UX Toolkit docs"
-git tag -a v1.1.0 -m "Release 1.1.0: Twig NowoQrCode component and UX Toolkit docs"
+git commit -m "Release 1.2.0: optional Doctrine profile overrides and admin CRUD"
+git tag -a v1.2.0 -m "Release 1.2.0: optional Doctrine profile overrides and admin CRUD"
 make check-no-cursor-coauthor
 git push origin main
-git push origin v1.1.0
+git push origin v1.2.0
 ```

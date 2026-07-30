@@ -1,5 +1,27 @@
 # Upgrading
 
+## [1.2.0] - 2026-07-30 — Database profile overrides
+
+Optional and **backward compatible** when left disabled (`use_database_config: false`, the default).
+
+1. Require Doctrine if you enable DB storage: `composer require doctrine/orm doctrine/doctrine-bundle symfony/form symfony/validator`.
+2. Set:
+
+```yaml
+nowo_qr_code:
+    use_database_config: true
+    doctrine:
+        table_prefix: ''   # e.g. nowo_ → nowo_qr_code_profile
+    security:
+        access_roles: [ROLE_ADMIN]
+```
+
+3. Create the table (`doctrine:schema:update` or a migration for `qr_code_profile`).
+4. Import routes (Flex recipe adds `config/routes/nowo_qr_code.yaml`) and open `/admin/qr-code-profiles`.
+5. Resolution rule: if a DB row shares a profile **name** with YAML, the DB row wins completely for that name.
+
+Protect `/admin/qr-code-profiles` with your firewall (default gate: `ROLE_ADMIN`). Set `security.allow_unauthenticated: true` only for local demos.
+
 ## [1.1.0] - 2026-07-30
 
 ### Twig Component + UX Toolkit

@@ -11,6 +11,7 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 
 use function array_key_exists;
+use function array_map;
 use function is_array;
 use function sprintf;
 
@@ -19,6 +20,7 @@ use function sprintf;
  *
  * Canonical shape: `default_profile` + `profiles` (REQ-CFG-001).
  * Flat root keys (`size`, `margin`, …) are normalized into `profiles.<default_profile>`.
+ * Optional Doctrine storage: `use_database_config` + `doctrine.table_prefix`.
  */
 final class Configuration implements ConfigurationInterface
 {
@@ -30,9 +32,7 @@ final class Configuration implements ConfigurationInterface
 
         $rootNode
             ->beforeNormalization()
-                ->ifTrue(static function ($v): bool {
-                    return is_array($v) && (!isset($v['profiles']) || $v['profiles'] === []);
-                })
+                ->ifTrue(static fn ($v): bool => is_array($v) && (!isset($v['profiles']) || $v['profiles'] === []))
                 ->then(static function (array $v): array {
                     $flatKeys = ['size', 'margin', 'error_correction', 'url_allowlist'];
                     $profile  = [];
@@ -50,13 +50,52 @@ final class Configuration implements ConfigurationInterface
                 })
             ->end()
             ->children()
+                ->booleanNode('use_database_config')
+                    ->info('When true, Doctrine rows with the same profile name fully override YAML profiles; enables admin CRUD and requires doctrine/orm')
+                    ->defaultFalse()
+                ->end()
+                ->arrayNode('doctrine')
+                    ->addDefaultsIfNotSet()
+                    ->children()
+                        ->scalarNode('table_prefix')
+                            ->info('Optional prefix for the qr_code_profile table (e.g. nowo_ → nowo_qr_code_profile)')
+                            ->defaultValue('')
+                        ->end()
+                    ->end()
+                ->end()
+                ->arrayNode('security')
+                    ->addDefaultsIfNotSet()
+                    ->children()
+                        ->arrayNode('access_roles')
+                            ->scalarPrototype()->end()
+                            ->defaultValue(['ROLE_ADMIN'])
+                            ->info('Roles allowed to use /admin/qr-code-profiles when allow_unauthenticated is false')
+                        ->end()
+                        ->scalarNode('access_checker')
+                            ->defaultNull()
+                            ->info('Optional service id implementing QrCodeAccessCheckerInterface')
+                        ->end()
+                        ->booleanNode('allow_unauthenticated')
+                            ->defaultFalse()
+                            ->info('When true, admin CRUD is open (demo/dev only)')
+                        ->end()
+                    ->end()
+                ->end()
+                ->arrayNode('web_ui')
+                    ->addDefaultsIfNotSet()
+                    ->children()
+                        ->scalarNode('layout_template')
+                            ->defaultValue('@NowoQrCodeBundle/admin/layout.html.twig')
+                        ->end()
+                    ->end()
+                ->end()
                 ->scalarNode('default_profile')
                     ->info('Profile used when no explicit profile is passed to the service / Twig helpers')
                     ->defaultValue('default')
                     ->cannotBeEmpty()
                 ->end()
                 ->arrayNode('profiles')
-                    ->info('Named QR rendering profiles')
+                    ->info('Named QR rendering profiles (YAML baseline; overridden by DB when names match)')
                     ->requiresAtLeastOneElement()
                     ->useAttributeAsKey('name')
                     ->arrayPrototype()

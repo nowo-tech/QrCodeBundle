@@ -5,6 +5,18 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+## [1.2.0] - 2026-07-30
+
+### Added
+
+- Optional Doctrine profile storage: `use_database_config` + `doctrine.table_prefix`.
+- Entity `QrCodeProfileConfig` (table `qr_code_profile`); DB rows with the same name **fully override** YAML profiles; DB-only names are also resolvable.
+- Admin CRUD at `/admin/qr-code-profiles` (import from YAML, create/edit/delete) with role gate via `security.access_roles`.
+- Flex recipe routes import (`config/routes/nowo_qr_code.yaml`) for the admin CRUD.
+- Composer `suggest` entries for `doctrine/orm`, `doctrine/doctrine-bundle`, `symfony/form`, `symfony/validator`, and `symfony/security-bundle`.
+
 ## [1.1.0] - 2026-07-30
 
 ### Added
@@ -34,5 +46,6 @@ Initial public release of **nowo-tech/qr-code-bundle**, extracted from [WalletQr
 - Flex recipe under `.symfony/recipe/nowo-tech/qr-code-bundle/`.
 - FrankenPHP-friendly worker mode claim; full Nowo docs / Spec Kit / CI scaffold.
 
+[1.2.0]: https://github.com/nowo-tech/QrCodeBundle/releases/tag/v1.2.0
 [1.1.0]: https://github.com/nowo-tech/QrCodeBundle/releases/tag/v1.1.0
 [1.0.0]: https://github.com/nowo-tech/QrCodeBundle/releases/tag/v1.0.0

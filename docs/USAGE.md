@@ -28,6 +28,12 @@ final class TicketController
 
 Omit the profile argument (or pass `null`) to use `default_profile`. An unknown profile name throws `InvalidQrProfileException`.
 
+## Database profiles (optional)
+
+When `use_database_config: true`, rows in `qr_code_profile` override YAML profiles that share the same **name**. See [CONFIGURATION.md](CONFIGURATION.md#database-overrides-optional).
+
+Admin CRUD: `/admin/qr-code-profiles` (requires Doctrine + form component and route import).
+
 ## Low-level renderer
 
 ```php

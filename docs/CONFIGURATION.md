@@ -27,6 +27,52 @@ nowo_qr_code:
 - `default_profile` **must** be a key under `profiles` (compile-time validation).
 - Runtime APIs accept an optional profile name; omitted/`null` uses `default_profile`.
 
+## Database overrides (optional)
+
+Disabled by default. When enabled, Doctrine rows in `qr_code_profile` override YAML **by profile name** (full replace for that name). New DB-only names are also valid at runtime.
+
+```yaml
+nowo_qr_code:
+    use_database_config: true
+    doctrine:
+        table_prefix: ''          # optional; e.g. app_ → app_qr_code_profile
+    security:
+        access_roles: [ROLE_ADMIN]
+        allow_unauthenticated: false
+    default_profile: default
+    profiles:
+        default:
+            size: 300
+            margin: 10
+            error_correction: high
+            url_allowlist: []
+```
+
+| Key | Default | Meaning |
+| --- | --- | --- |
+| `use_database_config` | `false` | When `true`, loads Doctrine services + admin CRUD; requires `doctrine/orm` |
+| `doctrine.table_prefix` | `''` | Prefixed onto table `qr_code_profile` |
+| `security.access_roles` | `[ROLE_ADMIN]` | Roles allowed to use `/admin/qr-code-profiles` |
+| `security.allow_unauthenticated` | `false` | Open admin (demo/dev only) |
+| `security.access_checker` | `null` | Optional custom `QrCodeAccessCheckerInterface` service id |
+
+**Setup**
+
+1. `composer require doctrine/orm doctrine/doctrine-bundle symfony/form symfony/validator`
+2. Set `use_database_config: true`
+3. Create schema for `qr_code_profile` (apply `table_prefix` if configured)
+4. Ensure routes import `@NowoQrCodeBundle/Resources/config/routing.yaml`
+5. Open `/admin/qr-code-profiles` — use **Import from YAML** or create rows manually
+
+**Merge rules**
+
+| Situation | Result |
+| --- | --- |
+| Flag off | YAML only (table unused) |
+| Flag on, no DB row for name | YAML profile |
+| Flag on, DB row with same name | **DB wins** (full replace) |
+| Flag on, DB-only name | DB profile |
+
 ### Selecting a profile
 
 | Surface | How |

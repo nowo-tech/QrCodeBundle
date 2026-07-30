@@ -1,0 +1,2 @@
+nowo_qr_code:
+    resource: '@NowoQrCodeBundle/Resources/config/routing.yaml'

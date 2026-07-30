@@ -44,6 +44,8 @@
         "twig/twig": "^3.8 || ^4.0"
     },
     "require-dev": {
+        "doctrine/doctrine-bundle": "^2.12 || ^3.0",
+        "doctrine/orm": "^2.19 || ^3.0",
         "friendsofphp/php-cs-fixer": "^3.0",
         "nowo-tech/phpstan-frankenphp": "^1.0",
         "phpstan/extension-installer": "^1.0",
@@ -52,7 +54,10 @@
         "phpstan/phpstan-symfony": "^2.0",
         "phpunit/phpunit": "^11.0",
         "rector/rector": "^2.0",
+        "symfony/form": "^7.0 || ^8.0",
         "symfony/framework-bundle": "^7.0 || ^8.0",
+        "symfony/security-core": "^7.0 || ^8.0",
+        "symfony/validator": "^7.0 || ^8.0",
         "symfony/yaml": "^7.0 || ^8.0"
     },
     "autoload": {
@@ -89,6 +94,11 @@
     },
     "suggest": {
         "ext-gd": "Required by endroid/qr-code for PNG rendering",
+        "doctrine/orm": "Required when nowo_qr_code.use_database_config is true (DB profile overrides + admin CRUD)",
+        "doctrine/doctrine-bundle": "Required when nowo_qr_code.use_database_config is true",
+        "symfony/form": "Required for the optional /admin/qr-code-profiles CRUD",
+        "symfony/validator": "Recommended for admin form constraints",
+        "symfony/security-bundle": "Recommended to protect admin CRUD via security.access_roles",
         "symfony/ux-toolkit": "Optional design-system toolkit (PHP 8.4+); NowoQrCode follows Toolkit @prop documentation conventions and works alongside Shadcn kit components"
     }
 }

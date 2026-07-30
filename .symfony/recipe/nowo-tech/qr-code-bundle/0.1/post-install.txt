@@ -1,6 +1,10 @@
   QR Code Bundle is installed.
 
-  Configure size, margin, error_correction, and optional url_allowlist in:
+  Configure profiles in:
     config/packages/nowo_qr_code.yaml
+
+  Optional DB overrides (Doctrine): set use_database_config: true, create
+  table qr_code_profile, import routes nowo_qr_code, then open
+  /admin/qr-code-profiles
 
   Docs: https://github.com/nowo-tech/QrCodeBundle

@@ -54,7 +54,8 @@ Confirm before each release (REQ-SEC-002):
 | Dependencies | `composer audit` clean or waived with documented CVE policy |
 | No-secret logs | Do not log full URLs that may contain tokens/PII |
 | Cryptography | N/A (no crypto in this bundle) |
-| Permissions / exposure | No HTTP controllers; consumers control who can request QR generation |
+| Permissions / exposure | Admin CRUD at `/admin/qr-code-profiles` is role-gated (`security.access_roles`); keep `allow_unauthenticated` false in production. QR generation APIs remain in-process (no public QR endpoint). |
+
 | Limits / DoS | `size`/`margin` bounded; rate-limit if exposed publicly |
 | AI security audit (REQ-SEC-004) | Pass recorded in monorepo `BUNDLES_SECURITY_ANALYSIS.md` |
 

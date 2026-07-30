@@ -1,4 +1,10 @@
 nowo_qr_code:
+    use_database_config: false
+    doctrine:
+        table_prefix: ''
+    security:
+        access_roles: [ROLE_ADMIN]
+        allow_unauthenticated: false
     default_profile: default
     profiles:
         default:

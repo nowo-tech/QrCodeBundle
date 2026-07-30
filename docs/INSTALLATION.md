@@ -10,7 +10,17 @@ Also pulls `symfony/twig-bundle` and `symfony/ux-twig-component` for Twig helper
 
 ## Symfony Flex
 
-With Symfony Flex, the recipe under `.symfony/recipe/nowo-tech/qr-code-bundle/` registers the bundle and copies `config/packages/nowo_qr_code.yaml`.
+With Symfony Flex, the recipe under `.symfony/recipe/nowo-tech/qr-code-bundle/` registers the bundle, copies `config/packages/nowo_qr_code.yaml`, and imports admin routes via `config/routes/nowo_qr_code.yaml`.
+
+## Optional database profiles
+
+To store profiles in Doctrine (override YAML by name) and use `/admin/qr-code-profiles`:
+
+```bash
+composer require doctrine/orm doctrine/doctrine-bundle symfony/form symfony/validator
+```
+
+Then set `use_database_config: true` and create the `qr_code_profile` table. See [Configuration](CONFIGURATION.md#database-overrides-optional) and [Upgrading](UPGRADING.md).
 
 ## Without Flex
 
