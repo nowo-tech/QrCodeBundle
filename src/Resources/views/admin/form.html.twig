@@ -1,9 +1,9 @@
-{% extends '@NowoQrCodeBundle/admin/layout.html.twig' %}
+{% extends '@NowoQrCodeBundle/admin/base.html.twig' %}
 
 {% block title %}{{ is_new ? 'New QR profile' : 'Edit QR profile' }}{% endblock %}
 
 {% block body %}
-    <div class="qr-header">
+    <div class="qr-header nowo-ui-header">
         <div>
             <h1>{{ is_new ? 'New profile' : 'Edit profile' }}</h1>
             <p class="qr-lead">{% if not is_new %}<code>{{ profile.name }}</code>{% else %}Database-backed QR settings{% endif %}</p>
@@ -12,19 +12,19 @@
     </div>
 
     {% if not use_database_config %}
-        <div class="qr-alert qr-alert-warn">
+        <div class="qr-alert qr-alert-warn nowo-ui-alert">
             <code>use_database_config</code> is <strong>false</strong>. Enable it for these rows to override YAML at runtime.
         </div>
     {% endif %}
 
-    {{ form_start(form, {attr: {class: 'qr-form'}}) }}
+    {{ form_start(form, {attr: {class: 'qr-form nowo-ui-form'}}) }}
         {{ form_row(form.name) }}
         {{ form_row(form.size) }}
         {{ form_row(form.margin) }}
         {{ form_row(form.errorCorrection) }}
         {{ form_row(form.urlAllowlist) }}
 
-        <div class="qr-form-actions">
+        <div class="qr-form-actions nowo-ui-form-actions">
             <button type="submit" class="qr-btn qr-btn-primary">Save</button>
             <a class="qr-btn" href="{{ path('nowo_qr_code_admin_index') }}">Cancel</a>
         </div>

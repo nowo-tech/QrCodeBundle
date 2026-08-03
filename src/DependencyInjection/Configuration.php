@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Nowo\QrCodeBundle\DependencyInjection;
 
+use Nowo\QrCodeBundle\Enum\CssFramework;
 use Nowo\QrCodeBundle\Enum\QrErrorCorrection;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
@@ -86,6 +87,13 @@ final class Configuration implements ConfigurationInterface
                     ->children()
                         ->scalarNode('layout_template')
                             ->defaultValue('@NowoQrCodeBundle/admin/layout.html.twig')
+                            ->cannotBeEmpty()
+                            ->info('Twig layout extended by admin/base.html.twig (global nowo_qr_code_layout_template). Set to your app layout or a one-file bridge.')
+                        ->end()
+                        ->enumNode('css_framework')
+                            ->values(CssFramework::values())
+                            ->defaultValue(CssFramework::Custom->value)
+                            ->info('Host CSS stack hint: bootstrap5 (alias bootstrap) | bootstrap4 | tabler | tailwind | foundation | custom | none. Default custom matches the demo standalone layout.')
                         ->end()
                     ->end()
                 ->end()

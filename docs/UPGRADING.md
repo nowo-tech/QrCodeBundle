@@ -1,5 +1,35 @@
 # Upgrading
 
+## [1.3.0] - 2026-08-03 — Admin Web UI look-and-feel + FrankenPHP demo
+
+**Backward compatible** for apps that do not customize admin templates. Defaults keep `web_ui.css_framework: custom` and the bundled standalone layout.
+
+### Optional host layout integration
+
+```yaml
+nowo_qr_code:
+    web_ui:
+        layout_template: 'base.html.twig'   # or a thin bridge mapping body/stylesheets/javascripts
+        css_framework: custom               # bootstrap5 | bootstrap | tailwind | tabler | …
+```
+
+1. Admin pages extend `admin/base.html.twig`, which calls `{{ parent() }}` so host CSS/JS still load.
+2. Prefer `layout_template` / nested `nowo_ui_styles` / `nowo_ui_scripts` over forking `index`/`form` templates.
+3. Alias `bootstrap` normalizes to `bootstrap5`.
+
+### SecurityBundle when using DB admin
+
+If `use_database_config: true` and `security.allow_unauthenticated: false`, the host app **must** have `symfony/security-bundle` registered (compile-time `LogicException` otherwise). Demos may set `allow_unauthenticated: true`.
+
+### FrankenPHP demo
+
+```bash
+make -C demo/symfony8 up
+# http://localhost:8012/demo
+```
+
+See [DEMO-FRANKENPHP.md](DEMO-FRANKENPHP.md).
+
 ## [1.2.0] - 2026-07-30 — Database profile overrides
 
 Optional and **backward compatible** when left disabled (`use_database_config: false`, the default).

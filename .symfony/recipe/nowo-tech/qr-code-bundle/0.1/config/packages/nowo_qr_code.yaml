@@ -5,6 +5,9 @@ nowo_qr_code:
     security:
         access_roles: [ROLE_ADMIN]
         allow_unauthenticated: false
+    web_ui:
+        layout_template: '@NowoQrCodeBundle/admin/layout.html.twig'
+        css_framework: custom
     default_profile: default
     profiles:
         default:

@@ -1,0 +1,12 @@
+{# Page shell (REQ-UI-001): extends configurable layout and stacks admin extras with parent(). #}
+{% extends nowo_qr_code_layout_template|default('@NowoQrCodeBundle/admin/layout.html.twig') %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    {% block nowo_ui_styles %}{% endblock %}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {% block nowo_ui_scripts %}{% endblock %}
+{% endblock %}

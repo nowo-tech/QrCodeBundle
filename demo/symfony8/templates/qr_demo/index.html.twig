@@ -1,0 +1,62 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<div class="container py-4 qr-demo-shell">
+    <div class="card qr-demo-card mb-4">
+        <div class="card-body p-4 p-md-5">
+            <h1 class="mb-2">QR Code Bundle</h1>
+            <p class="text-muted mb-0">
+                PNG data URIs via <code>QrCodeService</code>, Twig helpers
+                <code>qr_code_data_uri</code> / <code>qr_code_for_url</code>, and
+                <code>&lt;twig:NowoQrCode&gt;</code>. Profiles: <code>default</code> (300px) and <code>compact</code> (128px, allowlist <code>example.com</code>).
+            </p>
+        </div>
+    </div>
+
+    <h2 class="h5 mb-3">Twig functions</h2>
+    <div class="qr-grid mb-4">
+        <div class="qr-cell">
+            <img src="{{ qr_code_data_uri('EVENT-42') }}" alt="default profile QR">
+            <div class="label"><code>qr_code_data_uri('EVENT-42')</code></div>
+        </div>
+        <div class="qr-cell">
+            <img src="{{ qr_code_data_uri('EVENT-42', 'compact') }}" alt="compact profile QR">
+            <div class="label"><code>…('EVENT-42', 'compact')</code></div>
+        </div>
+        <div class="qr-cell">
+            <img src="{{ qr_code_for_url(sample_url, 'compact') }}" alt="URL QR compact">
+            <div class="label"><code>qr_code_for_url(url, 'compact')</code></div>
+        </div>
+    </div>
+
+    <h2 class="h5 mb-3">Twig UX component</h2>
+    <div class="qr-grid mb-4">
+        <div class="qr-cell">
+            <twig:NowoQrCode content="Hello" class="qr" />
+            <div class="label"><code>&lt;twig:NowoQrCode content="Hello" /&gt;</code></div>
+        </div>
+        <div class="qr-cell">
+            <twig:NowoQrCode url="{{ sample_url }}" profile="compact" />
+            <div class="label"><code>url + profile="compact"</code></div>
+        </div>
+    </div>
+
+    <h2 class="h5 mb-3">PHP <code>QrCodeService</code></h2>
+    <div class="qr-grid mb-4">
+        <div class="qr-cell">
+            <img src="{{ php_data_uri }}" alt="PHP createDataUri">
+            <div class="label"><code>createDataUri(…)</code></div>
+        </div>
+        <div class="qr-cell">
+            <img src="{{ php_url_uri }}" alt="PHP createDataUriForUrl">
+            <div class="label"><code>createDataUriForUrl(…, 'compact')</code></div>
+        </div>
+    </div>
+
+    <p class="small text-muted mb-0">
+        Config: <code>config/packages/nowo_qr_code.yaml</code>.
+        Admin CRUD (<code>/admin/qr-code-profiles</code>) needs <code>use_database_config: true</code> + Doctrine — not enabled in this lightweight demo.
+        See <a href="https://github.com/nowo-tech/QrCodeBundle/blob/main/docs/CONFIGURATION.md">CONFIGURATION.md</a>.
+    </p>
+</div>
+{% endblock %}

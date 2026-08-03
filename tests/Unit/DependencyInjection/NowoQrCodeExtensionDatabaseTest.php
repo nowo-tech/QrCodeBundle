@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Nowo\QrCodeBundle\Tests\Unit\DependencyInjection;
 
+use LogicException;
 use Nowo\QrCodeBundle\Config\ProfileResolver;
 use Nowo\QrCodeBundle\Controller\QrCodeProfileAdminController;
 use Nowo\QrCodeBundle\DependencyInjection\NowoQrCodeExtension;
@@ -16,6 +17,7 @@ use Nowo\QrCodeBundle\Service\QrCodeProfileAdminService;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
 use Symfony\Component\DependencyInjection\Reference;
 
@@ -52,6 +54,10 @@ final class NowoQrCodeExtensionDatabaseTest extends TestCase
         $container = $this->baseContainer();
 
         $extension = new NowoQrCodeExtension();
+
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('requires symfony/security-bundle');
+
         $extension->load([[
             'use_database_config' => true,
             'security'            => [
@@ -59,15 +65,12 @@ final class NowoQrCodeExtensionDatabaseTest extends TestCase
                 'access_roles'          => ['ROLE_ADMIN'],
             ],
         ]], $container);
-
-        $definition = $container->getDefinition('nowo_qr_code.access_checker.default');
-        self::assertTrue($definition->isAutowired());
-        self::assertFalse($container->hasDefinition(TablePrefixListener::class));
     }
 
     public function testRegistersConfigurableAccessCheckerWithAuthorizationChecker(): void
     {
         $container = $this->baseContainer();
+        $container->setParameter('kernel.bundles', ['SecurityBundle' => 'Symfony\\Bundle\\SecurityBundle\\SecurityBundle']);
         $container->register('security.authorization_checker', stdClass::class);
 
         $extension = new NowoQrCodeExtension();
@@ -84,9 +87,38 @@ final class NowoQrCodeExtensionDatabaseTest extends TestCase
         self::assertInstanceOf(Reference::class, $definition->getArgument('$authorizationChecker'));
     }
 
+    public function testAcceptsSecurityBundleViaRegisteredExtension(): void
+    {
+        $container = $this->baseContainer();
+        $container->registerExtension(new class extends Extension {
+            public function load(array $configs, ContainerBuilder $container): void
+            {
+            }
+
+            public function getAlias(): string
+            {
+                return 'security';
+            }
+        });
+
+        $extension = new NowoQrCodeExtension();
+        $extension->load([[
+            'use_database_config' => true,
+            'security'            => [
+                'allow_unauthenticated' => false,
+                'access_roles'          => ['ROLE_ADMIN'],
+            ],
+        ]], $container);
+
+        $definition = $container->getDefinition('nowo_qr_code.access_checker.default');
+        self::assertSame(ConfigurableQrCodeAccessChecker::class, $definition->getClass());
+        self::assertTrue($definition->isAutowired());
+    }
+
     public function testRegistersCustomAccessCheckerAlias(): void
     {
         $container = $this->baseContainer();
+        $container->setParameter('kernel.bundles', ['SecurityBundle' => 'Symfony\\Bundle\\SecurityBundle\\SecurityBundle']);
         $container->register('app.qr_access', AllowAllQrCodeAccessChecker::class);
 
         $extension = new NowoQrCodeExtension();

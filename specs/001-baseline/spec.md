@@ -55,6 +55,15 @@ As an integrator, I set named profiles under `default_profile` + `profiles` so s
 5. **Given** flat root keys without `profiles`, **When** configuration is processed, **Then** they are normalized into `profiles.default`.
 6. **Given** `createDataUri($content, 'compact')`, **When** `compact` exists, **Then** that profile’s size/ECC are used.
 
+### User Story 4 — Admin CRUD for database profiles (Priority: P2)
+
+As an operator, I manage QR profiles at `/admin/qr-code-profiles` so YAML defaults can be overridden in Doctrine.
+
+**Acceptance Scenarios**:
+
+1. **Given** an authenticated user with a configured access role, **When** they open the admin index, **Then** existing `QrCodeProfileConfig` rows are listed.
+2. **Given** `use_database_config: true`, **When** a profile exists in the database, **Then** runtime resolution prefers DB values over YAML.
+
 ### Edge Cases
 
 - Host allowlist: `example.com` must not match `evil-example.com`; subdomains like `cdn.example.com` are allowed.
@@ -87,13 +96,34 @@ As an integrator, I set named profiles under `default_profile` + `profiles` so s
 - **FR-SEC-002**: Allowlist host patterns MUST use exact/subdomain matching (not raw host substring).
 - **FR-SEC-003**: `InvalidQrUrlException` MUST be thrown when a URL is rejected via `assertAllowed`.
 
+### Security
+
+- **FR-SEC-001**: `QrUrlPolicy` MUST allow only `http`/`https` with a non-empty host.
+- **FR-SEC-002**: Allowlist host patterns MUST use exact/subdomain matching (not raw host substring).
+- **FR-SEC-003**: `InvalidQrUrlException` MUST be thrown when a URL is rejected via `assertAllowed`.
+- **FR-SEC-004**: Admin routes MUST be gated by `QrCodeAccessCheckerInterface` (`access_roles`, custom checker, or demo-only allow-all).
+
+### Entity & database (optional)
+
+- **FR-DB-001**: When `use_database_config: true`, Extension MUST load Doctrine services and apply table prefix listener.
+- **FR-DB-002**: `QrCodeProfileConfig` entity + repository MUST store per-profile size, margin, ECC, and allowlist overrides; `ProfileResolver` MUST prefer DB rows when enabled.
+
+### Admin CRUD
+
+- **FR-ADM-001**: `/admin/qr-code-profiles` MUST provide list/create/edit/delete with Twig admin views and `QrCodeProfileAdminService` seed/import helpers.
+
 ### Twig
 
 - **FR-TWIG-001**: `QrCodeExtension` MUST register `qr_code_data_uri` and `qr_code_for_url` with optional profile argument.
+- **FR-TWIG-002**: Twig namespace `NowoQrCodeBundle` MUST support app template overrides via `TwigPathsPass`.
+
+### UX component
+
+- **FR-UX-001**: Twig UX component `NowoQrCode` MUST render the shared component template with profile-aware data URIs.
 
 ### Explicit non-goals
 
-- No admin/Web UI, no Twig template namespace, no Doctrine/Messenger, no outbound HTTP from this package.
+- No Messenger or outbound HTTP from this package.
 - No demo tree is required for the Packagist contract.
 
 ---

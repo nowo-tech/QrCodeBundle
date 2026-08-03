@@ -12,6 +12,15 @@ Used by [WalletQrBundle](https://github.com/nowo-tech/WalletQrBundle) for wallet
 
 This bundle is **FrankenPHP worker mode friendly**.
 
+### FrankenPHP demo
+
+```bash
+make -C demo/symfony8 up
+# http://localhost:8012/demo
+```
+
+See [docs/DEMO-FRANKENPHP.md](docs/DEMO-FRANKENPHP.md) (`FRANKENPHP_MODE=worker` default; PHP **8.5** + **gd**).
+
 ## Features
 
 - ✅ PNG QR codes as data URIs (`QrCodeService` / `QrCodeDataUriRenderer`)
@@ -87,6 +96,7 @@ $safeUri = $qrCodeService->createDataUriForUrl('https://example.com/path', 'comp
 
 ### Additional documentation
 
+- [FrankenPHP demos](docs/DEMO-FRANKENPHP.md)
 - [GitHub CI](docs/GITHUB_CI.md)
 
 ## Tests and coverage

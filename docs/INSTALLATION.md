@@ -31,3 +31,14 @@ Nowo\QrCodeBundle\NowoQrCodeBundle::class => ['all' => true],
 ```
 
 And create `config/packages/nowo_qr_code.yaml` (see [Configuration](CONFIGURATION.md)).
+
+## FrankenPHP demo
+
+A Symfony **8** demo with FrankenPHP (PHP **8.5** + **gd**) lives under `demo/symfony8`:
+
+```bash
+make -C demo/symfony8 up
+# http://localhost:8012/demo
+```
+
+See [DEMO-FRANKENPHP.md](DEMO-FRANKENPHP.md).

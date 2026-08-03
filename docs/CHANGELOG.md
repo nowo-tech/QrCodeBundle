@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-08-03
+
+### Added
+
+- Admin Web UI look-and-feel (REQ-UI-001): `web_ui.css_framework` (`bootstrap5` / alias `bootstrap`, `bootstrap4`, `tabler`, `tailwind`, `foundation`, `custom`, `none`) and Twig global `nowo_qr_code_css_framework`.
+- `admin/base.html.twig` page shell that extends `web_ui.layout_template` and stacks `nowo_ui_styles` / `nowo_ui_scripts` with `{{ parent() }}`.
+- Semantic `nowo-ui-*` hooks on admin markup (alongside legacy `qr-*` classes).
+- Symfony **8** FrankenPHP demo under `demo/symfony8` (PHP **8.5** + **gd**, `FRANKENPHP_MODE`, Twig helpers / UX component / `QrCodeService` samples).
+- `docs/DEMO-FRANKENPHP.md` + aggregate `demo/Makefile` (`demo-smoke` / `verify`).
+- Compile-time guard: when `use_database_config` is true and `security.allow_unauthenticated` is false, SecurityBundle must be present.
+- `make release-check` now enforces **100%** PHP line coverage (`coverage-check`).
+
+### Changed
+
+- `web_ui.layout_template` is documented as the host integration point (cannot be empty); Twig global `nowo_qr_code_layout_template` is prepended (leading `@` escaped for DI).
+- Admin CRUD templates extend `admin/base.html.twig` instead of the full-HTML layout directly.
+- Flex recipe documents `web_ui.layout_template` / `web_ui.css_framework`.
+- Dev dependencies: `nowo-tech/phpstan-frankenphp` 1.0.3, `rector/rector` 2.6.0, `friendsofphp/php-cs-fixer` 3.95.18.
+
+### Documentation
+
+- Updated [CONFIGURATION.md](CONFIGURATION.md), [USAGE.md](USAGE.md), [INSTALLATION.md](INSTALLATION.md), [UPGRADING.md](UPGRADING.md), and Spec Kit baseline for Web UI + demo.
+
 ## [1.2.0] - 2026-07-30
 
 ### Added
@@ -46,6 +69,7 @@ Initial public release of **nowo-tech/qr-code-bundle**, extracted from [WalletQr
 - Flex recipe under `.symfony/recipe/nowo-tech/qr-code-bundle/`.
 - FrankenPHP-friendly worker mode claim; full Nowo docs / Spec Kit / CI scaffold.
 
+[1.3.0]: https://github.com/nowo-tech/QrCodeBundle/releases/tag/v1.3.0
 [1.2.0]: https://github.com/nowo-tech/QrCodeBundle/releases/tag/v1.2.0
 [1.1.0]: https://github.com/nowo-tech/QrCodeBundle/releases/tag/v1.1.0
 [1.0.0]: https://github.com/nowo-tech/QrCodeBundle/releases/tag/v1.0.0

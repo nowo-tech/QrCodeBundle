@@ -1,9 +1,9 @@
-{% extends '@NowoQrCodeBundle/admin/layout.html.twig' %}
+{% extends '@NowoQrCodeBundle/admin/base.html.twig' %}
 
 {% block title %}QR Code profiles{% endblock %}
 
 {% block body %}
-    <div class="qr-header">
+    <div class="qr-header nowo-ui-header">
         <div>
             <h1>QR Code profiles</h1>
             <p class="qr-lead">Database profiles override YAML when they share the same name (<code>use_database_config</code>).</p>
@@ -12,12 +12,12 @@
     </div>
 
     {% if not use_database_config %}
-        <div class="qr-alert qr-alert-warn">
+        <div class="qr-alert qr-alert-warn nowo-ui-alert">
             <code>use_database_config</code> is <strong>false</strong>. Rows below are editable but will not override YAML until you enable it.
         </div>
     {% endif %}
 
-    <div class="qr-toolbar">
+    <div class="qr-toolbar nowo-ui-toolbar">
         <form method="post" action="{{ path('nowo_qr_code_admin_import_yaml') }}">
             <input type="hidden" name="_token" value="{{ csrf_token('import_qr_yaml') }}">
             <button type="submit" class="qr-btn">Import from YAML</button>
@@ -25,51 +25,53 @@
         <span class="qr-muted">YAML baseline: {% for name in yaml_profiles %}<code>{{ name }}</code>{% if not loop.last %}, {% endif %}{% else %}—{% endfor %}</span>
     </div>
 
-    <table class="qr-table">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Size</th>
-                <th>Margin</th>
-                <th>Error correction</th>
-                <th>Allowlist</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for profile in profiles %}
-            <tr>
-                <td>
-                    <strong><code>{{ profile.name }}</code></strong>
-                    {% if profile.name in yaml_profiles %}
-                        <span class="qr-badge">overrides YAML</span>
-                    {% else %}
-                        <span class="qr-badge">DB only</span>
-                    {% endif %}
-                </td>
-                <td>{{ profile.size }}</td>
-                <td>{{ profile.margin }}</td>
-                <td><code>{{ profile.errorCorrection }}</code></td>
-                <td class="qr-muted">
-                    {% if profile.urlAllowlist is empty %}
-                        (any http/https)
-                    {% else %}
-                        {{ profile.urlAllowlist|join(', ') }}
-                    {% endif %}
-                </td>
-                <td class="qr-actions">
-                    <a href="{{ path('nowo_qr_code_admin_edit', {id: profile.id}) }}">Edit</a>
-                    <form method="post" action="{{ path('nowo_qr_code_admin_delete', {id: profile.id}) }}" onsubmit="return confirm('Delete this profile?');">
-                        <input type="hidden" name="_token" value="{{ csrf_token('delete_qr_profile_' ~ profile.id) }}">
-                        <button type="submit" class="qr-link-danger">Delete</button>
-                    </form>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="6">No database profiles yet. Create one or import from YAML.</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+    <div class="nowo-ui-table-wrap">
+        <table class="qr-table nowo-ui-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Size</th>
+                    <th>Margin</th>
+                    <th>Error correction</th>
+                    <th>Allowlist</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for profile in profiles %}
+                <tr>
+                    <td>
+                        <strong><code>{{ profile.name }}</code></strong>
+                        {% if profile.name in yaml_profiles %}
+                            <span class="qr-badge">overrides YAML</span>
+                        {% else %}
+                            <span class="qr-badge">DB only</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ profile.size }}</td>
+                    <td>{{ profile.margin }}</td>
+                    <td><code>{{ profile.errorCorrection }}</code></td>
+                    <td class="qr-muted">
+                        {% if profile.urlAllowlist is empty %}
+                            (any http/https)
+                        {% else %}
+                            {{ profile.urlAllowlist|join(', ') }}
+                        {% endif %}
+                    </td>
+                    <td class="qr-actions">
+                        <a href="{{ path('nowo_qr_code_admin_edit', {id: profile.id}) }}">Edit</a>
+                        <form method="post" action="{{ path('nowo_qr_code_admin_delete', {id: profile.id}) }}" onsubmit="return confirm('Delete this profile?');">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete_qr_profile_' ~ profile.id) }}">
+                            <button type="submit" class="qr-link-danger">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="6">No database profiles yet. Create one or import from YAML.</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
 {% endblock %}

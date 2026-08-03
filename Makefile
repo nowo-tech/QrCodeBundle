@@ -138,7 +138,7 @@ setup-hooks:
 	@git config core.hooksPath .githooks
 	@echo "✅ Git hooks installed (.githooks — includes commit-msg for REQ-GIT-001)."
 
-release-check: check-no-cursor-coauthor check-open-prs ensure-up composer-sync cs-fix cs-check rector-dry phpstan test-coverage release-check-demos
+release-check: check-no-cursor-coauthor check-open-prs ensure-up composer-sync cs-fix cs-check rector-dry phpstan coverage-check release-check-demos
 
 release-check-demos:
 	@if [ -f demo/Makefile ]; then $(MAKE) -C demo release-check; else echo "No demo/Makefile — skip release-check-demos"; fi

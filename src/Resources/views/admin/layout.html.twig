@@ -1,9 +1,11 @@
 <!DOCTYPE html>
-<html lang="{{ app.request.locale|default('en') }}">
+<html lang="{{ app.request.locale|default('en') }}" class="nowo-ui-html nowo-ui--{{ nowo_qr_code_css_framework|default('custom') }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}QR Code profiles{% endblock %}</title>
+    {# Demo root layout: no parent() (full HTML). Bundle pages stack via admin/base.html.twig. #}
+    {% block stylesheets %}
     <style>
         :root {
             --qr-bg: #f4f6f8;
@@ -17,19 +19,19 @@
             --qr-warn-border: #f59e0b;
         }
         * { box-sizing: border-box; }
-        body {
+        body, .nowo-ui-body {
             margin: 0;
             font-family: "Segoe UI", system-ui, sans-serif;
             background: var(--qr-bg);
             color: var(--qr-text);
             line-height: 1.45;
         }
-        .qr-wrap { max-width: 960px; margin: 0 auto; padding: 1.5rem; }
-        .qr-header { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; margin-bottom: 1rem; }
-        .qr-header h1 { margin: 0 0 .25rem; font-size: 1.5rem; }
+        .qr-wrap, .nowo-ui-container { max-width: 960px; margin: 0 auto; padding: 1.5rem; }
+        .qr-header, .nowo-ui-header { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; margin-bottom: 1rem; }
+        .qr-header h1, .nowo-ui-header h1 { margin: 0 0 .25rem; font-size: 1.5rem; }
         .qr-lead { margin: 0; color: var(--qr-muted); }
         .qr-muted { color: var(--qr-muted); font-size: .875rem; }
-        .qr-toolbar { display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; margin-bottom: 1rem; }
+        .qr-toolbar, .nowo-ui-toolbar { display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; margin-bottom: 1rem; }
         .qr-btn, button.qr-btn {
             display: inline-block;
             border: 1px solid var(--qr-border);
@@ -42,9 +44,10 @@
             font: inherit;
         }
         .qr-btn-primary { background: var(--qr-primary); border-color: var(--qr-primary); color: #fff; }
-        .qr-table { width: 100%; border-collapse: collapse; background: var(--qr-card); border: 1px solid var(--qr-border); border-radius: .5rem; overflow: hidden; }
-        .qr-table th, .qr-table td { border-bottom: 1px solid var(--qr-border); padding: .65rem .75rem; text-align: left; vertical-align: top; }
-        .qr-table th { background: #eef2f7; font-size: .85rem; }
+        .nowo-ui-table-wrap { overflow-x: auto; }
+        .qr-table, .nowo-ui-table { width: 100%; border-collapse: collapse; background: var(--qr-card); border: 1px solid var(--qr-border); border-radius: .5rem; overflow: hidden; }
+        .qr-table th, .qr-table td, .nowo-ui-table th, .nowo-ui-table td { border-bottom: 1px solid var(--qr-border); padding: .65rem .75rem; text-align: left; vertical-align: top; }
+        .qr-table th, .nowo-ui-table th { background: #eef2f7; font-size: .85rem; }
         .qr-actions { display: flex; gap: .75rem; align-items: center; white-space: nowrap; }
         .qr-actions form { margin: 0; }
         .qr-link-danger { background: none; border: 0; color: var(--qr-danger); cursor: pointer; padding: 0; font: inherit; }
@@ -52,25 +55,28 @@
         .qr-alert-warn { background: var(--qr-warn-bg); border: 1px solid var(--qr-warn-border); }
         .qr-alert-success { background: #ecfdf5; border: 1px solid #34d399; }
         .qr-alert-error { background: #fef2f2; border: 1px solid #f87171; }
-        .qr-form { background: var(--qr-card); border: 1px solid var(--qr-border); border-radius: .5rem; padding: 1rem 1.25rem; max-width: 36rem; }
-        .qr-form label { display: block; margin-top: .75rem; font-weight: 600; }
-        .qr-form input[type="text"], .qr-form input[type="number"], .qr-form select, .qr-form textarea {
+        .qr-form, .nowo-ui-form { background: var(--qr-card); border: 1px solid var(--qr-border); border-radius: .5rem; padding: 1rem 1.25rem; max-width: 36rem; }
+        .qr-form label, .nowo-ui-form label { display: block; margin-top: .75rem; font-weight: 600; }
+        .qr-form input[type="text"], .qr-form input[type="number"], .qr-form select, .qr-form textarea,
+        .nowo-ui-form input[type="text"], .nowo-ui-form input[type="number"], .nowo-ui-form select, .nowo-ui-form textarea {
             width: 100%; margin-top: .25rem; padding: .45rem .55rem; border: 1px solid var(--qr-border); border-radius: .35rem; font: inherit;
         }
-        .qr-form .form-help, .qr-form .help-text { color: var(--qr-muted); font-size: .85rem; }
-        .qr-form-actions { display: flex; gap: .75rem; margin-top: 1.25rem; }
+        .qr-form .form-help, .qr-form .help-text, .nowo-ui-form .form-help, .nowo-ui-form .help-text { color: var(--qr-muted); font-size: .85rem; }
+        .qr-form-actions, .nowo-ui-form-actions { display: flex; gap: .75rem; margin-top: 1.25rem; }
         .qr-badge { display: inline-block; border-radius: 999px; padding: .15rem .55rem; font-size: .75rem; background: #e0e7ff; color: #3730a3; }
         code { font-size: .9em; }
     </style>
+    {% endblock %}
 </head>
-<body>
-    <div class="qr-wrap">
+<body class="nowo-ui-body">
+    <div class="qr-wrap nowo-ui-container">
         {% for label, messages in app.flashes %}
             {% for message in messages %}
-                <div class="qr-alert qr-alert-{{ label == 'success' ? 'success' : (label == 'error' ? 'error' : 'warn') }}" role="alert">{{ message }}</div>
+                <div class="qr-alert qr-alert-{{ label == 'success' ? 'success' : (label == 'error' ? 'error' : 'warn') }} nowo-ui-alert" role="alert">{{ message }}</div>
             {% endfor %}
         {% endfor %}
         {% block body %}{% endblock %}
     </div>
+    {% block javascripts %}{% endblock %}
 </body>
 </html>

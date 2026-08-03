@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Nowo\QrCodeBundle\Tests\Unit\DependencyInjection;
 
 use Nowo\QrCodeBundle\DependencyInjection\Configuration;
+use Nowo\QrCodeBundle\Enum\CssFramework;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\Config\Definition\Processor;
@@ -40,6 +41,38 @@ final class ConfigurationTest extends TestCase
         $this->assertSame('', $config['doctrine']['table_prefix']);
         $this->assertSame(['ROLE_ADMIN'], $config['security']['access_roles']);
         $this->assertFalse($config['security']['allow_unauthenticated']);
+        $this->assertSame('@NowoQrCodeBundle/admin/layout.html.twig', $config['web_ui']['layout_template']);
+        $this->assertSame(CssFramework::Custom->value, $config['web_ui']['css_framework']);
+    }
+
+    public function testWebUiCssFrameworkAccepted(): void
+    {
+        $config = $this->processor->processConfiguration($this->configuration, [[
+            'web_ui' => [
+                'layout_template' => 'base.html.twig',
+                'css_framework'   => CssFramework::Tailwind->value,
+            ],
+            'profiles' => [
+                'default' => [],
+            ],
+        ]]);
+
+        $this->assertSame('base.html.twig', $config['web_ui']['layout_template']);
+        $this->assertSame(CssFramework::Tailwind->value, $config['web_ui']['css_framework']);
+    }
+
+    public function testInvalidCssFrameworkIsRejected(): void
+    {
+        $this->expectException(InvalidConfigurationException::class);
+
+        $this->processor->processConfiguration($this->configuration, [[
+            'web_ui' => [
+                'css_framework' => 'material',
+            ],
+            'profiles' => [
+                'default' => [],
+            ],
+        ]]);
     }
 
     public function testDatabaseConfigOptions(): void

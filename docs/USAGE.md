@@ -1,5 +1,12 @@
 # Usage
 
+## Table of contents
+
+- [Service](#service)
+- [Database profiles (optional)](#database-profiles-optional)
+- [Low-level renderer](#low-level-renderer)
+- [Twig](#twig)
+
 ## Service
 
 ```php
