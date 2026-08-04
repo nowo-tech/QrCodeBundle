@@ -23,7 +23,7 @@
     },
     "authors": [
         {
-            "name": "Héctor Franco Aceituno",
+            "name": "H\u00e9ctor Franco Aceituno",
             "email": "hectorfranco@nowo.tech",
             "homepage": "https://github.com/HecFranco",
             "role": "Developer"
@@ -34,13 +34,17 @@
         }
     ],
     "require": {
-        "php": ">=8.1 <8.6",
         "endroid/qr-code": "^6.0",
+        "nowo-tech/form-kit-bundle": "^2.0",
+        "nowo-tech/ui-kit-bundle": "^1.4",
+        "php": ">=8.1 <8.6",
         "symfony/config": "^7.0 || ^8.0",
         "symfony/dependency-injection": "^7.0 || ^8.0",
         "symfony/http-kernel": "^7.0 || ^8.0",
         "symfony/twig-bundle": "^7.0 || ^8.0",
         "symfony/ux-twig-component": "^2.20 || ^3.0",
+        "twig/extra-bundle": "^3.12",
+        "twig/string-extra": "^3.12",
         "twig/twig": "^3.8 || ^4.0"
     },
     "require-dev": {
@@ -58,7 +62,8 @@
         "symfony/framework-bundle": "^7.0 || ^8.0",
         "symfony/security-core": "^7.0 || ^8.0",
         "symfony/validator": "^7.0 || ^8.0",
-        "symfony/yaml": "^7.0 || ^8.0"
+        "symfony/yaml": "^7.0 || ^8.0",
+        "vincentlanglet/twig-cs-fixer": "^3.0"
     },
     "autoload": {
         "psr-4": {
@@ -80,7 +85,10 @@
     "minimum-stability": "stable",
     "prefer-stable": true,
     "archive": {
-        "exclude": ["/demo", "/.cursor"]
+        "exclude": [
+            "/demo",
+            "/.cursor"
+        ]
     },
     "scripts": {
         "test": "@php vendor/bin/phpunit --color=always",
@@ -90,7 +98,14 @@
         "rector": "@php vendor/bin/rector process",
         "rector-dry": "@php vendor/bin/rector process --dry-run --no-progress-bar",
         "phpstan": "@php vendor/bin/phpstan analyse --memory-limit=512M",
-        "qa": ["@cs-check", "@phpstan", "@test"]
+        "qa": [
+            "@cs-check",
+            "@phpstan",
+            "@test"
+        ],
+        "twig:lint": "twig-cs-fixer lint --config=.twig-cs-fixer.php",
+        "twig:fix": "twig-cs-fixer fix --config=.twig-cs-fixer.php",
+        "twig:fix:check": "twig-cs-fixer lint --config=.twig-cs-fixer.php --fix"
     },
     "suggest": {
         "ext-gd": "Required by endroid/qr-code for PNG rendering",

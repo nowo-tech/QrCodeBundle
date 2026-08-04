@@ -1,5 +1,43 @@
 # Upgrading
 
+## To 1.4.0
+
+From **1.3.x** — FormKit ^2, UiKit ^1.4, Twig Extra (REQ-TWIG-004), and Twig-CS-Fixer.
+
+```bash
+composer update nowo-tech/qr-code-bundle
+php bin/console cache:clear
+php bin/console assets:install
+```
+
+### UiKit composition (REQ-UI-001-kit)
+
+Admin UI now depends on **[UiKitBundle](https://github.com/nowo-tech/UiKitBundle)** (`nowo-tech/ui-kit-bundle` `^1.4`).
+
+1. Require the package (pulled transitively once you update this bundle) and run `assets:install`.
+2. Stylesheet package: `asset('css/nowo-ui.css', 'nowo_ui_kit')` via `admin/base.html.twig`.
+3. Optional: set `nowo_ui_kit.css_framework` / `icon_set` in the host. If unset, QrCode seeds those keys from `web_ui.css_framework` (default `custom`) and defaults `icon_set` to `bootstrap-icons`.
+4. Template overrides: extend `@NowoQrCodeBundle/admin/base.html.twig` and use UiKit macros (`ui.flash`, `ui.btn`) instead of hard-coded alert/button classes where applicable.
+
+### FormKitBundle (admin forms)
+
+Ensure `nowo-tech/form-kit-bundle` ^2.0 is installed (pulled transitively) and `Nowo\FormKitBundle\NowoFormKitBundle` is registered. Form types use profile `qr_code` via `#[FormKitConfig]`; the bundle prepends that profile when the host has not defined it.
+
+### Twig Extra Bundle (REQ-TWIG-004)
+
+Hosts that render this bundle's Twig templates must install:
+
+```bash
+composer require twig/extra-bundle twig/string-extra
+```
+
+and enable `Twig\Extra\TwigExtraBundle\TwigExtraBundle`. Flex recipes usually register it automatically.
+
+### Twig-CS-Fixer (maintainers)
+
+Package maintainers: `composer twig:lint` / `composer twig:fix` use `.twig-cs-fixer.php` over `src/` (and `templates/` when present).
+
+
 ## [1.3.0] - 2026-08-03 — Admin Web UI look-and-feel + FrankenPHP demo
 
 **Backward compatible** for apps that do not customize admin templates. Defaults keep `web_ui.css_framework: custom` and the bundled standalone layout.

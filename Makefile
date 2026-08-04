@@ -12,7 +12,7 @@ endif
 COMPOSE     := $(COMPOSE_BIN) -f $(COMPOSE_FILE)
 SERVICE_PHP := php
 
-.PHONY: help up down down-dev build shell install ensure-up test test-coverage test-coverage-100 coverage-check coverage-php-percent cs-check cs-fix qa clean release-check release-check-demos demo-smoke composer-sync rector rector-dry phpstan update validate assets setup-hooks check-no-cursor-coauthor check-open-prs strip-cursor-coauthor-from-history update-deps
+.PHONY: help up down down-dev build shell install ensure-up test test-coverage test-coverage-100 coverage-check coverage-php-percent cs-check cs-fix qa clean release-check release-check-demos demo-smoke composer-sync rector rector-dry phpstan update validate assets setup-hooks check-no-cursor-coauthor check-open-prs strip-cursor-coauthor-from-history update-deps check-twig-extra
 
 help:
 	@echo "QR Code Bundle - Development Commands"
@@ -138,7 +138,11 @@ setup-hooks:
 	@git config core.hooksPath .githooks
 	@echo "✅ Git hooks installed (.githooks — includes commit-msg for REQ-GIT-001)."
 
-release-check: check-no-cursor-coauthor check-open-prs ensure-up composer-sync cs-fix cs-check rector-dry phpstan coverage-check release-check-demos
+
+check-twig-extra:
+	@chmod +x .scripts/check-twig-extra.sh
+	@./.scripts/check-twig-extra.sh
+release-check: check-no-cursor-coauthor check-open-prs check-twig-extra ensure-up composer-sync cs-fix cs-check rector-dry phpstan coverage-check release-check-demos
 
 release-check-demos:
 	@if [ -f demo/Makefile ]; then $(MAKE) -C demo release-check; else echo "No demo/Makefile — skip release-check-demos"; fi
@@ -160,3 +164,6 @@ assets:
 BUNDLE_ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 # Optional: monorepo helper absent on standalone GitHub Actions checkout (REQ-MAKE-009).
 -include $(BUNDLE_ROOT)/../.scripts/Makefile.update-deps.mk
+
+twig-lint: ensure-up
+	@$(COMPOSE) exec -T $(SERVICE_PHP) composer twig:lint || $(COMPOSE) exec -T $(SERVICE_PHP) ./vendor/bin/twig-cs-fixer lint --config=.twig-cs-fixer.php

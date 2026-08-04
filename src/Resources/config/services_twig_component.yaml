@@ -7,3 +7,9 @@ services:
 
   Nowo\QrCodeBundle\Twig\Component\:
     resource: '../../Twig/Component/*'
+
+  # Form Kit injects FormOptionsMerger into tagged form types (FormOptionsMergerInjectorCompilerPass).
+  Nowo\QrCodeBundle\Form\:
+    resource: '../../Form/'
+    exclude: '../../Form/DataTransformer/'
+    tags: ['form.type']

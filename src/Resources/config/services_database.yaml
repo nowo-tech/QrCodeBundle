@@ -24,3 +24,9 @@ services:
     arguments:
       $useDatabaseConfig: '%nowo_qr_code.use_database_config%'
     tags: ['controller.service_arguments']
+
+  # Form Kit injects FormOptionsMerger into tagged form types (FormOptionsMergerInjectorCompilerPass).
+  Nowo\QrCodeBundle\Form\:
+    resource: '../../Form/'
+    exclude: '../../Form/DataTransformer/'
+    tags: ['form.type']

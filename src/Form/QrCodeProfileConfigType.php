@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace Nowo\QrCodeBundle\Form;
 
+use Nowo\FormKitBundle\Attribute\FormKitConfig;
+use Nowo\FormKitBundle\Form\FormOptionsTrait;
 use Nowo\QrCodeBundle\Entity\QrCodeProfileConfig;
 use Nowo\QrCodeBundle\Enum\QrErrorCorrection;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\CallbackTransformer;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -26,8 +24,11 @@ use function trim;
  *
  * @extends AbstractType<QrCodeProfileConfig>
  */
+#[FormKitConfig('qr_code')]
 final class QrCodeProfileConfigType extends AbstractType
 {
+    use FormOptionsTrait;
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $errorChoices = [];
@@ -35,40 +36,46 @@ final class QrCodeProfileConfigType extends AbstractType
             $errorChoices[$case->value] = $case->value;
         }
 
-        $builder
-            ->add('name', TextType::class, [
+        $this->withBuilder($builder, function () use ($errorChoices): void {
+            $this->addTextField('name', [
                 'label'       => 'Profile name',
+                'placeholder' => false,
                 'help'        => 'Must match a YAML profile name to override it; new names add DB-only profiles.',
                 'constraints' => [
                     new Assert\NotBlank(),
                     new Assert\Length(max: 64),
                     new Assert\Regex(pattern: '/^[a-zA-Z0-9_-]+$/', message: 'Use letters, digits, underscore or hyphen.'),
                 ],
-            ])
-            ->add('size', IntegerType::class, [
+            ]);
+            $this->addIntegerField('size', [
                 'label'       => 'Size (px)',
+                'placeholder' => false,
+                'help'        => false,
                 'constraints' => [
                     new Assert\NotNull(),
                     new Assert\Range(min: 64, max: 1024),
                 ],
-            ])
-            ->add('margin', IntegerType::class, [
+            ]);
+            $this->addIntegerField('margin', [
                 'label'       => 'Margin (px)',
+                'placeholder' => false,
+                'help'        => false,
                 'constraints' => [
                     new Assert\NotNull(),
                     new Assert\Range(min: 0, max: 64),
                 ],
-            ])
-            ->add('errorCorrection', ChoiceType::class, [
+            ]);
+            $this->addChoiceField('errorCorrection', [
                 'label'   => 'Error correction',
                 'choices' => $errorChoices,
-            ])
-            ->add('urlAllowlist', TextareaType::class, [
+            ]);
+            $this->addTextareaField('urlAllowlist', [
                 'label'    => 'URL allowlist',
                 'required' => false,
                 'help'     => 'One pattern per line. Empty = any http(s) URL.',
                 'attr'     => ['rows' => 5],
             ]);
+        });
 
         $builder->get('urlAllowlist')->addModelTransformer(new CallbackTransformer(
             static fn (?array $patterns): string => $patterns === null || $patterns === [] ? '' : implode("\n", $patterns),

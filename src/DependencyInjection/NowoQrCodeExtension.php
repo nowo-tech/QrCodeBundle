@@ -18,7 +18,9 @@ use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 
+use function array_key_exists;
 use function class_exists;
+use function is_array;
 use function is_string;
 
 /**
@@ -28,27 +30,139 @@ final class NowoQrCodeExtension extends Extension implements PrependExtensionInt
 {
     public function prepend(ContainerBuilder $container): void
     {
-        if (!$container->hasExtension('twig')) {
+        $this->prependFormKitDefaults($container);
+        if ($container->hasExtension('twig')) {
+            $configs = $container->getExtensionConfig($this->getAlias());
+            $config  = $this->processConfiguration(new Configuration(), $configs);
+
+            $layoutTemplate = $config['web_ui']['layout_template'];
+            // Escape leading "@" so DI does not treat Twig logical names as service refs.
+            if (is_string($layoutTemplate) && str_starts_with($layoutTemplate, '@')) {
+                $layoutTemplate = '@' . $layoutTemplate;
+            }
+
+            $cssFramework = CssFramework::from($config['web_ui']['css_framework'])->normalized()->value;
+
+            $container->prependExtensionConfig('twig', [
+                'globals' => [
+                    'nowo_qr_code_layout_template' => $layoutTemplate,
+                    'nowo_qr_code_css_framework'   => $cssFramework,
+                ],
+            ]);
+        }
+
+        $this->prependUiKitDefaults($container);
+    }
+
+    /**
+     * When UiKit is installed, seed nowo_ui_kit.css_framework / icon_set from web_ui
+     * so kit macros resolve the same stack. Does not override keys the host already set.
+     * web_ui.icon_set is optional — defaults to bootstrap-icons when seeding UiKit.
+     */
+
+    /**
+     * When FormKit is installed, register the qr_code profile. Forms select it via #[FormKitConfig].
+     */
+    private function prependFormKitDefaults(ContainerBuilder $container): void
+    {
+        if (!$container->hasExtension('nowo_form_kit')) {
             return;
         }
 
-        $configs = $container->getExtensionConfig($this->getAlias());
-        $config  = $this->processConfiguration(new Configuration(), $configs);
-
-        $layoutTemplate = $config['web_ui']['layout_template'];
-        // Escape leading "@" so DI does not treat Twig logical names as service refs.
-        if (is_string($layoutTemplate) && str_starts_with($layoutTemplate, '@')) {
-            $layoutTemplate = '@' . $layoutTemplate;
+        $hostHasCssFramework = false;
+        $hostHasProfile      = false;
+        foreach ($container->getExtensionConfig('nowo_form_kit') as $cfg) {
+            /** @var array<string, mixed> $cfg */
+            if (array_key_exists('css_framework', $cfg)) {
+                $hostHasCssFramework = true;
+            }
+            $profiles = $cfg['profiles'] ?? null;
+            if (is_array($profiles) && array_key_exists('qr_code', $profiles)) {
+                $hostHasProfile = true;
+            }
         }
 
-        $cssFramework = CssFramework::from($config['web_ui']['css_framework'])->normalized()->value;
+        $seed = [];
 
-        $container->prependExtensionConfig('twig', [
-            'globals' => [
-                'nowo_qr_code_layout_template' => $layoutTemplate,
-                'nowo_qr_code_css_framework'   => $cssFramework,
-            ],
-        ]);
+        if (!$hostHasCssFramework) {
+            $seed['css_framework'] = 'bootstrap';
+        }
+
+        if (!$hostHasProfile) {
+            $seed['profiles'] = [
+                'qr_code' => [
+                    'alias'              => 'qr_code',
+                    'translation_domain' => 'NowoQrCodeBundle',
+                    'defaults'           => [
+                        'attr'     => ['class' => 'nowo-ui-input form-control'],
+                        'row_attr' => ['class' => 'mb-2'],
+                    ],
+                    'field_types' => [
+                        'checkbox' => [
+                            'attr'     => ['class' => 'form-check-input'],
+                            'row_attr' => ['class' => 'form-check mb-2'],
+                        ],
+                        'choice' => [
+                            'attr' => ['class' => 'form-select'],
+                        ],
+                        'entity' => [
+                            'attr' => ['class' => 'form-select'],
+                        ],
+                        'file' => [
+                            'attr' => ['class' => 'nowo-ui-input form-control'],
+                        ],
+                        'textarea' => [
+                            'attr' => ['class' => 'nowo-ui-input form-control'],
+                        ],
+                    ],
+                ],
+            ];
+        }
+
+        if ($seed !== []) {
+            $container->prependExtensionConfig('nowo_form_kit', $seed);
+        }
+    }
+
+    private function prependUiKitDefaults(ContainerBuilder $container): void
+    {
+        if (!$container->hasExtension('nowo_ui_kit')) {
+            return;
+        }
+
+        $hostHasCssFramework = false;
+        $hostHasIconSet      = false;
+        foreach ($container->getExtensionConfig('nowo_ui_kit') as $cfg) {
+            if (!is_array($cfg)) {
+                continue;
+            }
+            if (array_key_exists('css_framework', $cfg)) {
+                $hostHasCssFramework = true;
+            }
+            if (array_key_exists('icon_set', $cfg)) {
+                $hostHasIconSet = true;
+            }
+        }
+
+        if ($hostHasCssFramework && $hostHasIconSet) {
+            return;
+        }
+
+        $config   = $this->processConfiguration(new Configuration(), $container->getExtensionConfig($this->getAlias()));
+        $webUi    = is_array($config['web_ui'] ?? null) ? $config['web_ui'] : [];
+        $defaults = [];
+
+        if (!$hostHasCssFramework) {
+            $fw                        = (string) ($webUi['css_framework'] ?? 'custom');
+            $defaults['css_framework'] = $fw === 'bootstrap' ? 'bootstrap5' : $fw;
+        }
+        if (!$hostHasIconSet) {
+            $defaults['icon_set'] = (string) ($webUi['icon_set'] ?? 'bootstrap-icons');
+        }
+
+        if ($defaults !== []) {
+            $container->prependExtensionConfig('nowo_ui_kit', $defaults);
+        }
     }
 
     public function load(array $configs, ContainerBuilder $container): void

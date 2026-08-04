@@ -1,4 +1,6 @@
 {% extends '@NowoQrCodeBundle/admin/base.html.twig' %}
+{% import '@NowoUiKitBundle/macros/ui.html.twig' as ui %}
+{% set _css_fw = nowo_qr_code_css_framework|default('custom') %}
 
 {% block title %}{{ is_new ? 'New QR profile' : 'Edit QR profile' }}{% endblock %}
 
@@ -8,7 +10,7 @@
             <h1>{{ is_new ? 'New profile' : 'Edit profile' }}</h1>
             <p class="qr-lead">{% if not is_new %}<code>{{ profile.name }}</code>{% else %}Database-backed QR settings{% endif %}</p>
         </div>
-        <a class="qr-btn" href="{{ path('nowo_qr_code_admin_index') }}">Back</a>
+        <a class="{{ ui.btn('secondary', null, _css_fw) }} qr-btn nowo-ui-action-cancel" href="{{ path('nowo_qr_code_admin_index') }}">Back</a>
     </div>
 
     {% if not use_database_config %}
@@ -25,8 +27,8 @@
         {{ form_row(form.urlAllowlist) }}
 
         <div class="qr-form-actions nowo-ui-form-actions">
-            <button type="submit" class="qr-btn qr-btn-primary">Save</button>
-            <a class="qr-btn" href="{{ path('nowo_qr_code_admin_index') }}">Cancel</a>
+            <button type="submit" class="{{ ui.btn('primary', null, _css_fw) }} qr-btn qr-btn-primary nowo-ui-action-save">Save</button>
+            <a class="{{ ui.btn('secondary', null, _css_fw) }} qr-btn nowo-ui-action-cancel" href="{{ path('nowo_qr_code_admin_index') }}">Cancel</a>
         </div>
     {{ form_end(form) }}
 {% endblock %}

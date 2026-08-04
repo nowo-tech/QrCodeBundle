@@ -1,4 +1,6 @@
 {% extends '@NowoQrCodeBundle/admin/base.html.twig' %}
+{% import '@NowoUiKitBundle/macros/ui.html.twig' as ui %}
+{% set _css_fw = nowo_qr_code_css_framework|default('custom') %}
 
 {% block title %}QR Code profiles{% endblock %}
 
@@ -8,7 +10,7 @@
             <h1>QR Code profiles</h1>
             <p class="qr-lead">Database profiles override YAML when they share the same name (<code>use_database_config</code>).</p>
         </div>
-        <a class="qr-btn qr-btn-primary" href="{{ path('nowo_qr_code_admin_new') }}">New profile</a>
+        <a class="{{ ui.btn('primary', null, _css_fw) }} qr-btn qr-btn-primary nowo-ui-action-create" href="{{ path('nowo_qr_code_admin_new') }}">New profile</a>
     </div>
 
     {% if not use_database_config %}
@@ -20,7 +22,7 @@
     <div class="qr-toolbar nowo-ui-toolbar">
         <form method="post" action="{{ path('nowo_qr_code_admin_import_yaml') }}">
             <input type="hidden" name="_token" value="{{ csrf_token('import_qr_yaml') }}">
-            <button type="submit" class="qr-btn">Import from YAML</button>
+            <button type="submit" class="{{ ui.btn('secondary', null, _css_fw) }} qr-btn">Import from YAML</button>
         </form>
         <span class="qr-muted">YAML baseline: {% for name in yaml_profiles %}<code>{{ name }}</code>{% if not loop.last %}, {% endif %}{% else %}—{% endfor %}</span>
     </div>
@@ -59,11 +61,13 @@
                         {% endif %}
                     </td>
                     <td class="qr-actions">
-                        <a href="{{ path('nowo_qr_code_admin_edit', {id: profile.id}) }}">Edit</a>
-                        <form method="post" action="{{ path('nowo_qr_code_admin_delete', {id: profile.id}) }}" onsubmit="return confirm('Delete this profile?');">
-                            <input type="hidden" name="_token" value="{{ csrf_token('delete_qr_profile_' ~ profile.id) }}">
-                            <button type="submit" class="qr-link-danger">Delete</button>
-                        </form>
+                        <div class="{{ ui.row_actions(_css_fw) }}">
+                            <a class="{{ ui.btn('secondary', 'sm', _css_fw) }} qr-btn nowo-ui-action-edit" href="{{ path('nowo_qr_code_admin_edit', {id: profile.id}) }}">Edit</a>
+                            <form method="post" action="{{ path('nowo_qr_code_admin_delete', {id: profile.id}) }}" onsubmit="return confirm('Delete this profile?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete_qr_profile_' ~ profile.id) }}">
+                                <button type="submit" class="{{ ui.btn('danger', 'sm', _css_fw) }} qr-link-danger nowo-ui-action-delete">Delete</button>
+                            </form>
+                        </div>
                     </td>
                 </tr>
             {% else %}

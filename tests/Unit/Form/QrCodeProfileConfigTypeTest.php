@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Nowo\QrCodeBundle\Tests\Unit\Form;
 
+use Nowo\FormKitBundle\Form\Constraint\ConstraintDefinitionFactory;
+use Nowo\FormKitBundle\Form\FormOptionsMerger;
 use Nowo\QrCodeBundle\Entity\QrCodeProfileConfig;
 use Nowo\QrCodeBundle\Enum\QrErrorCorrection;
 use Nowo\QrCodeBundle\Form\QrCodeProfileConfigType;
@@ -20,10 +22,14 @@ final class QrCodeProfileConfigTypeTest extends TestCase
 
     protected function setUp(): void
     {
+        $type = new QrCodeProfileConfigType();
+        $type->setFormOptionsMerger($this->formOptionsMerger());
+
         $validator     = Validation::createValidator();
         $this->factory = Forms::createFormFactoryBuilder()
             ->addExtension(new CoreExtension())
             ->addExtension(new ValidatorExtension($validator))
+            ->addType($type)
             ->getFormFactory();
     }
 
@@ -62,5 +68,23 @@ final class QrCodeProfileConfigTypeTest extends TestCase
 
         self::assertTrue($form->isValid());
         self::assertSame([], $entity->getUrlAllowlist());
+    }
+
+    private function formOptionsMerger(): FormOptionsMerger
+    {
+        return new FormOptionsMerger(
+            [
+                'qr_code' => [
+                    'translation_domain' => 'NowoQrCodeBundle',
+                    'defaults'           => [
+                        'attr'     => [],
+                        'row_attr' => [],
+                    ],
+                    'field_types' => [],
+                ],
+            ],
+            'qr_code',
+            new ConstraintDefinitionFactory(),
+        );
     }
 }

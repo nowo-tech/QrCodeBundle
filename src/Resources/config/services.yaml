@@ -16,3 +16,9 @@ services:
       $profileResolver: '@Nowo\QrCodeBundle\Config\ProfileResolver'
 
   Nowo\QrCodeBundle\Twig\QrCodeExtension: ~
+
+  # Form Kit injects FormOptionsMerger into tagged form types (FormOptionsMergerInjectorCompilerPass).
+  Nowo\QrCodeBundle\Form\:
+    resource: '../../Form/'
+    exclude: '../../Form/DataTransformer/'
+    tags: ['form.type']
