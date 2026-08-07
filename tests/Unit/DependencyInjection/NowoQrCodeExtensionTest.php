@@ -10,6 +10,7 @@ use Nowo\QrCodeBundle\Enum\CssFramework;
 use Nowo\QrCodeBundle\Service\QrCodeService;
 use Nowo\QrCodeBundle\Twig\Component\QrCode;
 use PHPUnit\Framework\TestCase;
+use ReflectionProperty;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 
@@ -207,8 +208,8 @@ final class NowoQrCodeExtensionTest extends TestCase
             ],
         ]);
         // Non-array host entries are ignored when detecting existing UiKit keys.
-        $extensionConfigs = new \ReflectionProperty(ContainerBuilder::class, 'extensionConfigs');
-        $configs          = $extensionConfigs->getValue($container);
+        $extensionConfigs         = new ReflectionProperty(ContainerBuilder::class, 'extensionConfigs');
+        $configs                  = $extensionConfigs->getValue($container);
         $configs['nowo_ui_kit'][] = 'not-an-array';
         $extensionConfigs->setValue($container, $configs);
 
