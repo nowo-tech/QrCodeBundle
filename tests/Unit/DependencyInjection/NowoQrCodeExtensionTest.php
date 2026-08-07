@@ -131,6 +131,153 @@ final class NowoQrCodeExtensionTest extends TestCase
         self::assertSame([], $container->getExtensionConfig('twig'));
     }
 
+    public function testPrependSeedsFormKitDefaultsWhenMissing(): void
+    {
+        $container = new ContainerBuilder();
+        $container->registerExtension($this->createExtension('nowo_form_kit'));
+        $container->registerExtension(new NowoQrCodeExtension());
+        $container->loadFromExtension('nowo_qr_code', []);
+        $container->loadFromExtension('nowo_form_kit', [
+            'profiles' => 'not-an-array',
+        ]);
+
+        (new NowoQrCodeExtension())->prepend($container);
+
+        $seed = $container->getExtensionConfig('nowo_form_kit')[0];
+        self::assertSame('bootstrap', $seed['css_framework']);
+        self::assertArrayHasKey('qr_code', $seed['profiles']);
+        self::assertSame('qr_code', $seed['profiles']['qr_code']['alias']);
+        self::assertSame('NowoQrCodeBundle', $seed['profiles']['qr_code']['translation_domain']);
+    }
+
+    public function testPrependDoesNotOverrideHostFormKitCssOrQrCodeProfile(): void
+    {
+        $container = new ContainerBuilder();
+        $container->registerExtension($this->createExtension('nowo_form_kit'));
+        $container->registerExtension(new NowoQrCodeExtension());
+        $container->loadFromExtension('nowo_qr_code', []);
+        $container->loadFromExtension('nowo_form_kit', [
+            'css_framework' => 'tailwind',
+            'profiles'      => [
+                'qr_code' => [
+                    'alias' => 'host_qr',
+                ],
+            ],
+        ]);
+
+        (new NowoQrCodeExtension())->prepend($container);
+
+        self::assertSame([
+            [
+                'css_framework' => 'tailwind',
+                'profiles'      => [
+                    'qr_code' => [
+                        'alias' => 'host_qr',
+                    ],
+                ],
+            ],
+        ], $container->getExtensionConfig('nowo_form_kit'));
+    }
+
+    public function testPrependSeedsOnlyMissingFormKitProfileWhenCssIsSet(): void
+    {
+        $container = new ContainerBuilder();
+        $container->registerExtension($this->createExtension('nowo_form_kit'));
+        $container->registerExtension(new NowoQrCodeExtension());
+        $container->loadFromExtension('nowo_qr_code', []);
+        $container->loadFromExtension('nowo_form_kit', [
+            'css_framework' => 'bootstrap5',
+        ]);
+
+        (new NowoQrCodeExtension())->prepend($container);
+
+        $seed = $container->getExtensionConfig('nowo_form_kit')[0];
+        self::assertArrayNotHasKey('css_framework', $seed);
+        self::assertArrayHasKey('qr_code', $seed['profiles']);
+    }
+
+    public function testPrependSeedsUiKitDefaultsFromWebUi(): void
+    {
+        $container = new ContainerBuilder();
+        $container->registerExtension($this->createExtension('nowo_ui_kit'));
+        $container->registerExtension(new NowoQrCodeExtension());
+        $container->loadFromExtension('nowo_qr_code', [
+            'web_ui' => [
+                'css_framework' => 'bootstrap',
+            ],
+        ]);
+        // Non-array host entries are ignored when detecting existing UiKit keys.
+        $extensionConfigs = new \ReflectionProperty(ContainerBuilder::class, 'extensionConfigs');
+        $configs          = $extensionConfigs->getValue($container);
+        $configs['nowo_ui_kit'][] = 'not-an-array';
+        $extensionConfigs->setValue($container, $configs);
+
+        (new NowoQrCodeExtension())->prepend($container);
+
+        $seed = $container->getExtensionConfig('nowo_ui_kit')[0];
+        self::assertSame('bootstrap5', $seed['css_framework']);
+        self::assertSame('bootstrap-icons', $seed['icon_set']);
+    }
+
+    public function testPrependSeedsOnlyMissingUiKitIconSet(): void
+    {
+        $container = new ContainerBuilder();
+        $container->registerExtension($this->createExtension('nowo_ui_kit'));
+        $container->registerExtension(new NowoQrCodeExtension());
+        $container->loadFromExtension('nowo_qr_code', [
+            'web_ui' => [
+                'css_framework' => 'tailwind',
+            ],
+        ]);
+        $container->loadFromExtension('nowo_ui_kit', [
+            'css_framework' => 'tabler',
+        ]);
+
+        (new NowoQrCodeExtension())->prepend($container);
+
+        self::assertSame(['icon_set' => 'bootstrap-icons'], $container->getExtensionConfig('nowo_ui_kit')[0]);
+    }
+
+    public function testPrependDoesNotOverrideHostUiKitWhenFullyConfigured(): void
+    {
+        $container = new ContainerBuilder();
+        $container->registerExtension($this->createExtension('nowo_ui_kit'));
+        $container->registerExtension(new NowoQrCodeExtension());
+        $container->loadFromExtension('nowo_qr_code', []);
+        $container->loadFromExtension('nowo_ui_kit', [
+            'css_framework' => 'foundation',
+            'icon_set'      => 'fontawesome',
+        ]);
+
+        (new NowoQrCodeExtension())->prepend($container);
+
+        self::assertSame([
+            [
+                'css_framework' => 'foundation',
+                'icon_set'      => 'fontawesome',
+            ],
+        ], $container->getExtensionConfig('nowo_ui_kit'));
+    }
+
+    public function testPrependSeedsOnlyMissingUiKitCssFramework(): void
+    {
+        $container = new ContainerBuilder();
+        $container->registerExtension($this->createExtension('nowo_ui_kit'));
+        $container->registerExtension(new NowoQrCodeExtension());
+        $container->loadFromExtension('nowo_qr_code', [
+            'web_ui' => [
+                'css_framework' => 'custom',
+            ],
+        ]);
+        $container->loadFromExtension('nowo_ui_kit', [
+            'icon_set' => 'heroicons',
+        ]);
+
+        (new NowoQrCodeExtension())->prepend($container);
+
+        self::assertSame(['css_framework' => 'custom'], $container->getExtensionConfig('nowo_ui_kit')[0]);
+    }
+
     private function createExtension(string $alias): Extension
     {
         return new class($alias) extends Extension {

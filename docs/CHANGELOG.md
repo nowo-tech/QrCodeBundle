@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.1] - 2026-08-07
+
+### Fixed
+
+- CI coverage gate: raise measured coverage to **100%** with unit tests for FormKit / UiKit `prepend` seeding branches in `NowoQrCodeExtension`.
+
+[1.4.1]: https://github.com/nowo-tech/QrCodeBundle/releases/tag/v1.4.1
+
 ## [1.4.0] - 2026-08-04
 
 ### Changed

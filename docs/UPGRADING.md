@@ -1,5 +1,13 @@
 # Upgrading
 
+## To 1.4.1
+
+No application code changes required. Patch restores the CI **100%** PHP line coverage gate (FormKit / UiKit extension prepend tests).
+
+```bash
+composer update nowo-tech/qr-code-bundle
+```
+
 ## To 1.4.0
 
 From **1.3.x** — FormKit ^2, UiKit ^1.4, Twig Extra (REQ-TWIG-004), and Twig-CS-Fixer.

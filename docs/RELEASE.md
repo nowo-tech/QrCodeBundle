@@ -1,6 +1,6 @@
 # Release process
 
-Current stable: **v1.3.0** (2026-08-03).
+Current stable: **v1.4.1** (2026-08-07).
 
 1. Update [CHANGELOG.md](CHANGELOG.md): move entries from `[Unreleased]` to a new `[X.Y.Z] - YYYY-MM-DD` section. (This project does not store version in `composer.json`; Packagist uses the git tag.)
 2. Update [UPGRADING.md](UPGRADING.md) if the release has upgrade notes.
@@ -10,6 +10,30 @@ Current stable: **v1.3.0** (2026-08-03).
 6. Publish the package to Packagist if applicable (usually automatic when the tag is pushed).
 
 After creating the release commit and tag, run `make check-no-cursor-coauthor` again **before** `git push` (REQ-GIT-001). The release commit itself is not covered by an earlier `release-check` run.
+
+## Example for v1.4.1
+
+```bash
+git add -A
+git status   # review
+git commit -m "Release 1.4.1: restore CI coverage gate to 100%"
+git tag -a v1.4.1 -m "Release 1.4.1: restore CI coverage gate to 100%"
+make check-no-cursor-coauthor
+git push origin main
+git push origin v1.4.1
+```
+
+## Example for v1.4.0
+
+```bash
+git add -A
+git status   # review
+git commit -m "Release v1.4.0: FormKit/UiKit, Twig Extra (REQ-TWIG-004), and Twig-CS-Fixer."
+git tag -a v1.4.0 -m "Release v1.4.0: FormKit/UiKit, Twig Extra (REQ-TWIG-004), and Twig-CS-Fixer."
+make check-no-cursor-coauthor
+git push origin main
+git push origin v1.4.0
+```
 
 ## Example for v1.3.0
 

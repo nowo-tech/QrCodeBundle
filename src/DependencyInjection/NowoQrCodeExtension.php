@@ -133,14 +133,13 @@ final class NowoQrCodeExtension extends Extension implements PrependExtensionInt
         $hostHasCssFramework = false;
         $hostHasIconSet      = false;
         foreach ($container->getExtensionConfig('nowo_ui_kit') as $cfg) {
-            if (!is_array($cfg)) {
-                continue;
-            }
-            if (array_key_exists('css_framework', $cfg)) {
-                $hostHasCssFramework = true;
-            }
-            if (array_key_exists('icon_set', $cfg)) {
-                $hostHasIconSet = true;
+            if (is_array($cfg)) {
+                if (array_key_exists('css_framework', $cfg)) {
+                    $hostHasCssFramework = true;
+                }
+                if (array_key_exists('icon_set', $cfg)) {
+                    $hostHasIconSet = true;
+                }
             }
         }
 
