@@ -26,7 +26,8 @@ See [docs/DEMO-FRANKENPHP.md](docs/DEMO-FRANKENPHP.md) (`FRANKENPHP_MODE=worker`
 - ✅ PNG QR codes as data URIs (`QrCodeService` / `QrCodeDataUriRenderer`)
 - ✅ Named profiles (`default_profile` + `profiles`) for size, ECC, and allowlists
 - ✅ Optional Doctrine storage: DB profiles override YAML by name (`use_database_config`)
-- ✅ Admin CRUD at `/admin/qr-code-profiles` (when DB storage is enabled)
+- ✅ Admin CRUD at `/admin/qr-code-profiles` (when DB storage is enabled; requires FormKit + UiKit)
+- ✅ Panel security: `security.access_roles` (default `[ROLE_ADMIN]`) / `allow_unauthenticated` (see [CONFIGURATION](docs/CONFIGURATION.md))
 - ✅ URL safety policy (`QrUrlPolicy`; blocks `javascript:`, `data:`, etc.)
 - ✅ Optional host/URL allowlist (exact host or subdomain; path substrings; `#regex`)
 - ✅ Typed `QrErrorCorrection` enum (`low` | `medium` | `quartile` | `high`)
