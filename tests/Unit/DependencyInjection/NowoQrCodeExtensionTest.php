@@ -41,6 +41,7 @@ final class NowoQrCodeExtensionTest extends TestCase
         $this->assertSame(10, $container->getParameter('nowo_qr_code.margin'));
         $this->assertSame('high', $container->getParameter('nowo_qr_code.error_correction'));
         $this->assertSame([], $container->getParameter('nowo_qr_code.url_allowlist'));
+        $this->assertFalse($container->getParameter('nowo_qr_code.url_allowlist_required'));
         $this->assertSame('@NowoQrCodeBundle/admin/layout.html.twig', $container->getParameter('nowo_qr_code.web_ui.layout_template'));
         $this->assertSame(CssFramework::Custom->value, $container->getParameter('nowo_qr_code.web_ui.css_framework'));
     }
@@ -334,5 +335,13 @@ final class NowoQrCodeExtensionTest extends TestCase
         $this->assertSame('wallet', $container->getParameter('nowo_qr_code.default_profile'));
         $this->assertSame(200, $container->getParameter('nowo_qr_code.size'));
         $this->assertSame(['pay.google.com'], $container->getParameter('nowo_qr_code.url_allowlist'));
+    }
+
+    public function testLoadSetsUrlAllowlistRequiredParameter(): void
+    {
+        $container = new ContainerBuilder();
+        $this->extension->load([['url_allowlist_required' => true]], $container);
+
+        $this->assertTrue($container->getParameter('nowo_qr_code.url_allowlist_required'));
     }
 }

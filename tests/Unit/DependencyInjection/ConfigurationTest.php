@@ -37,6 +37,7 @@ final class ConfigurationTest extends TestCase
         $this->assertSame(10, $config['profiles']['default']['margin']);
         $this->assertSame('high', $config['profiles']['default']['error_correction']);
         $this->assertSame([], $config['profiles']['default']['url_allowlist']);
+        $this->assertFalse($config['url_allowlist_required']);
         $this->assertFalse($config['use_database_config']);
         $this->assertSame('', $config['doctrine']['table_prefix']);
         $this->assertSame(['ROLE_ADMIN'], $config['security']['access_roles']);
@@ -131,6 +132,15 @@ final class ConfigurationTest extends TestCase
         $this->assertSame('compact', $config['default_profile']);
         $this->assertSame(128, $config['profiles']['compact']['size']);
         $this->assertSame(['nowo.tech'], $config['profiles']['compact']['url_allowlist']);
+    }
+
+    public function testUrlAllowlistRequiredFlag(): void
+    {
+        $config = $this->processor->processConfiguration($this->configuration, [[
+            'url_allowlist_required' => true,
+        ]]);
+
+        $this->assertTrue($config['url_allowlist_required']);
     }
 
     public function testUnknownDefaultProfileIsRejected(): void

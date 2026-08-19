@@ -182,6 +182,7 @@ final class NowoQrCodeExtension extends Extension implements PrependExtensionInt
         $container->setParameter('nowo_qr_code.margin', $default['margin']);
         $container->setParameter('nowo_qr_code.error_correction', $default['error_correction']);
         $container->setParameter('nowo_qr_code.url_allowlist', $default['url_allowlist']);
+        $container->setParameter('nowo_qr_code.url_allowlist_required', $config['url_allowlist_required']);
         $container->setParameter('nowo_qr_code.use_database_config', $config['use_database_config']);
         $container->setParameter('nowo_qr_code.doctrine.table_prefix', $config['doctrine']['table_prefix']);
         $container->setParameter('nowo_qr_code.security.access_roles', $config['security']['access_roles']);
