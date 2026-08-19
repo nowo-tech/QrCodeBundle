@@ -6,8 +6,8 @@ namespace Nowo\QrCodeBundle;
 
 use Doctrine\Bundle\DoctrineBundle\DependencyInjection\Compiler\DoctrineOrmMappingsPass;
 use Nowo\QrCodeBundle\DependencyInjection\Compiler\TwigPathsPass;
-use Nowo\QrCodeBundle\DependencyInjection\UrlAllowlistValidationPass;
 use Nowo\QrCodeBundle\DependencyInjection\NowoQrCodeExtension;
+use Nowo\QrCodeBundle\DependencyInjection\UrlAllowlistValidationPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
