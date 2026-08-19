@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.3] - 2026-08-19
+
+### Security
+
+- **Flex recipe `when@prod`:** `url_allowlist` placeholder for SSRF-safe QR generation in production.
+- **CI:** run `composer audit --locked` after dependency install (REQ-SEC / P3).
+
+[1.4.3]: https://github.com/nowo-tech/QrCodeBundle/releases/tag/v1.4.3
+
 ## [1.4.2] - 2026-08-18
 
 ### Changed

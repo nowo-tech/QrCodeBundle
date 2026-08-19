@@ -1,5 +1,14 @@
 # Upgrading
 
+## To 1.4.3
+
+From **1.4.2** — Review production SSRF config. Flex recipe `when@prod` ships a `url_allowlist` placeholder under `nowo_qr_code`. Replace with your allowed host patterns before generating QR codes from user-supplied URLs.
+
+```bash
+composer update nowo-tech/qr-code-bundle
+php bin/console cache:clear
+```
+
 ## To 1.4.2
 
 No application upgrade steps. **Demos only:** Hot Reload Bundle `^1.4` (FrankenPHP Mercure/`hot_reload`, `dev`/`test`).
