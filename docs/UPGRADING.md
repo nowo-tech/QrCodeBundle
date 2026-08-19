@@ -1,5 +1,14 @@
 # Upgrading
 
+## To 1.4.5
+
+From **1.4.4** — Ensure you are on **`^1.4.5`** for the shipped `UrlAllowlistValidationPass`. When `url_allowlist_required: true`, non-empty `url_allowlist` is required at compile time.
+
+```bash
+composer update nowo-tech/qr-code-bundle
+php bin/console cache:clear
+```
+
 ## To 1.4.4
 
 From **1.4.3** — When `url_allowlist_required: true` (Flex `when@prod`), ensure `nowo_qr_code.default.url_allowlist` is non-empty before deploying. Compilation fails with a clear error if the allowlist is empty.

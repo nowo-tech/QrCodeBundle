@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.5] - 2026-08-19
+
+### Security
+
+- **`url_allowlist_required` compiler pass:** ships on `main` with Flex recipe `when@prod` flag and validation tests (REQ-SEC-004). Prefer **`^1.4.5`** over `v1.4.4` if you rely on compile-time allowlist enforcement.
+
+### Fixed
+
+- **Tests:** coverage for `UrlAllowlistValidationPass` and `Configuration`/`NowoQrCodeExtension` wiring.
+
+[1.4.5]: https://github.com/nowo-tech/QrCodeBundle/releases/tag/v1.4.5
+
 ## [1.4.4] - 2026-08-19
 
 ### Security
