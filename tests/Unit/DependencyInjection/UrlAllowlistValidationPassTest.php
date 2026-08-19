@@ -34,7 +34,7 @@ final class UrlAllowlistValidationPassTest extends TestCase
 
         (new UrlAllowlistValidationPass())->process($container);
 
-        self::assertTrue(true);
+        $this->expectNotToPerformAssertions();
     }
 
     public function testPassesWhenNotRequiredAndAllowlistEmpty(): void
@@ -45,6 +45,13 @@ final class UrlAllowlistValidationPassTest extends TestCase
 
         (new UrlAllowlistValidationPass())->process($container);
 
-        self::assertTrue(true);
+        $this->expectNotToPerformAssertions();
+    }
+
+    public function testSkipsWhenAllowlistParameterMissing(): void
+    {
+        (new UrlAllowlistValidationPass())->process(new ContainerBuilder());
+
+        $this->expectNotToPerformAssertions();
     }
 }
