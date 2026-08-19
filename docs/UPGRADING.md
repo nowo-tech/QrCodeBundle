@@ -1,5 +1,14 @@
 # Upgrading
 
+## To 1.4.4
+
+From **1.4.3** — When `url_allowlist_required: true` (Flex `when@prod`), ensure `nowo_qr_code.default.url_allowlist` is non-empty before deploying. Compilation fails with a clear error if the allowlist is empty.
+
+```bash
+composer update nowo-tech/qr-code-bundle
+php bin/console cache:clear
+```
+
 ## To 1.4.3
 
 From **1.4.2** — Review production SSRF config. Flex recipe `when@prod` ships a `url_allowlist` placeholder under `nowo_qr_code`. Replace with your allowed host patterns before generating QR codes from user-supplied URLs.

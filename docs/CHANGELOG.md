@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.4] - 2026-08-19
+
+### Security
+
+- **`url_allowlist_required`:** when `true`, container compilation fails if the default profile `url_allowlist` is empty (REQ-SEC-004). Flex recipe `when@prod` enables this flag with a placeholder allowlist.
+
+[1.4.4]: https://github.com/nowo-tech/QrCodeBundle/releases/tag/v1.4.4
+
 ## [1.4.3] - 2026-08-19
 
 ### Security
