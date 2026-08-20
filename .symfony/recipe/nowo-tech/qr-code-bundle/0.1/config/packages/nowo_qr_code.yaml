@@ -21,6 +21,6 @@ when@prod:
         url_allowlist_required: true
         profiles:
             default:
-                # Set host allowlist in production when encoding URLs (not plain text).
-                url_allowlist:
-                    - example.com
+                # Compile fails until you list real hosts. Do not use example.com
+                # (rejected as a Flex placeholder when url_allowlist_required is true).
+                url_allowlist: []

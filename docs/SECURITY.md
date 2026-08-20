@@ -10,7 +10,7 @@ Report vulnerabilities privately via [GitHub Security Advisories](https://github
 |------|------------|
 | Phishing / unsafe QR payloads | `QrUrlPolicy` accepts only `http`/`https` and rejects `javascript:`, `data:`, and other schemes. |
 | Host allowlist bypass | Host patterns match exact host or subdomains only (not raw substrings). Path patterns require `/`. Regex patterns use `#…` PCRE. |
-| Empty allowlist | Any http(s) URL may be encoded — treat QR content as **host-controlled**; do not pass untrusted end-user URLs without an allowlist. |
+| Empty allowlist | Any http(s) URL may be encoded — treat QR content as **host-controlled**; do not pass untrusted end-user URLs without an allowlist. Flex `when@prod` sets `url_allowlist_required: true` so an empty or `example.com` placeholder fail compilation (since 1.4.6). |
 | Twig / XSS | Helpers emit data-URI strings; escape surrounding HTML as usual (`attr`/`html` contexts). |
 | Resource abuse | Bound `size`/`margin` in config; rate-limit generation if exposed to anonymous users. |
 | Supply chain | Keep `endroid/qr-code` and Symfony components updated; run `composer audit` before releases. |

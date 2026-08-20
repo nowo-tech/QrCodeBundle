@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.6] - 2026-08-20
+
+### Security
+
+- **Flex recipe `when@prod`:** stop shipping `example.com` as a silent allowlist. `url_allowlist_required: true` now fails compilation when the default profile allowlist is empty **or** only the placeholder `example.com` / `www.example.com`. Replace with your production hosts before `cache:clear --env=prod`.
+
+[1.4.6]: https://github.com/nowo-tech/QrCodeBundle/releases/tag/v1.4.6
+
 ## [1.4.5] - 2026-08-19
 
 ### Security

@@ -29,7 +29,42 @@ final class UrlAllowlistValidationPassTest extends TestCase
     public function testPassesWhenRequiredAndAllowlistNonEmpty(): void
     {
         $container = new ContainerBuilder();
+        $container->setParameter('nowo_qr_code.url_allowlist', ['pay.google.com']);
+        $container->setParameter('nowo_qr_code.url_allowlist_required', true);
+
+        (new UrlAllowlistValidationPass())->process($container);
+
+        $this->expectNotToPerformAssertions();
+    }
+
+    public function testFailsWhenRequiredAndAllowlistIsExampleComPlaceholder(): void
+    {
+        $container = new ContainerBuilder();
         $container->setParameter('nowo_qr_code.url_allowlist', ['example.com']);
+        $container->setParameter('nowo_qr_code.url_allowlist_required', true);
+
+        $this->expectException(InvalidConfigurationException::class);
+        $this->expectExceptionMessage('Flex placeholder example.com');
+
+        (new UrlAllowlistValidationPass())->process($container);
+    }
+
+    public function testFailsWhenRequiredAndAllowlistIsWwwExampleComPlaceholder(): void
+    {
+        $container = new ContainerBuilder();
+        $container->setParameter('nowo_qr_code.url_allowlist', ['www.example.com']);
+        $container->setParameter('nowo_qr_code.url_allowlist_required', true);
+
+        $this->expectException(InvalidConfigurationException::class);
+        $this->expectExceptionMessage('Flex placeholder example.com');
+
+        (new UrlAllowlistValidationPass())->process($container);
+    }
+
+    public function testPassesWhenRequiredAndAllowlistIncludesRealHostBesidePlaceholder(): void
+    {
+        $container = new ContainerBuilder();
+        $container->setParameter('nowo_qr_code.url_allowlist', ['example.com', 'pay.google.com']);
         $container->setParameter('nowo_qr_code.url_allowlist_required', true);
 
         (new UrlAllowlistValidationPass())->process($container);
@@ -51,6 +86,17 @@ final class UrlAllowlistValidationPassTest extends TestCase
     public function testSkipsWhenAllowlistParameterMissing(): void
     {
         (new UrlAllowlistValidationPass())->process(new ContainerBuilder());
+
+        $this->expectNotToPerformAssertions();
+    }
+
+    public function testPassesWhenRequiredAndAllowlistHasNonStringEntry(): void
+    {
+        $container = new ContainerBuilder();
+        $container->setParameter('nowo_qr_code.url_allowlist', [1]);
+        $container->setParameter('nowo_qr_code.url_allowlist_required', true);
+
+        (new UrlAllowlistValidationPass())->process($container);
 
         $this->expectNotToPerformAssertions();
     }

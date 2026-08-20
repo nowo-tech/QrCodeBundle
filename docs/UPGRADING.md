@@ -1,5 +1,31 @@
 # Upgrading
 
+## To 1.4.6
+
+From **1.4.5** — **Production compile can fail.** Flex `when@prod` no longer lists `example.com`. With `url_allowlist_required: true`, container compilation fails if the default profile `url_allowlist` is empty **or** only `example.com` / `www.example.com` (leftover recipe placeholder).
+
+1. Set real hosts (or path/regex patterns) on `nowo_qr_code.profiles.default.url_allowlist`.
+2. Keep `url_allowlist_required: true` in production.
+3. Local demos may set `url_allowlist_required: false` (not for production).
+
+Existing apps that copied the old recipe and left `example.com` **will fail compile after this upgrade** until the allowlist is replaced. That is intentional (fail-fast instead of encoding only `example.com` URLs).
+
+```yaml
+# config/packages/prod/nowo_qr_code.yaml (or when@prod)
+nowo_qr_code:
+    url_allowlist_required: true
+    profiles:
+        default:
+            url_allowlist:
+                - pay.google.com
+                - wallet.apple.com
+```
+
+```bash
+composer update nowo-tech/qr-code-bundle
+php bin/console cache:clear --env=prod
+```
+
 ## To 1.4.5
 
 From **1.4.4** — Ensure you are on **`^1.4.5`** for the shipped `UrlAllowlistValidationPass`. When `url_allowlist_required: true`, non-empty `url_allowlist` is required at compile time.

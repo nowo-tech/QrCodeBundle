@@ -164,6 +164,8 @@ Used by `QrCodeService::createDataUriForUrl` and Twig `qr_code_for_url` **for th
 
 Only `http` and `https` schemes are accepted. Schemes such as `javascript:` and `data:` are always rejected.
 
+`url_allowlist_required` (default `false`): when `true` (Flex recipe `when@prod`), compilation fails if the **default** profile allowlist is empty or only the Flex placeholder `example.com` / `www.example.com`. Set real hosts before deploying.
+
 ## Container parameters
 
 | Parameter | Meaning |
