@@ -13,16 +13,16 @@ use Nowo\QrCodeBundle\Enum\QrErrorCorrection;
 /**
  * Renders arbitrary content as PNG QR codes encoded as data URIs.
  */
-final class QrCodeDataUriRenderer
+final readonly class QrCodeDataUriRenderer
 {
-    private readonly QrErrorCorrection $errorCorrection;
+    private QrErrorCorrection $errorCorrection;
 
     /**
      * @param QrErrorCorrection|string $errorCorrection Enum or string value (`low`|`medium`|`quartile`|`high`)
      */
     public function __construct(
-        private readonly int $size = 300,
-        private readonly int $margin = 10,
+        private int $size = 300,
+        private int $margin = 10,
         QrErrorCorrection|string $errorCorrection = QrErrorCorrection::High,
     ) {
         $this->errorCorrection = $errorCorrection instanceof QrErrorCorrection

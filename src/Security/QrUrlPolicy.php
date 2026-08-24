@@ -26,13 +26,13 @@ use const PHP_URL_HOST;
  * - Pattern containing `/`: substring match against the full URL (path allowlisting).
  * - Otherwise: host match — exact host or a subdomain of the pattern (not a raw substring).
  */
-final class QrUrlPolicy
+final readonly class QrUrlPolicy
 {
     /**
      * @param list<string> $hostAllowlist Host patterns, URL path substrings, or `#regex`. Empty = any public http(s) host.
      */
     public function __construct(
-        private readonly array $hostAllowlist = [],
+        private array $hostAllowlist = [],
     ) {
     }
 

@@ -12,10 +12,10 @@ use Nowo\QrCodeBundle\Security\QrUrlPolicy;
 /**
  * High-level API to create PNG QR codes as data URIs (profile-aware).
  */
-final class QrCodeService
+final readonly class QrCodeService
 {
     public function __construct(
-        private readonly ProfileResolver $profileResolver,
+        private ProfileResolver $profileResolver,
     ) {
     }
 
