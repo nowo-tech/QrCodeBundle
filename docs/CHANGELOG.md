@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+## [1.4.7] - 2026-08-24
+
+### Changed
+
+- Raise minimum PHP to **8.2** and sync README badge (REQ-SF-001).
+- **Docs:** PHP-FIG PSR evaluation (REQ-CS-007).
+- **Refactor:** apply `ReadOnlyClassRector` for PHP 8.2 readonly classes.
+- **Style:** PHP CS Fixer alignment.
+
+### Notes
+
+- **No API or configuration changes** for integrators unless noted above.
+
+[1.4.7]: https://github.com/nowo-tech/QrCodeBundle/releases/tag/v1.4.7
+
 ## [1.4.6] - 2026-08-20
 
 ### Security

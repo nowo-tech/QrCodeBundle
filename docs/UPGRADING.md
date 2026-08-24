@@ -1,5 +1,27 @@
 # Upgrading
 
+## Table of contents
+
+- [From 1.4.6 to 1.4.7](#from-146-to-147)
+
+## From 1.4.6 to 1.4.7
+
+Review the [CHANGELOG](CHANGELOG.md) entry. PHP **8.2+** may now be required.
+
+```bash
+composer update nowo-tech/qr-code-bundle
+```
+
+## From 1.4.6 to 1.4.7
+
+Review the [CHANGELOG](CHANGELOG.md) entry. PHP **8.2+** may now be required.
+
+```bash
+composer update nowo-tech/qr-code-bundle
+```
+
+# Upgrading
+
 ## To 1.4.6
 
 From **1.4.5** — **Production compile can fail.** Flex `when@prod` no longer lists `example.com`. With `url_allowlist_required: true`, container compilation fails if the default profile `url_allowlist` is empty **or** only `example.com` / `www.example.com` (leftover recipe placeholder).
