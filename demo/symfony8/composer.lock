@@ -429,7 +429,7 @@
             "dist": {
                 "type": "path",
                 "url": "/var/qr-code-bundle",
-                "reference": "675f542ba0a2d7c689ad3d781b5eeab2dd8a1d83"
+                "reference": "30ef2c3b786f8c5983d2388a1d286835f2092419"
             },
             "require": {
                 "endroid/qr-code": "^6.0",
@@ -461,7 +461,7 @@
                 "symfony/security-core": "^7.0 || ^8.0",
                 "symfony/validator": "^7.0 || ^8.0",
                 "symfony/yaml": "^7.0 || ^8.0",
-                "vincentlanglet/twig-cs-fixer": "^3.0"
+                "vincentlanglet/twig-cs-fixer": "^4.1"
             },
             "suggest": {
                 "doctrine/doctrine-bundle": "Required when nowo_qr_code.use_database_config is true",

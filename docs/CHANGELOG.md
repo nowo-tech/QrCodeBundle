@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.8] - 2026-09-03
+
+### Fixed
+
+- Apply Rector `??=` null-coalesce assignment in `NowoQrCodeBundle::getContainerExtension()` so `composer rector-dry` stays clean on Rector 2.6.4+.
+
+### Changed
+
+- **Deps (dev):** bump `vincentlanglet/twig-cs-fixer`; refresh Composer lockfiles.
+
+[1.4.8]: https://github.com/nowo-tech/QrCodeBundle/releases/tag/v1.4.8
 
 ## [1.4.7] - 2026-08-24
 

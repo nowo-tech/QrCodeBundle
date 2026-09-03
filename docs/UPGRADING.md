@@ -2,7 +2,16 @@
 
 ## Table of contents
 
+- [From 1.4.7 to 1.4.8](#from-147-to-148)
 - [From 1.4.6 to 1.4.7](#from-146-to-147)
+
+## From 1.4.7 to 1.4.8
+
+No application upgrade steps.
+
+```bash
+composer update nowo-tech/qr-code-bundle
+```
 
 ## From 1.4.6 to 1.4.7
 
