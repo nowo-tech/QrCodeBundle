@@ -37,9 +37,7 @@ final class NowoQrCodeBundle extends Bundle
 
     public function getContainerExtension(): ?ExtensionInterface
     {
-        if ($this->extension === null) {
-            $this->extension = new NowoQrCodeExtension();
-        }
+        $this->extension ??= new NowoQrCodeExtension();
 
         return $this->extension instanceof ExtensionInterface ? $this->extension : null;
     }
