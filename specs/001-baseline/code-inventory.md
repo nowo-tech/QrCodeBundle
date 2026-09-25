@@ -2,7 +2,7 @@
 
 **Baseline spec**: [`spec.md`](spec.md)  
 **Package**: `nowo-tech/qr-code-bundle`  
-**Last audited**: 2026-08-03
+**Last audited**: 2026-09-25
 
 This file proves that **every production source artifact** under `src/` is referenced by the baseline specification. Test-only files under `tests/` are out of Packagist scope unless promoted in the spec.
 
@@ -14,6 +14,7 @@ This file proves that **every production source artifact** under `src/` is refer
 | `DependencyInjection/Configuration.php` | Config tree + profiles | FR-CFG-001, FR-CFG-002 |
 | `DependencyInjection/NowoQrCodeExtension.php` | DI extension | FR-CFG-002, FR-DI-001, FR-DB-001, FR-SEC-004 |
 | `DependencyInjection/TablePrefixListener.php` | Doctrine table prefix | FR-DB-001 |
+| `DependencyInjection/UrlAllowlistValidationPass.php` | Compile-time allowlist gate | FR-SEC-004 |
 | `DependencyInjection/Compiler/TwigPathsPass.php` | Twig namespace + overrides | FR-TWIG-001, FR-TWIG-002 |
 
 ## Configuration & profiles
@@ -21,13 +22,14 @@ This file proves that **every production source artifact** under `src/` is refer
 | Source file | Spec section | Requirement IDs |
 | --- | --- | --- |
 | `Config/QrCodeProfile.php` | Resolved profile DTO | FR-CFG-001 |
-| `Config/ProfileResolver.php` | Profile name resolution | FR-CFG-001, FR-CFG-003 |
+| `Config/ProfileResolver.php` | Profile name resolution | FR-CFG-001, FR-CFG-003, FR-WRK-001 |
 
 ## Rendering & public API
 
 | Source file | Spec section | Requirement IDs |
 | --- | --- | --- |
 | `Enum/QrErrorCorrection.php` | Error-correction enum | FR-QR-002 |
+| `Enum/CssFramework.php` | Admin Web UI framework enum | FR-ADM-001 |
 | `QrCode/QrCodeDataUriRenderer.php` | PNG data URI renderer | FR-QR-001, FR-QR-002 |
 | `Service/QrCodeService.php` | Public API | FR-SVC-001 |
 
@@ -47,7 +49,8 @@ This file proves that **every production source artifact** under `src/` is refer
 | Source file | Spec section | Requirement IDs |
 | --- | --- | --- |
 | `Entity/QrCodeProfileConfig.php` | Doctrine profile entity | FR-DB-001, FR-DB-002 |
-| `Repository/QrCodeProfileConfigRepository.php` | Profile lookup | FR-DB-002 |
+| `Repository/QrCodeProfileConfigRepository.php` | Profile lookup | FR-DB-002, FR-WRK-001 |
+| `EventSubscriber/ClosedEntityManagerSubscriber.php` | Worker EM hygiene (DB mode) | FR-WRK-001 |
 
 ## Admin CRUD
 
@@ -69,7 +72,7 @@ This file proves that **every production source artifact** under `src/` is refer
 | Source file | Spec section | Requirement IDs |
 | --- | --- | --- |
 | `Resources/config/services.yaml` | Core service wiring | FR-DI-001, FR-SEC-004 |
-| `Resources/config/services_database.yaml` | Doctrine services | FR-DB-001, FR-DB-002 |
+| `Resources/config/services_database.yaml` | Doctrine services | FR-DB-001, FR-DB-002, FR-WRK-001 |
 | `Resources/config/services_twig_component.yaml` | Twig component services | FR-UX-001 |
 | `Resources/config/routing.yaml` | Admin routes | FR-ADM-001 |
 
@@ -78,6 +81,7 @@ This file proves that **every production source artifact** under `src/` is refer
 | Source file | Spec section | Requirement IDs |
 | --- | --- | --- |
 | `Resources/views/components/qr_code.html.twig` | Component template | FR-UX-001, FR-TWIG-001 |
+| `Resources/views/admin/base.html.twig` | Admin page shell (UiKit) | FR-ADM-001, FR-TWIG-002 |
 | `Resources/views/admin/layout.html.twig` | Admin layout shell | FR-ADM-001, FR-TWIG-002 |
 | `Resources/views/admin/index.html.twig` | Admin profile list | FR-ADM-001 |
 | `Resources/views/admin/form.html.twig` | Admin create/edit form | FR-ADM-001 |
@@ -86,13 +90,13 @@ This file proves that **every production source artifact** under `src/` is refer
 
 | Category | Files | Mapped |
 | --- | ---: | ---: |
-| Bundle & DI | 5 | 5 |
+| Bundle & DI | 6 | 6 |
 | Configuration & profiles | 2 | 2 |
-| Rendering & public API | 3 | 3 |
+| Rendering & public API | 4 | 4 |
 | Security & URL policy | 6 | 6 |
-| Entity & persistence | 2 | 2 |
+| Entity & persistence | 3 | 3 |
 | Admin CRUD | 3 | 3 |
 | Twig & UX component | 2 | 2 |
 | Symfony config | 4 | 4 |
-| Twig views | 4 | 4 |
-| **Total production sources** | **31** | **31** |
+| Twig views | 5 | 5 |
+| **Total production sources** | **35** | **35** |

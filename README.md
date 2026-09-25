@@ -10,7 +10,7 @@ Used by [WalletQrBundle](https://github.com/nowo-tech/WalletQrBundle) for wallet
 
 ![FrankenPHP Friendly Worker Mode](docs/images/frankenphp-friendly.png)
 
-This bundle is **FrankenPHP worker mode friendly**.
+This bundle is **FrankenPHP worker mode friendly**, including workers that do **not** reset the Symfony kernel between requests. YAML-only setups are fully stateless; with `use_database_config: true`, profiles are read without the Doctrine identity map and closed EntityManagers are recovered (see [docs/FRANKENPHP-WORKER-AUDIT.md](docs/FRANKENPHP-WORKER-AUDIT.md)).
 
 ### FrankenPHP demo
 
@@ -99,6 +99,7 @@ $safeUri = $qrCodeService->createDataUriForUrl('https://example.com/path', 'comp
 ### Additional documentation
 
 - [FrankenPHP demos](docs/DEMO-FRANKENPHP.md)
+- [FrankenPHP worker audit](docs/FRANKENPHP-WORKER-AUDIT.md)
 - [GitHub CI](docs/GITHUB_CI.md)
 
 ## Tests and coverage

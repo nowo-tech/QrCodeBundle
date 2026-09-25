@@ -429,7 +429,7 @@
             "dist": {
                 "type": "path",
                 "url": "/var/qr-code-bundle",
-                "reference": "2a7f0af988fa103fd683c7fc5d79c75e8fd6cdbd"
+                "reference": "79c22201f1c9dd50574bbd810f33707049daf4a9"
             },
             "require": {
                 "endroid/qr-code": "^6.0",

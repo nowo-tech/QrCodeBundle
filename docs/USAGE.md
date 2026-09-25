@@ -41,6 +41,8 @@ When `use_database_config: true`, rows in `qr_code_profile` override YAML profil
 
 Admin CRUD: `/admin/qr-code-profiles` (requires Doctrine + form component and route import).
 
+Under FrankenPHP worker mode without kernel reset, DB-backed render and admin stay correct without Doctrine `kernel.reset` — see [FRANKENPHP-WORKER-AUDIT.md](FRANKENPHP-WORKER-AUDIT.md).
+
 ## Low-level renderer
 
 ```php

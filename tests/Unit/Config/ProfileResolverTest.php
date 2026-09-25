@@ -8,7 +8,9 @@ use Nowo\QrCodeBundle\Config\ProfileResolver;
 use Nowo\QrCodeBundle\Entity\QrCodeProfileConfig;
 use Nowo\QrCodeBundle\Enum\QrErrorCorrection;
 use Nowo\QrCodeBundle\Exception\InvalidQrProfileException;
+use Nowo\QrCodeBundle\Exception\InvalidQrUrlException;
 use Nowo\QrCodeBundle\Repository\QrCodeProfileConfigRepository;
+use Nowo\QrCodeBundle\Service\QrCodeService;
 use PHPUnit\Framework\TestCase;
 
 final class ProfileResolverTest extends TestCase
@@ -49,11 +51,12 @@ final class ProfileResolverTest extends TestCase
             ->setSize(200)
             ->setMargin(4)
             ->setErrorCorrection(QrErrorCorrection::Low->value)
-            ->setUrlAllowlist(['db.example.com']);
+            ->setUrlAllowlist(['db.example.com'])
+            ->toProfileArray();
 
         $repo = $this->createMock(QrCodeProfileConfigRepository::class);
-        $repo->method('findOneByName')->willReturnCallback(
-            static fn (string $name): ?QrCodeProfileConfig => $name === 'compact' ? $stored : null,
+        $repo->method('findProfileArrayByName')->willReturnCallback(
+            static fn (string $name): ?array => $name === 'compact' ? $stored : null,
         );
         $repo->method('findAllNames')->willReturn(['compact', 'from_db']);
 
@@ -73,11 +76,12 @@ final class ProfileResolverTest extends TestCase
             ->setSize(256)
             ->setMargin(8)
             ->setErrorCorrection(QrErrorCorrection::Medium->value)
-            ->setUrlAllowlist([]);
+            ->setUrlAllowlist([])
+            ->toProfileArray();
 
         $repo = $this->createMock(QrCodeProfileConfigRepository::class);
-        $repo->method('findOneByName')->willReturnCallback(
-            static fn (string $name): ?QrCodeProfileConfig => $name === 'from_db' ? $stored : null,
+        $repo->method('findProfileArrayByName')->willReturnCallback(
+            static fn (string $name): ?array => $name === 'from_db' ? $stored : null,
         );
         $repo->method('findAllNames')->willReturn(['from_db']);
 
@@ -91,13 +95,39 @@ final class ProfileResolverTest extends TestCase
     public function testDatabaseDisabledIgnoresRepository(): void
     {
         $repo = $this->createMock(QrCodeProfileConfigRepository::class);
-        $repo->expects(self::never())->method('findOneByName');
+        $repo->expects(self::never())->method('findProfileArrayByName');
 
         $resolver = new ProfileResolver($this->yamlProfiles(), 'default', false, $repo);
         $profile  = $resolver->resolve('compact');
 
         self::assertSame(128, $profile->size);
         self::assertFalse($resolver->usesDatabaseConfig());
+    }
+
+    public function testConsecutiveRequestsWithoutResetSeeTightenedAllowlist(): void
+    {
+        $repo = $this->createMock(QrCodeProfileConfigRepository::class);
+        $repo->expects(self::exactly(3))->method('findProfileArrayByName')->with('compact')->willReturnOnConsecutiveCalls(
+            ['size' => 200, 'margin' => 4, 'error_correction' => 'low', 'url_allowlist' => ['example.com', 'evil.com']],
+            ['size' => 240, 'margin' => 4, 'error_correction' => 'low', 'url_allowlist' => ['example.com']],
+            null,
+        );
+
+        $service = new QrCodeService(new ProfileResolver($this->yamlProfiles(), 'default', true, $repo));
+
+        // Request 1: the stored allowlist still accepts evil.com.
+        self::assertStringStartsWith('data:image/png;base64,', $service->createDataUriForUrl('https://evil.com/x', 'compact'));
+
+        // Request 2 on the same service instances (no reset): the admin tightened the allowlist in another worker.
+        try {
+            $service->createDataUriForUrl('https://evil.com/x', 'compact');
+            self::fail('The tightened allowlist must be enforced on the next request.');
+        } catch (InvalidQrUrlException) {
+        }
+
+        // Request 3: the row was deleted, the YAML profile applies again.
+        $resolver = new ProfileResolver($this->yamlProfiles(), 'default', true, $repo);
+        self::assertSame(128, $resolver->resolve('compact')->size);
     }
 
     public function testUsesDatabaseConfigFlag(): void

@@ -82,6 +82,8 @@ security:
         - { path: ^/admin/qr-code-profiles, roles: ROLE_ADMIN }
 ```
 
+**FrankenPHP worker mode:** with `use_database_config: true`, the bundle does not rely on Doctrine `kernel.reset`. Render uses array hydration; `ClosedEntityManagerSubscriber` recovers a closed EntityManager and detaches managed profile rows on each main request. See [FRANKENPHP-WORKER-AUDIT.md](FRANKENPHP-WORKER-AUDIT.md).
+
 **Merge rules**
 
 | Situation | Result |

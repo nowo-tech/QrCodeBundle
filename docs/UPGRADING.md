@@ -2,20 +2,29 @@
 
 ## Table of contents
 
+- [From 1.4.8 to 1.4.9](#from-148-to-149)
 - [From 1.4.7 to 1.4.8](#from-147-to-148)
 - [From 1.4.6 to 1.4.7](#from-146-to-147)
 
-## From 1.4.7 to 1.4.8
+## From 1.4.8 to 1.4.9
 
-No application upgrade steps.
+No required application upgrade steps for YAML-only setups.
+
+If you use **`use_database_config: true`** under FrankenPHP **worker** mode with the kernel **not** reset between requests (`reset_kernel` / equivalent off):
+
+- Render path no longer depends on Doctrine's identity map (`findProfileArrayByName()`).
+- Database mode registers `ClosedEntityManagerSubscriber` (closed EM recovery + detach of `QrCodeProfileConfig` on each main request).
+- Prefer `QrCodeProfileConfigRepository::findProfileArrayByName()` over `findOneByName()` if you call the repository from your own code for rendering.
+
+See [FRANKENPHP-WORKER-AUDIT.md](FRANKENPHP-WORKER-AUDIT.md).
 
 ```bash
 composer update nowo-tech/qr-code-bundle
 ```
 
-## From 1.4.6 to 1.4.7
+## From 1.4.7 to 1.4.8
 
-Review the [CHANGELOG](CHANGELOG.md) entry. PHP **8.2+** may now be required.
+No application upgrade steps.
 
 ```bash
 composer update nowo-tech/qr-code-bundle

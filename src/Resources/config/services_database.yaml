@@ -20,6 +20,8 @@ services:
 
   Nowo\QrCodeBundle\Form\QrCodeProfileConfigType: ~
 
+  Nowo\QrCodeBundle\EventSubscriber\ClosedEntityManagerSubscriber: ~
+
   Nowo\QrCodeBundle\Controller\QrCodeProfileAdminController:
     arguments:
       $useDatabaseConfig: '%nowo_qr_code.use_database_config%'

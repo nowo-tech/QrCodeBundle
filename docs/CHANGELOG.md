@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.9] - 2026-09-25
+
+### Fixed
+
+- **FrankenPHP worker mode (`reset_kernel` false / no `services_resetter`), `use_database_config: true`:** `ProfileResolver` reads database profiles with array hydration (`QrCodeProfileConfigRepository::findProfileArrayByName()`) instead of managed entities, so admin edits (including a tightened `url_allowlist`) made in any worker apply on the next render instead of being hidden by a stale identity map.
+- **FrankenPHP worker mode (database mode):** `ClosedEntityManagerSubscriber` resets a closed Doctrine manager on every main request and detaches managed `QrCodeProfileConfig` rows so admin CRUD stays fresh; `findAllOrderedByName()` also uses `Query::HINT_REFRESH`.
+
+### Changed
+
+- **Docs:** FrankenPHP worker audit (`docs/FRANKENPHP-WORKER-AUDIT.md`), UPGRADING notes, README / demo / configuration pointers; baseline spec `FR-WRK-001` + code inventory.
+
+[1.4.9]: https://github.com/nowo-tech/QrCodeBundle/releases/tag/v1.4.9
+
 ## [1.4.8] - 2026-09-03
 
 ### Fixed

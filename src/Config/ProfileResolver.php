@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Nowo\QrCodeBundle\Config;
 
-use Nowo\QrCodeBundle\Entity\QrCodeProfileConfig;
 use Nowo\QrCodeBundle\Exception\InvalidQrProfileException;
 use Nowo\QrCodeBundle\Repository\QrCodeProfileConfigRepository;
 
@@ -20,6 +19,9 @@ use function sprintf;
  *
  * When use_database_config is true and a DB row shares a profile name, the DB row
  * fully replaces the YAML profile. DB-only names are also resolvable.
+ *
+ * Nothing is memoized: every call reads the current database row (no identity map), so admin edits
+ * made in any worker apply to the next render without a kernel reset.
  */
 final readonly class ProfileResolver
 {
@@ -44,9 +46,9 @@ final readonly class ProfileResolver
         $name = $profile ?? $this->defaultProfile;
 
         if ($this->useDatabaseConfig && $this->profileRepository instanceof QrCodeProfileConfigRepository) {
-            $stored = $this->profileRepository->findOneByName($name);
-            if ($stored instanceof QrCodeProfileConfig) {
-                return QrCodeProfile::fromArray($name, $stored->toProfileArray());
+            $stored = $this->profileRepository->findProfileArrayByName($name);
+            if ($stored !== null) {
+                return QrCodeProfile::fromArray($name, $stored);
             }
         }
 

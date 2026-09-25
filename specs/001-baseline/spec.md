@@ -107,6 +107,7 @@ As an operator, I manage QR profiles at `/admin/qr-code-profiles` so YAML defaul
 
 - **FR-DB-001**: When `use_database_config: true`, Extension MUST load Doctrine services and apply table prefix listener.
 - **FR-DB-002**: `QrCodeProfileConfig` entity + repository MUST store per-profile size, margin, ECC, and allowlist overrides; `ProfileResolver` MUST prefer DB rows when enabled.
+- **FR-WRK-001**: With `use_database_config: true`, the bundle MUST remain correct under FrankenPHP worker mode when the kernel is not reset between requests: DB profile resolution MUST bypass the Doctrine identity map for rendering; closed EntityManagers MUST be recovered on main requests; managed `QrCodeProfileConfig` rows MUST NOT leak stale admin state into the next request.
 
 ### Admin CRUD
 

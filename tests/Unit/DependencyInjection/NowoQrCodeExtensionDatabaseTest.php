@@ -9,6 +9,7 @@ use Nowo\QrCodeBundle\Config\ProfileResolver;
 use Nowo\QrCodeBundle\Controller\QrCodeProfileAdminController;
 use Nowo\QrCodeBundle\DependencyInjection\NowoQrCodeExtension;
 use Nowo\QrCodeBundle\DependencyInjection\TablePrefixListener;
+use Nowo\QrCodeBundle\EventSubscriber\ClosedEntityManagerSubscriber;
 use Nowo\QrCodeBundle\Repository\QrCodeProfileConfigRepository;
 use Nowo\QrCodeBundle\Security\AllowAllQrCodeAccessChecker;
 use Nowo\QrCodeBundle\Security\ConfigurableQrCodeAccessChecker;
@@ -39,6 +40,7 @@ final class NowoQrCodeExtensionDatabaseTest extends TestCase
         self::assertTrue($container->hasDefinition(QrCodeProfileAdminService::class));
         self::assertTrue($container->hasDefinition(QrCodeProfileAdminController::class));
         self::assertTrue($container->hasDefinition(TablePrefixListener::class));
+        self::assertTrue($container->hasDefinition(ClosedEntityManagerSubscriber::class));
         self::assertTrue($container->hasDefinition('nowo_qr_code.access_checker.allow_all'));
         self::assertSame(
             AllowAllQrCodeAccessChecker::class,
