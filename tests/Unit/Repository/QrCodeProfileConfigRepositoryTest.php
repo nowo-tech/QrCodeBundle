@@ -28,7 +28,7 @@ final class QrCodeProfileConfigRepositoryTest extends TestCase
         $query->method('getResult')->willReturn([$entity]);
 
         $qb = $this->createMock(QueryBuilder::class);
-        $qb->method('orderBy')->with('p.name', SortDirection::AscendingASC->willReturnSelf();
+        $qb->method('orderBy')->with('p.name', SortDirection::Ascending)->willReturnSelf();
         $qb->method('getQuery')->willReturn($query);
 
         $em = $this->createMock(EntityManagerInterface::class);
