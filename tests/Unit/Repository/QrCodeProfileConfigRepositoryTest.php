@@ -12,6 +12,7 @@ use Doctrine\Persistence\ManagerRegistry;
 use Nowo\QrCodeBundle\Entity\QrCodeProfileConfig;
 use Nowo\QrCodeBundle\Repository\QrCodeProfileConfigRepository;
 use PHPUnit\Framework\TestCase;
+use SortDirection;
 
 final class QrCodeProfileConfigRepositoryTest extends TestCase
 {
@@ -27,7 +28,7 @@ final class QrCodeProfileConfigRepositoryTest extends TestCase
         $query->method('getResult')->willReturn([$entity]);
 
         $qb = $this->createMock(QueryBuilder::class);
-        $qb->method('orderBy')->with('p.name', 'ASC')->willReturnSelf();
+        $qb->method('orderBy')->with('p.name', SortDirection::AscendingASC->willReturnSelf();
         $qb->method('getQuery')->willReturn($query);
 
         $em = $this->createMock(EntityManagerInterface::class);

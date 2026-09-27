@@ -9,6 +9,7 @@ use Doctrine\ORM\Query;
 use Doctrine\Persistence\ManagerRegistry;
 use Nowo\QrCodeBundle\Config\QrCodeProfile;
 use Nowo\QrCodeBundle\Entity\QrCodeProfileConfig;
+use SortDirection;
 
 /**
  * @extends ServiceEntityRepository<QrCodeProfileConfig>
@@ -54,7 +55,7 @@ class QrCodeProfileConfigRepository extends ServiceEntityRepository
     {
         /** @var list<QrCodeProfileConfig> $rows */
         $rows = $this->createQueryBuilder('p')
-            ->orderBy('p.name', 'ASC')
+            ->orderBy('p.name', SortDirection::Ascending)
             ->getQuery()
             ->setHint(Query::HINT_REFRESH, true)
             ->getResult();
@@ -70,7 +71,7 @@ class QrCodeProfileConfigRepository extends ServiceEntityRepository
         /** @var list<string> $names */
         $names = $this->createQueryBuilder('p')
             ->select('p.name')
-            ->orderBy('p.name', 'ASC')
+            ->orderBy('p.name', SortDirection::Ascending)
             ->getQuery()
             ->getSingleColumnResult();
 
