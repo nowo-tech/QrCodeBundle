@@ -12,7 +12,7 @@ endif
 COMPOSE     := $(COMPOSE_BIN) -f $(COMPOSE_FILE)
 SERVICE_PHP := php
 
-.PHONY: help up down down-dev build shell install ensure-up test test-coverage test-coverage-100 coverage-check coverage-php-percent cs-check cs-fix qa clean release-check release-check-demos demo-smoke composer-sync rector rector-dry phpstan update validate assets setup-hooks check-no-cursor-coauthor check-open-prs strip-cursor-coauthor-from-history update-deps check-twig-extra
+.PHONY: help up down down-dev build shell install ensure-up test test-coverage test-coverage-100 coverage-check coverage-php-percent cs-check cs-fix qa clean release-check release-check-demos demo-smoke composer-sync rector rector-dry phpstan igor update validate assets setup-hooks check-no-cursor-coauthor check-open-prs strip-cursor-coauthor-from-history update-deps check-twig-extra
 
 help:
 	@echo "QR Code Bundle - Development Commands"
@@ -36,6 +36,7 @@ help:
 	@echo "  rector        Apply Rector refactoring"
 	@echo "  rector-dry    Run Rector in dry-run mode"
 	@echo "  phpstan       Run PHPStan static analysis"
+	@echo "  igor          Run Igor worker-state audit (REQ-CS-008)"
 	@echo "  qa            Run all QA checks (cs-check + test)"
 	@echo "  release-check Pre-release: git-hygiene, open-PRs, cs, phpstan, coverage, demos"
 	@echo "  demo-smoke    REQ-TEST-011: boot primary demo + HTTP 200 (skipped when no demo/)"
@@ -142,7 +143,11 @@ setup-hooks:
 check-twig-extra:
 	@chmod +x .scripts/check-twig-extra.sh
 	@./.scripts/check-twig-extra.sh
-release-check: check-no-cursor-coauthor check-open-prs check-twig-extra ensure-up composer-sync cs-fix cs-check rector-dry phpstan coverage-check release-check-demos
+
+# Run Igor worker-state audit (REQ-CS-008)
+igor: ensure-up
+	$(COMPOSE) exec -T php composer igor
+release-check: check-no-cursor-coauthor check-open-prs check-twig-extra ensure-up composer-sync cs-fix cs-check rector-dry phpstan igor coverage-check release-check-demos
 
 release-check-demos:
 	@if [ -f demo/Makefile ]; then $(MAKE) -C demo release-check; else echo "No demo/Makefile — skip release-check-demos"; fi

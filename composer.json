@@ -51,6 +51,7 @@
         "doctrine/doctrine-bundle": "^2.12 || ^3.0",
         "doctrine/orm": "^2.19 || ^3.0",
         "friendsofphp/php-cs-fixer": "^3.0",
+        "igor-php/igor-php": "^0.9.7",
         "nowo-tech/phpstan-frankenphp": "^1.0",
         "phpstan/extension-installer": "^1.0",
         "phpstan/phpstan": "^2.0",
@@ -105,7 +106,8 @@
         ],
         "twig:lint": "twig-cs-fixer lint --config=.twig-cs-fixer.php",
         "twig:fix": "twig-cs-fixer fix --config=.twig-cs-fixer.php",
-        "twig:fix:check": "twig-cs-fixer lint --config=.twig-cs-fixer.php --fix"
+        "twig:fix:check": "twig-cs-fixer lint --config=.twig-cs-fixer.php --fix",
+        "igor": "igor-php --no-agent ."
     },
     "suggest": {
         "ext-gd": "Required by endroid/qr-code for PNG rendering",
@@ -115,5 +117,8 @@
         "symfony/validator": "Recommended for admin form constraints",
         "symfony/security-bundle": "Recommended to protect admin CRUD via security.access_roles",
         "symfony/ux-toolkit": "Optional design-system toolkit (PHP 8.4+); NowoQrCode follows Toolkit @prop documentation conventions and works alongside Shadcn kit components"
+    },
+    "scripts-descriptions": {
+        "igor": "Run Igor FrankenPHP worker-state audit (REQ-CS-008)"
     }
 }

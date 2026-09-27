@@ -51,6 +51,7 @@ class QrCodeProfileConfig
 
     public function setName(string $name): self
     {
+        // @igor-ignore - Doctrine entity field; instance-scoped, not a shared service.
         $this->name = $name;
 
         return $this;
@@ -63,6 +64,7 @@ class QrCodeProfileConfig
 
     public function setSize(int $size): self
     {
+        // @igor-ignore - Doctrine entity field; instance-scoped, not a shared service.
         $this->size = $size;
 
         return $this;
@@ -75,6 +77,7 @@ class QrCodeProfileConfig
 
     public function setMargin(int $margin): self
     {
+        // @igor-ignore - Doctrine entity field; instance-scoped, not a shared service.
         $this->margin = $margin;
 
         return $this;
@@ -87,6 +90,7 @@ class QrCodeProfileConfig
 
     public function setErrorCorrection(string $errorCorrection): self
     {
+        // @igor-ignore - Doctrine entity field; instance-scoped, not a shared service.
         $this->errorCorrection = $errorCorrection;
 
         return $this;
@@ -105,6 +109,7 @@ class QrCodeProfileConfig
      */
     public function setUrlAllowlist(array $urlAllowlist): self
     {
+        // @igor-ignore - Doctrine entity field; instance-scoped, not a shared service.
         $this->urlAllowlist = array_values($urlAllowlist);
 
         return $this;

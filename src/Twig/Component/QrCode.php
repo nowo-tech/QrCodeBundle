@@ -46,7 +46,9 @@ final class QrCode
         string $class = '',
         bool $forUrl = false,
     ): void {
-        $this->alt   = $alt;
+        // @igor-ignore - Request-scoped Twig/Form wiring; not a shared worker singleton.
+        $this->alt = $alt;
+        // @igor-ignore - Request-scoped Twig/Form wiring; not a shared worker singleton.
         $this->class = $class;
 
         if ($url !== null || $forUrl) {
@@ -54,6 +56,7 @@ final class QrCode
             if ($target === null || $target === '') {
                 throw new InvalidArgumentException('NowoQrCode requires a non-empty url (or content with forUrl=true).');
             }
+            // @igor-ignore - Request-scoped Twig/Form wiring; not a shared worker singleton.
             $this->dataUri = $this->qrCodeService->createDataUriForUrl($target, $profile);
 
             return;
@@ -63,6 +66,7 @@ final class QrCode
             throw new InvalidArgumentException(sprintf('NowoQrCode requires content=… or url=… (optional profile=%s).', $profile ?? 'default'));
         }
 
+        // @igor-ignore - Request-scoped Twig/Form wiring; not a shared worker singleton.
         $this->dataUri = $this->qrCodeService->createDataUri($content, $profile);
     }
 }
