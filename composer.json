@@ -66,6 +66,9 @@
         "symfony/yaml": "^7.0 || ^8.0",
         "vincentlanglet/twig-cs-fixer": "^4.1"
     },
+    "conflict": {
+        "doctrine/orm": "<3.7"
+    },
     "autoload": {
         "psr-4": {
             "Nowo\\QrCodeBundle\\": "src/"
@@ -111,7 +114,7 @@
     },
     "suggest": {
         "ext-gd": "Required by endroid/qr-code for PNG rendering",
-        "doctrine/orm": "Required when nowo_qr_code.use_database_config is true (DB profile overrides + admin CRUD)",
+        "doctrine/orm": "Required (^3.7) when nowo_qr_code.use_database_config is true (DB profile overrides + admin CRUD)",
         "doctrine/doctrine-bundle": "Required when nowo_qr_code.use_database_config is true",
         "symfony/form": "Required for the optional /admin/qr-code-profiles CRUD",
         "symfony/validator": "Recommended for admin form constraints",
