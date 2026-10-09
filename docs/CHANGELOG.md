@@ -7,10 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-10-09
+
 ### Changed
 
 - **Doctrine ORM SortDirection:** replace string `'ASC'`/`'DESC'` in `#[ORM\OrderBy]` and QueryBuilder `orderBy`/`addOrderBy` with `SortDirection::Ascending`/`Descending` (doctrine/orm deprecation, https://github.com/doctrine/orm/issues/11313); require `doctrine/orm` `^3.7` where applicable.
+- **Composer:** `conflict: doctrine/orm <3.7` (Doctrine stays optional via `suggest`), so optional Doctrine installs always provide `SortDirection`.
+- Dependencies (Dependabot + lock refresh): FormKitBundle 2.6.1, UiKitBundle 1.9.1; dev `doctrine/orm` 3.7.3, `igor-php/igor-php` 0.10, PHPStan 2.3.1 (+ phpunit/symfony extensions 2.1), Rector 2.7.0, `nowo-tech/phpstan-frankenphp` 1.2.3.
+- Demo (Symfony 8): FormKitBundle 2.6.1, UiKitBundle 1.9.1, Twig 3.30.0, HotReloadBundle 1.5.5, TwigInspectorBundle 1.1.7; regenerated `config/reference.php`.
 
+### Fixed
+
+- Tests: repair the `SortDirection` QueryBuilder mock in `QrCodeProfileConfigRepositoryTest`.
+
+[1.5.0]: https://github.com/nowo-tech/QrCodeBundle/releases/tag/v1.5.0
 
 ## [1.4.10] - 2026-09-27
 

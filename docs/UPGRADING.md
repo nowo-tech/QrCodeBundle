@@ -3,6 +3,18 @@
 
 ## Unreleased
 
+## To 1.5.0
+
+From **1.4.10** — Doctrine `SortDirection`; `doctrine/orm` `^3.7` when Doctrine storage is used.
+
+```bash
+composer update nowo-tech/qr-code-bundle
+php bin/console cache:clear
+```
+
+- If you use `use_database_config: true`, ensure `doctrine/orm` is `^3.7` (the package now conflicts with `doctrine/orm <3.7`). Apps without Doctrine are unaffected.
+- No configuration changes.
+
 ## To 1.4.10
 
 From **1.4.9** — REQ-CS-008 Igor FrankenPHP worker audit (igor-php require-dev, igor.json, make igor).
@@ -16,6 +28,8 @@ php bin/console cache:clear
 
 ## Table of contents
 
+- [To 1.5.0](#to-150)
+- [To 1.4.10](#to-1410)
 - [From 1.4.8 to 1.4.9](#from-148-to-149)
 - [From 1.4.7 to 1.4.8](#from-147-to-148)
 - [From 1.4.6 to 1.4.7](#from-146-to-147)

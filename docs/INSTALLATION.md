@@ -16,7 +16,7 @@ With Symfony Flex, the recipe under `.symfony/recipe/nowo-tech/qr-code-bundle/` 
 
 ## Optional database profiles
 
-To store profiles in Doctrine (override YAML by name) and use `/admin/qr-code-profiles`:
+To store profiles in Doctrine (override YAML by name) and use `/admin/qr-code-profiles` (requires `doctrine/orm` ^3.7):
 
 ```bash
 composer require doctrine/orm doctrine/doctrine-bundle symfony/form symfony/validator

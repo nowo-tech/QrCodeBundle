@@ -60,7 +60,7 @@ nowo_qr_code:
 
 | Key | Default | Meaning |
 | --- | --- | --- |
-| `use_database_config` | `false` | When `true`, loads Doctrine services + admin CRUD; requires `doctrine/orm` |
+| `use_database_config` | `false` | When `true`, loads Doctrine services + admin CRUD; requires `doctrine/orm` ^3.7 |
 | `doctrine.table_prefix` | `''` | Prefixed onto table `qr_code_profile` |
 | `security.access_roles` | `[ROLE_ADMIN]` | Roles allowed to use `/admin/qr-code-profiles` |
 | `security.allow_unauthenticated` | `false` | Open admin (demo/dev only) |
