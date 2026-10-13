@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- **Requirements:** Symfony **7.4** or **8.x** is now required (`^7.4 || ^8.0`, was `^7.0 || ^8.0`). Apps on Symfony 7.0–7.3 must upgrade to 7.4 LTS first (`composer update "symfony/*" --with-all-dependencies`).
+
 ## To 1.6.0
 
 From **1.5.1** — security: fail closed on empty access_roles, parsed URL path patterns, unique profile names.

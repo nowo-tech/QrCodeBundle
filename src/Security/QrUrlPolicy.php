@@ -37,7 +37,8 @@ use const PHP_URL_PORT;
 final readonly class QrUrlPolicy
 {
     /**
-     * @param list<string> $hostAllowlist Host patterns, URL path substrings, or `#regex`. Empty = any public http(s) host.
+     * @param list<string> $hostAllowlist Host patterns, `[scheme://]host[:port]/path-prefix` patterns, or `#regex`.
+     *                                    Empty = any http(s) URL with a non-empty host (no public/private host or IP check is performed).
      */
     public function __construct(
         private array $hostAllowlist = [],

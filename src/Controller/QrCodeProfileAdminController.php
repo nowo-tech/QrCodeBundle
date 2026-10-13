@@ -96,11 +96,15 @@ class QrCodeProfileAdminController extends AbstractController
     {
         $this->denyUnlessGranted();
 
-        if ($this->isCsrfTokenValid('delete_qr_profile_' . $profile->getId(), (string) $request->request->get('_token'))) {
-            $this->entityManager->remove($profile);
-            $this->entityManager->flush();
-            $this->addFlash('success', sprintf('Profile "%s" deleted.', $profile->getName()));
+        if (!$this->isCsrfTokenValid('delete_qr_profile_' . $profile->getId(), (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'Invalid CSRF token.');
+
+            return $this->redirectToRoute('nowo_qr_code_admin_index');
         }
+
+        $this->entityManager->remove($profile);
+        $this->entityManager->flush();
+        $this->addFlash('success', sprintf('Profile "%s" deleted.', $profile->getName()));
 
         return $this->redirectToRoute('nowo_qr_code_admin_index');
     }
