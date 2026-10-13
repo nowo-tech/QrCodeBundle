@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.1] - 2026-10-13
+
+### Changed
+
+- Repository: `.twig-cs-fixer.cache` is now git-ignored.
+
+### Dependencies
+
+- `nowo-tech/form-kit-bundle` 2.6.1 → 2.7.1 (development lock; #19).
+- `nowo-tech/ui-kit-bundle` 1.9.1 → 1.11.0 (development lock; #20).
+
+[1.5.1]: https://github.com/nowo-tech/QrCodeBundle/releases/tag/v1.5.1
+
 ## [1.5.0] - 2026-10-09
 
 ### Changed

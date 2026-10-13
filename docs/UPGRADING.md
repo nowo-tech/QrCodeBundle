@@ -1,7 +1,16 @@
 # Upgrading
 
-
 ## Unreleased
+
+## To 1.5.1
+
+From **1.5.0** — dependency refresh and repository maintenance.
+
+```bash
+composer update nowo-tech/qr-code-bundle
+```
+
+- No breaking changes. No application upgrade steps.
 
 ## To 1.5.0
 
@@ -28,6 +37,7 @@ php bin/console cache:clear
 
 ## Table of contents
 
+- [To 1.5.1](#to-151)
 - [To 1.5.0](#to-150)
 - [To 1.4.10](#to-1410)
 - [From 1.4.8 to 1.4.9](#from-148-to-149)
@@ -174,7 +184,6 @@ and enable `Twig\Extra\TwigExtraBundle\TwigExtraBundle`. Flex recipes usually re
 ### Twig-CS-Fixer (maintainers)
 
 Package maintainers: `composer twig:lint` / `composer twig:fix` use `.twig-cs-fixer.php` over `src/` (and `templates/` when present).
-
 
 ## [1.3.0] - 2026-08-03 — Admin Web UI look-and-feel + FrankenPHP demo
 
