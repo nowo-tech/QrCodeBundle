@@ -30,6 +30,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- `url_allowlist` path patterns with a scheme (e.g. `https://good.com/Docs/`) no longer lowercase the path prefix, which made them never match mixed-case paths. Only the scheme and host are case-insensitive.
+
 ## [1.7.0] - 2026-10-13
 
 ### Changed

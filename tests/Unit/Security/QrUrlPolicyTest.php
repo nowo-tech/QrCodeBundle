@@ -105,6 +105,15 @@ final class QrUrlPolicyTest extends TestCase
         self::assertFalse($policy->isAllowed('https://evil.tld:8443/app/x'));
     }
 
+    public function testPathPatternKeepsPathCaseWithAndWithoutScheme(): void
+    {
+        foreach (['HTTPS://Good.com/Docs/', 'Good.com/Docs/'] as $pattern) {
+            $policy = new QrUrlPolicy([$pattern]);
+            self::assertTrue($policy->isAllowed('https://good.com/Docs/file.pdf'), $pattern);
+            self::assertFalse($policy->isAllowed('https://good.com/docs/file.pdf'), $pattern);
+        }
+    }
+
     public function testMalformedHostInPathPatternNeverMatches(): void
     {
         $policy = new QrUrlPolicy([':/app/']);

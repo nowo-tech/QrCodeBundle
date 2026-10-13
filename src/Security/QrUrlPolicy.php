@@ -110,7 +110,9 @@ final readonly class QrUrlPolicy
     {
         $patternScheme = null;
         if (str_contains($pattern, '://')) {
-            [$patternScheme, $pattern] = explode('://', strtolower($pattern), 2);
+            // Only the scheme (and the host, below) are case-insensitive: the path prefix keeps its case.
+            [$patternScheme, $pattern] = explode('://', $pattern, 2);
+            $patternScheme             = strtolower($patternScheme);
         }
 
         [$authority, $patternPath] = explode('/', $pattern, 2);
