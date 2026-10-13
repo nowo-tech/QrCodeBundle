@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-10-13
+
 ### Security
 
 - **Admin access (behaviour change):** `security.access_roles: []` now **denies** everyone (fail-closed) instead of opening `/admin/qr-code-profiles` to all users. Use `security.allow_unauthenticated: true` (demo/dev only) or a custom `access_checker` to open it.
@@ -15,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - **Admin CRUD:** `QrCodeProfileConfig` declares `#[UniqueEntity('name')]`, so a duplicate profile name shows a form error instead of a 500 (unique constraint violation).
+
+[1.6.0]: https://github.com/nowo-tech/QrCodeBundle/releases/tag/v1.6.0
 
 ## [1.5.1] - 2026-10-13
 

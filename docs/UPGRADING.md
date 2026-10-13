@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+## To 1.6.0
+
+From **1.5.1** — security: fail closed on empty access_roles, parsed URL path patterns, unique profile names.
+
+```bash
+composer update nowo-tech/qr-code-bundle
+```
+
+- **Behaviour change:** `security.access_roles: []` used to open the admin to everyone and now denies access. Set roles, or `allow_unauthenticated: true` (dev only).
+- Allowlist patterns containing `/` no longer match anywhere in the URL: `good.com/path` needs host good.com and a path starting with `/path`; `/wallet/` must be a path prefix.
+
 ## To 1.5.1
 
 From **1.5.0** — dependency refresh and repository maintenance.
@@ -37,6 +48,7 @@ php bin/console cache:clear
 
 ## Table of contents
 
+- [To 1.6.0](#to-160)
 - [To 1.5.1](#to-151)
 - [To 1.5.0](#to-150)
 - [To 1.4.10](#to-1410)
