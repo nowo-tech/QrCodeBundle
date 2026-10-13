@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## To 1.7.0
+
+From **1.6.0** — CSRF delete feedback, accurate allowlist docs, Symfony >=7.4.
+
+```bash
+composer update nowo-tech/qr-code-bundle
+```
+
 - **Requirements:** Symfony **7.4** or **8.x** is now required (`^7.4 || ^8.0`, was `^7.0 || ^8.0`). Apps on Symfony 7.0–7.3 must upgrade to 7.4 LTS first (`composer update "symfony/*" --with-all-dependencies`).
 
 ## To 1.6.0
@@ -50,6 +58,7 @@ php bin/console cache:clear
 
 ## Table of contents
 
+- [To 1.7.0](#to-170)
 - [To 1.6.0](#to-160)
 - [To 1.5.1](#to-151)
 - [To 1.5.0](#to-150)

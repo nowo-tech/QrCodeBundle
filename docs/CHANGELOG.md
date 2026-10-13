@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-10-13
+
 ### Changed
 
 - **Requirements:** Symfony floor raised from `^7.0` to `^7.4` (`^7.4 || ^8.0`), matching what CI actually tests; the redundant Symfony `7.0` CI matrix cell (which resolved to the latest 7.x anyway) was removed.
@@ -15,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Admin CRUD:** deleting a profile with an invalid CSRF token now shows an `Invalid CSRF token.` error flash (same as the YAML import action) instead of silently redirecting to the list.
 - **Docs:** `QrUrlPolicy` constructor docblock no longer claims an empty allowlist restricts URLs to *public* hosts; it allows any http(s) URL with a host (no public/private host or IP check).
+
+[1.7.0]: https://github.com/nowo-tech/QrCodeBundle/releases/tag/v1.7.0
 
 ## [1.6.0] - 2026-10-13
 
