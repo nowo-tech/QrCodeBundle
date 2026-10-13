@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Table of contents
 
 - [[Unreleased]](#unreleased)
+- [[1.7.1] - 2026-10-13](#171---2026-10-13)
 - [[1.7.0] - 2026-10-13](#170---2026-10-13)
 - [[1.6.0] - 2026-10-13](#160---2026-10-13)
 - [[1.5.1] - 2026-10-13](#151---2026-10-13)
@@ -30,9 +31,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.7.1] - 2026-10-13
+
 ### Fixed
 
 - `url_allowlist` path patterns with a scheme (e.g. `https://good.com/Docs/`) no longer lowercase the path prefix, which made them never match mixed-case paths. Only the scheme and host are case-insensitive.
+
+[1.7.1]: https://github.com/nowo-tech/QrCodeBundle/releases/tag/v1.7.1
 
 ## [1.7.0] - 2026-10-13
 

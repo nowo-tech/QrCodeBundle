@@ -3,6 +3,7 @@
 ## Table of contents
 
 - [Unreleased](#unreleased)
+- [To 1.7.1](#to-171)
 - [To 1.7.0](#to-170)
 - [To 1.6.0](#to-160)
 - [To 1.5.1](#to-151)
@@ -33,6 +34,16 @@
 - [[1.0.0] - 2026-07-30](#100---2026-07-30)
 
 ## Unreleased
+
+## To 1.7.1
+
+From **1.7.0** — allowlist path patterns keep their case when a scheme is given.
+
+```bash
+composer update nowo-tech/qr-code-bundle
+```
+
+- No breaking changes. No application upgrade steps.
 
 ## To 1.7.0
 
