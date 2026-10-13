@@ -6,9 +6,12 @@ namespace Nowo\QrCodeBundle\Security;
 
 use Nowo\QrCodeBundle\Exception\InvalidQrUrlException;
 
+use function explode;
 use function in_array;
+use function is_array;
 use function is_string;
 use function preg_match;
+use function rawurldecode;
 use function sprintf;
 use function str_contains;
 use function str_ends_with;
@@ -16,6 +19,8 @@ use function str_starts_with;
 use function strtolower;
 
 use const PHP_URL_HOST;
+use const PHP_URL_PATH;
+use const PHP_URL_PORT;
 
 /**
  * Validates URLs encoded into QR codes (http/https only; blocks javascript/data schemes).
@@ -23,7 +28,10 @@ use const PHP_URL_HOST;
  * Allowlist patterns:
  * - Empty list: any http(s) URL with a host is allowed.
  * - Pattern starting with `#`: PCRE applied to host, then full URL.
- * - Pattern containing `/`: substring match against the full URL (path allowlisting).
+ * - Pattern containing `/`: `[scheme://]host[:port]/path-prefix` — the URL is parsed; the host must match exactly
+ *   (or be a subdomain, as below), the port/scheme must match when given, and the URL path must start with the
+ *   pattern path. A pattern with an empty host (e.g. `/wallet/`) matches that path prefix on any host.
+ *   Paths containing dot segments (`/../`, `/./`, also percent-encoded) never match.
  * - Otherwise: host match — exact host or a subdomain of the pattern (not a raw substring).
  */
 final readonly class QrUrlPolicy
@@ -80,7 +88,7 @@ final readonly class QrUrlPolicy
                 continue;
             }
             if (str_contains($pattern, '/')) {
-                if (str_contains($url, $pattern)) {
+                if ($this->urlMatchesPathPattern($host, $url, $pattern)) {
                     return true;
                 }
                 continue;
@@ -91,6 +99,49 @@ final readonly class QrUrlPolicy
         }
 
         return false;
+    }
+
+    /**
+     * Host (+ optional scheme/port) and path-prefix match on the parsed URL — never a substring of the raw URL,
+     * so `https://evil.tld/?r=good.com/path` does not match `good.com/path`.
+     */
+    private function urlMatchesPathPattern(string $host, string $url, string $pattern): bool
+    {
+        $patternScheme = null;
+        if (str_contains($pattern, '://')) {
+            [$patternScheme, $pattern] = explode('://', strtolower($pattern), 2);
+        }
+
+        [$authority, $patternPath] = explode('/', $pattern, 2);
+        $patternPath               = '/' . $patternPath;
+
+        if ($patternScheme !== null && $patternScheme !== $this->extractScheme($url)) {
+            return false;
+        }
+
+        if ($authority !== '') {
+            $patternParts = parse_url('//' . strtolower($authority));
+            $patternHost  = is_array($patternParts) ? ($patternParts['host'] ?? '') : '';
+            if ($patternHost === '' || !$this->hostMatchesPattern($host, $patternHost)) {
+                return false;
+            }
+            if (isset($patternParts['port']) && $patternParts['port'] !== parse_url($url, PHP_URL_PORT)) {
+                return false;
+            }
+        }
+
+        $path = parse_url($url, PHP_URL_PATH);
+        $path = is_string($path) && $path !== '' ? $path : '/';
+        if ($this->hasDotSegment($path)) {
+            return false;
+        }
+
+        return str_starts_with($path, $patternPath);
+    }
+
+    private function hasDotSegment(string $path): bool
+    {
+        return preg_match('#(^|/)\.{1,2}(/|$)#', rawurldecode($path)) === 1;
     }
 
     /**

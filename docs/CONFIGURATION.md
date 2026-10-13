@@ -62,7 +62,7 @@ nowo_qr_code:
 | --- | --- | --- |
 | `use_database_config` | `false` | When `true`, loads Doctrine services + admin CRUD; requires `doctrine/orm` ^3.7 |
 | `doctrine.table_prefix` | `''` | Prefixed onto table `qr_code_profile` |
-| `security.access_roles` | `[ROLE_ADMIN]` | Roles allowed to use `/admin/qr-code-profiles` |
+| `security.access_roles` | `[ROLE_ADMIN]` | Roles allowed to use `/admin/qr-code-profiles`. Empty list = **deny everyone** (fail-closed); use `allow_unauthenticated` to open it |
 | `security.allow_unauthenticated` | `false` | Open admin (demo/dev only) |
 | `security.access_checker` | `null` | Optional custom `QrCodeAccessCheckerInterface` service id |
 
@@ -161,7 +161,7 @@ Used by `QrCodeService::createDataUriForUrl` and Twig `qr_code_for_url` **for th
 | --- | --- |
 | Empty list | Any `http`/`https` URL with a host is allowed |
 | Host name (no `/`) | Exact host **or** subdomain (e.g. `example.com` matches `cdn.example.com`, **not** `evil-example.com`) |
-| Contains `/` | Substring match against the full URL (path allowlisting) |
+| Contains `/` | `[scheme://]host[:port]/path-prefix` on the **parsed** URL: host exact or subdomain, scheme/port when given, URL path starts with the pattern path. Empty host (e.g. `/wallet/`) = that path prefix on any host. Paths with dot segments (`..`, `.`) never match. |
 | Starts with `#` | PCRE applied to host, then full URL |
 
 Only `http` and `https` schemes are accepted. Schemes such as `javascript:` and `data:` are always rejected.

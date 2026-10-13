@@ -74,7 +74,7 @@ final class Configuration implements ConfigurationInterface
                         ->arrayNode('access_roles')
                             ->scalarPrototype()->end()
                             ->defaultValue(['ROLE_ADMIN'])
-                            ->info('Roles allowed to use /admin/qr-code-profiles when allow_unauthenticated is false')
+                            ->info('Roles allowed to use /admin/qr-code-profiles when allow_unauthenticated is false. Empty = deny everyone (fail-closed).')
                         ->end()
                         ->scalarNode('access_checker')
                             ->defaultNull()

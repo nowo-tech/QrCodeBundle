@@ -27,12 +27,13 @@ final class QrCodeAccessCheckerTest extends TestCase
         self::assertTrue($checker->canAccess());
     }
 
-    public function testEmptyRolesAllowAccess(): void
+    public function testEmptyRolesDenyAccess(): void
     {
         $auth = $this->createMock(AuthorizationCheckerInterface::class);
         $auth->expects(self::never())->method('isGranted');
 
-        self::assertTrue((new ConfigurableQrCodeAccessChecker($auth, []))->canAccess());
+        // Fail-closed: access_roles: [] must not open the admin to everyone (use allow_unauthenticated instead).
+        self::assertFalse((new ConfigurableQrCodeAccessChecker($auth, []))->canAccess());
     }
 
     public function testConfigurableDeniesWithoutMatchingRole(): void

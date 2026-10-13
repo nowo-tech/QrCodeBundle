@@ -9,7 +9,7 @@ Report vulnerabilities privately via [GitHub Security Advisories](https://github
 | Risk | Mitigation |
 |------|------------|
 | Phishing / unsafe QR payloads | `QrUrlPolicy` accepts only `http`/`https` and rejects `javascript:`, `data:`, and other schemes. |
-| Host allowlist bypass | Host patterns match exact host or subdomains only (not raw substrings). Path patterns require `/`. Regex patterns use `#…` PCRE. |
+| Host allowlist bypass | Host patterns match exact host or subdomains only (not raw substrings). Path patterns (`host/path`) parse the URL and match host + path prefix (never a raw substring of the URL, so `https://evil.tld/?r=good.com/path` does not match `good.com/path`). Regex patterns use `#…` PCRE. |
 | Empty allowlist | Any http(s) URL may be encoded — treat QR content as **host-controlled**; do not pass untrusted end-user URLs without an allowlist. Flex `when@prod` sets `url_allowlist_required: true` so an empty or `example.com` placeholder fail compilation (since 1.4.6). |
 | Twig / XSS | Helpers emit data-URI strings; escape surrounding HTML as usual (`attr`/`html` contexts). |
 | Resource abuse | Bound `size`/`margin` in config; rate-limit generation if exposed to anonymous users. |
@@ -54,7 +54,7 @@ Confirm before each release (REQ-SEC-002):
 | Dependencies | `composer audit` clean or waived with documented CVE policy |
 | No-secret logs | Do not log full URLs that may contain tokens/PII |
 | Cryptography | N/A (no crypto in this bundle) |
-| Permissions / exposure | Admin CRUD at `/admin/qr-code-profiles` is role-gated (`security.access_roles`); keep `allow_unauthenticated` false in production. QR generation APIs remain in-process (no public QR endpoint). |
+| Permissions / exposure | Admin CRUD at `/admin/qr-code-profiles` is role-gated (`security.access_roles`; an empty list denies everyone, fail-closed); keep `allow_unauthenticated` false in production. QR generation APIs remain in-process (no public QR endpoint). |
 
 | Limits / DoS | `size`/`margin` bounded; rate-limit if exposed publicly |
 | AI security audit (REQ-SEC-004) | Pass recorded in monorepo `BUNDLES_SECURITY_ANALYSIS.md` |

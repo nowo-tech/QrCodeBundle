@@ -70,6 +70,48 @@ final class QrUrlPolicyTest extends TestCase
         self::assertFalse($policy->isAllowed('https://cdn.example.com/other/pass.pkpass'));
     }
 
+    public function testHostPathPatternRejectsQueryStringBypass(): void
+    {
+        $policy = new QrUrlPolicy(['good.com/path']);
+
+        self::assertTrue($policy->isAllowed('https://good.com/path/pass.pkpass'));
+        self::assertTrue($policy->isAllowed('https://cdn.good.com/path'));
+        self::assertFalse($policy->isAllowed('https://evil.tld/?r=good.com/path'));
+        self::assertFalse($policy->isAllowed('https://evil.tld/good.com/path'));
+        self::assertFalse($policy->isAllowed('https://evil.tld/#good.com/path'));
+        self::assertFalse($policy->isAllowed('https://good.com.evil.tld/path'));
+        self::assertFalse($policy->isAllowed('https://good.com@evil.tld/path'));
+        self::assertFalse($policy->isAllowed('https://good.com/other/path'));
+        self::assertFalse($policy->isAllowed('https://good.com/path/../admin'));
+        self::assertFalse($policy->isAllowed('https://good.com/path/%2e%2e/admin'));
+    }
+
+    public function testPathOnlyPatternIsPrefixOnParsedPath(): void
+    {
+        $policy = new QrUrlPolicy(['/wallet/']);
+
+        self::assertFalse($policy->isAllowed('https://evil.tld/?next=/wallet/'));
+        self::assertFalse($policy->isAllowed('https://evil.tld/x/wallet/'));
+        self::assertFalse($policy->isAllowed('https://evil.tld'));
+    }
+
+    public function testSchemeAndPortInPathPattern(): void
+    {
+        $policy = new QrUrlPolicy(['https://good.com:8443/app/']);
+
+        self::assertTrue($policy->isAllowed('https://good.com:8443/app/x'));
+        self::assertFalse($policy->isAllowed('http://good.com:8443/app/x'));
+        self::assertFalse($policy->isAllowed('https://good.com/app/x'));
+        self::assertFalse($policy->isAllowed('https://evil.tld:8443/app/x'));
+    }
+
+    public function testMalformedHostInPathPatternNeverMatches(): void
+    {
+        $policy = new QrUrlPolicy([':/app/']);
+
+        self::assertFalse($policy->isAllowed('https://good.com/app/x'));
+    }
+
     public function testHostAllowlistRegexOnHost(): void
     {
         $policy = new QrUrlPolicy(['#^cdn\\.example\\.com$#']);

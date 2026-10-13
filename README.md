@@ -29,7 +29,7 @@ See [docs/DEMO-FRANKENPHP.md](docs/DEMO-FRANKENPHP.md) (`FRANKENPHP_MODE=worker`
 - ✅ Admin CRUD at `/admin/qr-code-profiles` (when DB storage is enabled; requires FormKit + UiKit)
 - ✅ Panel security: `security.access_roles` (default `[ROLE_ADMIN]`) / `allow_unauthenticated` (see [CONFIGURATION](docs/CONFIGURATION.md))
 - ✅ URL safety policy (`QrUrlPolicy`; blocks `javascript:`, `data:`, etc.)
-- ✅ Optional host/URL allowlist (exact host or subdomain; path substrings; `#regex`)
+- ✅ Optional host/URL allowlist (exact host or subdomain; `host/path` prefixes; `#regex`)
 - ✅ Typed `QrErrorCorrection` enum (`low` | `medium` | `quartile` | `high`)
 - ✅ Twig helpers `qr_code_data_uri` and `qr_code_for_url` (optional profile argument)
 - ✅ Twig UX component `<twig:NowoQrCode>` (`symfony/ux-twig-component`)

@@ -8,6 +8,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Nowo\QrCodeBundle\Enum\QrErrorCorrection;
 use Nowo\QrCodeBundle\Repository\QrCodeProfileConfigRepository;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * Database-backed QR profile (overrides YAML when use_database_config is true and names match).
@@ -15,6 +16,7 @@ use Nowo\QrCodeBundle\Repository\QrCodeProfileConfigRepository;
 #[ORM\Entity(repositoryClass: QrCodeProfileConfigRepository::class)]
 #[ORM\Table(name: 'qr_code_profile')]
 #[ORM\UniqueConstraint(name: 'uniq_qr_code_profile_name', columns: ['name'])]
+#[UniqueEntity(fields: ['name'], message: 'A QR profile with this name already exists.')]
 class QrCodeProfileConfig
 {
     #[ORM\Id]

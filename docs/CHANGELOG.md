@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+
+- **Admin access (behaviour change):** `security.access_roles: []` now **denies** everyone (fail-closed) instead of opening `/admin/qr-code-profiles` to all users. Use `security.allow_unauthenticated: true` (demo/dev only) or a custom `access_checker` to open it.
+- **URL allowlist (behaviour change):** patterns containing `/` are matched against the parsed URL (host exact/subdomain, optional scheme/port, path prefix) instead of a substring of the whole URL, closing bypasses such as `https://evil.tld/?r=good.com/path`. Path-only patterns (`/wallet/`) are now path prefixes; paths with dot segments never match.
+
+### Fixed
+
+- **Admin CRUD:** `QrCodeProfileConfig` declares `#[UniqueEntity('name')]`, so a duplicate profile name shows a form error instead of a 500 (unique constraint violation).
+
 ## [1.5.1] - 2026-10-13
 
 ### Changed
