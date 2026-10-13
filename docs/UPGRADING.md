@@ -1,5 +1,37 @@
 # Upgrading
 
+## Table of contents
+
+- [Unreleased](#unreleased)
+- [To 1.7.0](#to-170)
+- [To 1.6.0](#to-160)
+- [To 1.5.1](#to-151)
+- [To 1.5.0](#to-150)
+- [To 1.4.10](#to-1410)
+- [From 1.4.8 to 1.4.9](#from-148-to-149)
+- [From 1.4.7 to 1.4.8](#from-147-to-148)
+- [From 1.4.6 to 1.4.7](#from-146-to-147)
+- [To 1.4.6](#to-146)
+- [To 1.4.5](#to-145)
+- [To 1.4.4](#to-144)
+- [To 1.4.3](#to-143)
+- [To 1.4.2](#to-142)
+- [To 1.4.1](#to-141)
+- [To 1.4.0](#to-140)
+  - [UiKit composition (REQ-UI-001-kit)](#uikit-composition-req-ui-001-kit)
+  - [FormKitBundle (admin forms)](#formkitbundle-admin-forms)
+  - [Twig Extra Bundle (REQ-TWIG-004)](#twig-extra-bundle-req-twig-004)
+  - [Twig-CS-Fixer (maintainers)](#twig-cs-fixer-maintainers)
+- [[1.3.0] - 2026-08-03 — Admin Web UI look-and-feel + FrankenPHP demo](#130---2026-08-03--admin-web-ui-look-and-feel--frankenphp-demo)
+  - [Optional host layout integration](#optional-host-layout-integration)
+  - [SecurityBundle when using DB admin](#securitybundle-when-using-db-admin)
+  - [FrankenPHP demo](#frankenphp-demo)
+- [[1.2.0] - 2026-07-30 — Database profile overrides](#120---2026-07-30--database-profile-overrides)
+- [[1.1.0] - 2026-07-30](#110---2026-07-30)
+  - [Twig Component + UX Toolkit](#twig-component--ux-toolkit)
+- [From WalletQrBundle-embedded QR helpers](#from-walletqrbundle-embedded-qr-helpers)
+- [[1.0.0] - 2026-07-30](#100---2026-07-30)
+
 ## Unreleased
 
 ## To 1.7.0
@@ -55,17 +87,6 @@ php bin/console cache:clear
 ```
 
 - No application upgrade steps for require-dev Igor tooling (REQ-CS-008). Consumers do not pull `igor-php/igor-php` transitively.
-
-## Table of contents
-
-- [To 1.7.0](#to-170)
-- [To 1.6.0](#to-160)
-- [To 1.5.1](#to-151)
-- [To 1.5.0](#to-150)
-- [To 1.4.10](#to-1410)
-- [From 1.4.8 to 1.4.9](#from-148-to-149)
-- [From 1.4.7 to 1.4.8](#from-147-to-148)
-- [From 1.4.6 to 1.4.7](#from-146-to-147)
 
 ## From 1.4.8 to 1.4.9
 
