@@ -32,6 +32,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Documentation
+
+- Documentation: wave-1 REQ compliance — canonical issue and pull request templates, canonical FrankenPHP claim and demo section moved out of the README preamble, documentation list order (PSR under Additional documentation), CONTRIBUTING Code of Conduct link and Cursor Agent queue settings (REQ-IDE-006), DEMO-FRANKENPHP dev/production start and troubleshooting, demo compose project name `qr-code-bundle-demo-symfony-8`, tables of contents on long docs.
+
 ## [1.7.2] - 2026-10-18
 
 Allows nowo-tech/ui-kit-bundle 2.x (^1.4 || ^2.2) so hosts can move to UiKit 2.2. See [UPGRADING](UPGRADING.md#to-172).
@@ -274,7 +278,7 @@ Allows nowo-tech/ui-kit-bundle 2.x (^1.4 || ^2.2) so hosts can move to UiKit 2.2
 
 ## [1.0.0] - 2026-07-30
 
-Initial public release of **nowo-tech/qr-code-bundle**, extracted from [WalletQrBundle](https://github.com/nowo-tech/WalletQrBundle) for standalone PNG QR generation.
+Initial public release of **nowo-tech/qr-code-bundle**, extracted from [WalletQrBundle](https://github.com/nowo-tech/WalletQRBundle) for standalone PNG QR generation.
 
 ### Added
 

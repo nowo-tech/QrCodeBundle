@@ -1,5 +1,17 @@
 # Security
 
+## Table of contents
+
+- [Reporting](#reporting)
+- [Threat model](#threat-model)
+- [Secrets and cryptography](#secrets-and-cryptography)
+- [Logging and observability](#logging-and-observability)
+- [Composer audit](#composer-audit)
+- [Exposure surface](#exposure-surface)
+- [Residual risk](#residual-risk)
+- [Release security checklist (12.4.1)](#release-security-checklist-1241)
+- [AI security audit (REQ-SEC-004)](#ai-security-audit-req-sec-004)
+
 ## Reporting
 
 Report vulnerabilities privately via [GitHub Security Advisories](https://github.com/nowo-tech/QrCodeBundle/security/advisories) for this repository. Do not open public issues for unfixed vulnerabilities.

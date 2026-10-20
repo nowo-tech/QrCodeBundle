@@ -11,6 +11,14 @@ Current stable: **v1.4.9** (2026-09-25).
 
 After creating the release commit and tag, run `make check-no-cursor-coauthor` again **before** `git push` (REQ-GIT-001). The release commit itself is not covered by an earlier `release-check` run.
 
+## Table of contents
+
+- [Example for v1.4.9](#example-for-v149)
+- [Example for v1.4.1](#example-for-v141)
+- [Example for v1.4.0](#example-for-v140)
+- [Example for v1.3.0](#example-for-v130)
+- [Example for v1.2.0](#example-for-v120)
+
 ## Example for v1.4.9
 
 ```bash

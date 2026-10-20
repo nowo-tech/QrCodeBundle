@@ -9,6 +9,17 @@
 | **Verdict** | ✅ **Compatible under scenario B** — YAML-only is fully stateless; with `use_database_config: true`, render uses array hydration, closed EntityManagers are recovered on every main request, and managed `QrCodeProfileConfig` rows are detached so admin CRUD sees fresh data without a kernel reset |
 | Remediation | W-01: `ProfileResolver` + `QrCodeProfileConfigRepository::findProfileArrayByName()`; W-02: `EventSubscriber/ClosedEntityManagerSubscriber` (reset closed managers + detach profile entities; `findAllOrderedByName()` uses `Query::HINT_REFRESH`). Tests under `tests/Unit/Config`, `tests/Unit/Repository`, `tests/Unit/EventSubscriber` |
 
+## Table of contents
+
+- [Execution model assumed](#execution-model-assumed)
+- [Summary](#summary)
+- [Services reviewed](#services-reviewed)
+- [Findings](#findings)
+  - [W-01 — DB-backed profiles can go stale in a worker that is never reset (Medium)](#w-01--db-backed-profiles-can-go-stale-in-a-worker-that-is-never-reset-medium)
+  - [W-02 — Closed EntityManager / stale admin entities without reset (Medium)](#w-02--closed-entitymanager--stale-admin-entities-without-reset-medium)
+- [Usage recommendations in worker mode](#usage-recommendations-in-worker-mode)
+- [Re-audit triggers](#re-audit-triggers)
+
 ## Execution model assumed
 
 FrankenPHP worker mode boots the Symfony kernel once per worker and serves many requests with the same container. This audit assumes the **strict** variant: the kernel is **not** rebooted between requests (`reset_kernel` / equivalent off), so every shared service, static property and PHP global survives from one request to the next. Two scenarios are evaluated:

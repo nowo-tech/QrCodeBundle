@@ -6,20 +6,13 @@
 
 **Symfony bundle to generate PNG QR codes as data URIs**, with optional URL validation (`http`/`https` only) and host allowlisting.
 
-Used by [WalletQrBundle](https://github.com/nowo-tech/WalletQrBundle) for wallet save-link QRs, and usable standalone in any Symfony app.
+Used by [WalletQrBundle](https://github.com/nowo-tech/WalletQRBundle) for wallet save-link QRs, and usable standalone in any Symfony app.
 
 ![FrankenPHP Friendly Worker Mode](docs/images/frankenphp-friendly.png)
 
-This bundle is **FrankenPHP worker mode friendly**, including workers that do **not** reset the Symfony kernel between requests. YAML-only setups are fully stateless; with `use_database_config: true`, profiles are read without the Doctrine identity map and closed EntityManagers are recovered (see [docs/FRANKENPHP-WORKER-AUDIT.md](docs/FRANKENPHP-WORKER-AUDIT.md)).
+This bundle is **FrankenPHP worker mode friendly**.
 
-### FrankenPHP demo
-
-```bash
-make -C demo/symfony8 up
-# http://localhost:8012/demo
-```
-
-See [docs/DEMO-FRANKENPHP.md](docs/DEMO-FRANKENPHP.md) (`FRANKENPHP_MODE=worker` default; PHP **8.5** + **gd**).
+It supports workers that do **not** reset the Symfony kernel between requests. YAML-only setups are fully stateless; with `use_database_config: true`, profiles are read without the Doctrine identity map and closed EntityManagers are recovered (see [docs/FRANKENPHP-WORKER-AUDIT.md](docs/FRANKENPHP-WORKER-AUDIT.md)).
 
 ## Features
 
@@ -78,13 +71,21 @@ $safeUri = $qrCodeService->createDataUriForUrl('https://example.com/path', 'comp
 
 ## Related
 
-- [WalletQrBundle](https://github.com/nowo-tech/WalletQrBundle) — Google Wallet / Apple Wallet save links + QR (depends on this bundle)
+- [WalletQrBundle](https://github.com/nowo-tech/WalletQRBundle) — Google Wallet / Apple Wallet save links + QR (depends on this bundle)
+
+## Demo (FrankenPHP)
+
+```bash
+make -C demo/symfony8 up
+# http://localhost:8012/demo
+```
+
+See [docs/DEMO-FRANKENPHP.md](docs/DEMO-FRANKENPHP.md) (`FRANKENPHP_MODE=worker` default; PHP **8.5** + **gd**).
 
 ## Documentation
 
 - [Installation](docs/INSTALLATION.md)
 - [Configuration](docs/CONFIGURATION.md)
-- [PSR evaluation (REQ-CS-007)](docs/PSR.md)
 - [Usage](docs/USAGE.md)
 - [Contributing](docs/CONTRIBUTING.md)
 - [Code of Conduct](CODE_OF_CONDUCT.md)
@@ -98,6 +99,7 @@ $safeUri = $qrCodeService->createDataUriForUrl('https://example.com/path', 'comp
 
 ### Additional documentation
 
+- [PSR evaluation (REQ-CS-007)](docs/PSR.md)
 - [FrankenPHP demos](docs/DEMO-FRANKENPHP.md)
 - [FrankenPHP worker audit](docs/FRANKENPHP-WORKER-AUDIT.md)
 - [GitHub CI](docs/GITHUB_CI.md)

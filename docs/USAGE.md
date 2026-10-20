@@ -6,6 +6,9 @@
 - [Database profiles (optional)](#database-profiles-optional)
 - [Low-level renderer](#low-level-renderer)
 - [Twig](#twig)
+  - [Functions](#functions)
+  - [Twig Component (`NowoQrCode`)](#twig-component-nowoqrcode)
+  - [Symfony UX Toolkit](#symfony-ux-toolkit)
 
 ## Service
 

@@ -1,4 +1,4 @@
-name: qr-code-demo-symfony8
+name: qr-code-bundle-demo-symfony-8
 
 services:
   php:

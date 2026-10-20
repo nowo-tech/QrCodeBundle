@@ -12,6 +12,14 @@ Requirements: PHP **8.2+** and Symfony **7.4** or **8.x** (`symfony/*` `^7.4 || 
 
 Also pulls `symfony/twig-bundle` and `symfony/ux-twig-component` for Twig helpers and the `<twig:NowoQrCode>` component. Optionally install [`symfony/ux-toolkit`](https://symfony.com/bundles/ux-toolkit/current/index.html) in the host app (PHP 8.4+) for design-system kit components around the QR image.
 
+## Table of contents
+
+- [Symfony Flex](#symfony-flex)
+- [Optional database profiles](#optional-database-profiles)
+- [Without Flex](#without-flex)
+- [FrankenPHP demo](#frankenphp-demo)
+- [Twig Extra Bundle (REQ-TWIG-004)](#twig-extra-bundle-req-twig-004)
+
 ## Symfony Flex
 
 With Symfony Flex, the recipe under `.symfony/recipe/nowo-tech/qr-code-bundle/` registers the bundle, copies `config/packages/nowo_qr_code.yaml`, and imports admin routes via `config/routes/nowo_qr_code.yaml`.

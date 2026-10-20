@@ -6,7 +6,9 @@ Root key: `nowo_qr_code`.
 
 - [Profiles (REQ-CFG-001)](#profiles-req-cfg-001)
 - [Database overrides (optional)](#database-overrides-optional)
+  - [Selecting a profile](#selecting-a-profile)
 - [Admin Web UI (layout and CSS)](#admin-web-ui-layout-and-css)
+  - [Flat legacy config (BC)](#flat-legacy-config-bc)
 - [`error_correction`](#error_correction)
 - [`url_allowlist`](#url_allowlist)
 - [Container parameters](#container-parameters)
