@@ -62,6 +62,7 @@
         "symfony/form": "^7.4 || ^8.0",
         "symfony/framework-bundle": "^7.4 || ^8.0",
         "symfony/security-core": "^7.4 || ^8.0",
+        "symfony/security-csrf": "^7.4 || ^8.0",
         "symfony/validator": "^7.4 || ^8.0",
         "symfony/yaml": "^7.4 || ^8.0",
         "vincentlanglet/twig-cs-fixer": "^4.1"
@@ -117,6 +118,7 @@
         "doctrine/orm": "Required (^3.7) when nowo_qr_code.use_database_config is true (DB profile overrides + admin CRUD)",
         "doctrine/doctrine-bundle": "Required when nowo_qr_code.use_database_config is true",
         "symfony/form": "Required for the optional /admin/qr-code-profiles CRUD",
+        "symfony/security-csrf": "Required for the optional admin CRUD (CSRF-protected action forms)",
         "symfony/validator": "Recommended for admin form constraints",
         "symfony/security-bundle": "Recommended to protect admin CRUD via security.access_roles",
         "symfony/ux-toolkit": "Optional design-system toolkit (PHP 8.4+); NowoQrCode follows Toolkit @prop documentation conventions and works alongside Shadcn kit components"

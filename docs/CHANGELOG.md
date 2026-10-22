@@ -32,6 +32,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `nowo_qr_code.web_ui.list_page_size` (default 50): the admin profile list is paginated (`?page=N`) instead of loading every profile (REQ-PERF-001).
+
+### Changed
+
+- The admin import-YAML and delete buttons are Symfony forms built by the controller (same `_token` ids), so the views contain no raw `<form>` / `<input>`; `release-check` starts with `ensure-up` and runs the new `check-no-raw-html-form` (REQ-TWIG-005, REQ-MAKE-002). The controller receives the form factory through its constructor (autowired); the admin CRUD needs `symfony/security-csrf` (now listed in `suggest`, and in `require-dev` for the tests).
+- Coverage now includes `src/Controller` and `src/Repository` (no `<source>` exclusions) (REQ-TEST-003); the last docblock `@covers` became `#[CoversClass]` (REQ-TEST-010); new `Demo smoke` workflow (REQ-TEST-011).
+- `docs/SECURITY.md` describes the admin CRUD exposure and flags the AI review as due for a re-audit (REQ-SEC-001); PSR.md gives the real PSR-3 reason (REQ-CS-007); the co-author check accepts git worktrees.
+
 ### Changed
 
 - Dependencies refreshed (Composer and pnpm/npm lock files of the bundle and its demos, campaign 2026-10-19).

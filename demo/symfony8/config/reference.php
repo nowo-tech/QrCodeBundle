@@ -821,6 +821,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     web_ui?: array{
  *         layout_template?: scalar|Param|null, // Twig layout extended by admin/base.html.twig (global nowo_qr_code_layout_template). Set to your app layout or a one-file bridge. // Default: "@NowoQrCodeBundle/admin/layout.html.twig"
  *         css_framework?: "bootstrap"|"bootstrap4"|"bootstrap5"|"tabler"|"tailwind"|"foundation"|"custom"|"none"|Param, // Host CSS stack hint: bootstrap5 (alias bootstrap) | bootstrap4 | tabler | tailwind | foundation | custom | none. Default custom matches the demo standalone layout. // Default: "custom"
+ *         list_page_size?: int|Param, // Profiles per page on the admin list (?page=N) (REQ-PERF-001). // Default: 50
  *     },
  *     default_profile?: scalar|Param|null, // Profile used when no explicit profile is passed to the service / Twig helpers // Default: "default"
  *     profiles?: array<string, array{ // Default: {"default":{"size":300,"margin":10,"error_correction":"high","url_allowlist":[]}}

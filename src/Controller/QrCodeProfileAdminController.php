@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Nowo\QrCodeBundle\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
+use LogicException;
 use Nowo\QrCodeBundle\Entity\QrCodeProfileConfig;
 use Nowo\QrCodeBundle\Enum\QrErrorCorrection;
 use Nowo\QrCodeBundle\Form\QrCodeProfileConfigType;
@@ -12,11 +13,17 @@ use Nowo\QrCodeBundle\Repository\QrCodeProfileConfigRepository;
 use Nowo\QrCodeBundle\Security\QrCodeAccessCheckerInterface;
 use Nowo\QrCodeBundle\Service\QrCodeProfileAdminService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\Extension\Core\Type\FormType;
+use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\Form\FormView;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
+use function ceil;
+use function max;
+use function min;
 use function sprintf;
 
 /**
@@ -31,16 +38,35 @@ class QrCodeProfileAdminController extends AbstractController
         private readonly QrCodeProfileAdminService $adminService,
         private readonly QrCodeAccessCheckerInterface $accessChecker,
         private readonly bool $useDatabaseConfig,
+        private readonly int $listPageSize = 50,
+        private readonly ?FormFactoryInterface $formFactory = null,
     ) {
     }
 
     #[Route(path: '', name: 'index', methods: ['GET'])]
-    public function index(): Response
+    public function index(Request $request): Response
     {
         $this->denyUnlessGranted();
 
+        // REQ-PERF-001: paginated list (web_ui.list_page_size rows per page).
+        $total      = $this->repository->count([]);
+        $totalPages = max(1, (int) ceil($total / $this->listPageSize));
+        $page       = min(max(1, $request->query->getInt('page', 1)), $totalPages);
+        $profiles   = $this->repository->findPageOrderedByName($this->listPageSize, ($page - 1) * $this->listPageSize);
+
+        $deleteForms = [];
+        foreach ($profiles as $profile) {
+            $deleteForms[(int) $profile->getId()] = $this->actionForm(
+                $this->generateUrl('nowo_qr_code_admin_delete', ['id' => $profile->getId()]),
+                'delete_qr_profile_' . $profile->getId(),
+            );
+        }
+
         return $this->render('@NowoQrCodeBundle/admin/index.html.twig', [
-            'profiles'            => $this->repository->findAllOrderedByName(),
+            'profiles'            => $profiles,
+            'pagination'          => ['page' => $page, 'total_pages' => $totalPages, 'total' => $total],
+            'import_form'         => $this->actionForm($this->generateUrl('nowo_qr_code_admin_import_yaml'), 'import_qr_yaml'),
+            'delete_forms'        => $deleteForms,
             'yaml_profiles'       => $this->adminService->yamlProfileNames(),
             'use_database_config' => $this->useDatabaseConfig,
         ]);
@@ -128,6 +154,23 @@ class QrCodeProfileAdminController extends AbstractController
             'is_new'              => $isNew,
             'use_database_config' => $this->useDatabaseConfig,
         ]);
+    }
+
+    /**
+     * Empty POST form carrying only the `_token` CSRF field (REQ-TWIG-005: no raw form markup in the views).
+     */
+    private function actionForm(string $action, string $tokenId): FormView
+    {
+        if (!$this->formFactory instanceof FormFactoryInterface) {
+            throw new LogicException('QrCodeProfileAdminController needs the form factory (symfony/form).');
+        }
+
+        return $this->formFactory->createNamed('', FormType::class, null, [
+            'action'          => $action,
+            'method'          => 'POST',
+            'csrf_field_name' => '_token',
+            'csrf_token_id'   => $tokenId,
+        ])->createView();
     }
 
     private function denyUnlessGranted(): void

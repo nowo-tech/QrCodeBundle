@@ -122,12 +122,14 @@ Admin CRUD pages (when `use_database_config` is enabled) extend `@NowoQrCodeBund
 | --- | --- | --- |
 | `web_ui.layout_template` | `@NowoQrCodeBundle/admin/layout.html.twig` | Root Twig layout (global `nowo_qr_code_layout_template`) |
 | `web_ui.css_framework` | `custom` | Host CSS stack hint (global `nowo_qr_code_css_framework`). Values: `bootstrap5` (alias `bootstrap`), `bootstrap4`, `tabler`, `tailwind`, `foundation`, `custom`, `none` |
+| `web_ui.list_page_size` | `50` | Profiles per page on the admin list (`?page=N`, 1–500) (REQ-PERF-001) |
 
 ```yaml
 nowo_qr_code:
     web_ui:
         layout_template: 'base.html.twig'   # host layout or one-file bridge
         css_framework: custom               # or bootstrap5 | tailwind | …
+        list_page_size: 50
 ```
 
 **Host integration**

@@ -36,6 +36,8 @@
 
 ## Unreleased
 
+- The admin profile list is paginated (`nowo_qr_code.web_ui.list_page_size`, default 50). If you override `admin/index.html.twig`, use the new `import_form`, `delete_forms` and `pagination` variables instead of building raw `<form>` tags with `csrf_token()`.
+
 ## To 1.7.2
 
 From **1.7.1**:

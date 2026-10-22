@@ -190,6 +190,7 @@ final class NowoQrCodeExtension extends Extension implements PrependExtensionInt
         $container->setParameter('nowo_qr_code.security.allow_unauthenticated', $config['security']['allow_unauthenticated']);
         $container->setParameter('nowo_qr_code.web_ui.layout_template', $config['web_ui']['layout_template']);
         $container->setParameter('nowo_qr_code.web_ui.css_framework', $cssFramework);
+        $container->setParameter('nowo_qr_code.web_ui.list_page_size', $config['web_ui']['list_page_size']);
 
         $loader = new YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load('services.yaml');

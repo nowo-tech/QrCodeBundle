@@ -5,13 +5,12 @@ declare(strict_types=1);
 namespace Nowo\QrCodeBundle\Tests\Unit\DependencyInjection;
 
 use Nowo\QrCodeBundle\DependencyInjection\UrlAllowlistValidationPass;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
-/**
- * @covers \Nowo\QrCodeBundle\DependencyInjection\UrlAllowlistValidationPass
- */
+#[CoversClass(UrlAllowlistValidationPass::class)]
 final class UrlAllowlistValidationPassTest extends TestCase
 {
     public function testFailsWhenRequiredAndAllowlistEmpty(): void

@@ -20,10 +20,9 @@
     {% endif %}
 
     <div class="qr-toolbar nowo-ui-toolbar">
-        <form method="post" action="{{ path('nowo_qr_code_admin_import_yaml') }}">
-            <input type="hidden" name="_token" value="{{ csrf_token('import_qr_yaml') }}">
+        {{ form_start(import_form) }}
             <button type="submit" class="{{ ui.btn('secondary', null, _css_fw) }} qr-btn">Import from YAML</button>
-        </form>
+        {{ form_end(import_form) }}
         <span class="qr-muted">YAML baseline: {% for name in yaml_profiles %}<code>{{ name }}</code>{% if not loop.last %}, {% endif %}{% else %}—{% endfor %}</span>
     </div>
 
@@ -63,10 +62,9 @@
                     <td class="qr-actions">
                         <div class="{{ ui.row_actions(_css_fw) }}">
                             <a class="{{ ui.btn('secondary', 'sm', _css_fw) }} qr-btn nowo-ui-action-edit" href="{{ path('nowo_qr_code_admin_edit', {id: profile.id}) }}">Edit</a>
-                            <form method="post" action="{{ path('nowo_qr_code_admin_delete', {id: profile.id}) }}" onsubmit="return confirm('Delete this profile?');">
-                                <input type="hidden" name="_token" value="{{ csrf_token('delete_qr_profile_' ~ profile.id) }}">
+                            {{ form_start(delete_forms[profile.id], {attr: {onsubmit: "return confirm('Delete this profile?');"}}) }}
                                 <button type="submit" class="{{ ui.btn('danger', 'sm', _css_fw) }} qr-link-danger nowo-ui-action-delete">Delete</button>
-                            </form>
+                            {{ form_end(delete_forms[profile.id]) }}
                         </div>
                     </td>
                 </tr>
@@ -78,4 +76,16 @@
             </tbody>
         </table>
     </div>
+
+    {% if pagination.total_pages > 1 %}
+        <nav class="qr-pagination nowo-ui-pagination" aria-label="Profiles pages">
+            {% if pagination.page > 1 %}
+                <a class="{{ ui.btn('secondary', 'sm', _css_fw) }} qr-btn" href="{{ path('nowo_qr_code_admin_index', {page: pagination.page - 1}) }}">Previous</a>
+            {% endif %}
+            <span class="qr-muted">Page {{ pagination.page }} of {{ pagination.total_pages }} ({{ pagination.total }} profiles)</span>
+            {% if pagination.page < pagination.total_pages %}
+                <a class="{{ ui.btn('secondary', 'sm', _css_fw) }} qr-btn" href="{{ path('nowo_qr_code_admin_index', {page: pagination.page + 1}) }}">Next</a>
+            {% endif %}
+        </nav>
+    {% endif %}
 {% endblock %}

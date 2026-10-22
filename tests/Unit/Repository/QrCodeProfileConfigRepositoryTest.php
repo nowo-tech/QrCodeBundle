@@ -52,6 +52,74 @@ final class QrCodeProfileConfigRepositoryTest extends TestCase
         self::assertSame([$entity], $repo->findAllOrderedByName());
     }
 
+    public function testFindPageOrderedByNameAppliesLimitAndOffset(): void
+    {
+        $entity = (new QrCodeProfileConfig())->setName('compact');
+        $query  = $this->getMockBuilder(Query::class)->disableOriginalConstructor()->onlyMethods(['getResult'])->getMock();
+        $query->method('getResult')->willReturn([$entity]);
+
+        $qb = $this->createMock(QueryBuilder::class);
+        $qb->method('orderBy')->willReturnSelf();
+        $qb->expects(self::once())->method('setMaxResults')->with(10)->willReturnSelf();
+        $qb->expects(self::once())->method('setFirstResult')->with(20)->willReturnSelf();
+        $qb->method('getQuery')->willReturn($query);
+
+        self::assertSame([$entity], $this->repositoryWithQueryBuilder($qb)->findPageOrderedByName(10, 20));
+    }
+
+    public function testFindAllNamesReturnsTheNameColumn(): void
+    {
+        $query = $this->getMockBuilder(Query::class)->disableOriginalConstructor()->onlyMethods(['getSingleColumnResult'])->getMock();
+        $query->method('getSingleColumnResult')->willReturn(['a', 'b']);
+
+        $qb = $this->createMock(QueryBuilder::class);
+        $qb->method('select')->with('p.name')->willReturnSelf();
+        $qb->method('orderBy')->willReturnSelf();
+        $qb->method('getQuery')->willReturn($query);
+
+        self::assertSame(['a', 'b'], $this->repositoryWithQueryBuilder($qb)->findAllNames());
+    }
+
+    public function testFindOneByNameDelegatesToFindOneBy(): void
+    {
+        $entity   = (new QrCodeProfileConfig())->setName('compact');
+        $registry = $this->createMock(ManagerRegistry::class);
+        $repo     = new class($registry, $entity) extends QrCodeProfileConfigRepository {
+            public function __construct(ManagerRegistry $registry, private readonly QrCodeProfileConfig $entity)
+            {
+                parent::__construct($registry);
+            }
+
+            public function findOneBy(array $criteria, ?array $orderBy = null): ?object
+            {
+                return $criteria === ['name' => 'compact'] ? $this->entity : null;
+            }
+        };
+
+        self::assertSame($entity, $repo->findOneByName('compact'));
+        self::assertNull($repo->findOneByName('other'));
+    }
+
+    private function repositoryWithQueryBuilder(QueryBuilder $qb): QrCodeProfileConfigRepository
+    {
+        $em = $this->createMock(EntityManagerInterface::class);
+        $em->method('getClassMetadata')->willReturn(new ClassMetadata(QrCodeProfileConfig::class));
+        $registry = $this->createMock(ManagerRegistry::class);
+        $registry->method('getManagerForClass')->willReturn($em);
+
+        return new class($registry, $qb) extends QrCodeProfileConfigRepository {
+            public function __construct(ManagerRegistry $registry, private readonly QueryBuilder $qb)
+            {
+                parent::__construct($registry);
+            }
+
+            public function createQueryBuilder(string $alias, ?string $indexBy = null): QueryBuilder
+            {
+                return $this->qb;
+            }
+        };
+    }
+
     public function testFindProfileArrayByNameUsesArrayHydration(): void
     {
         $row = ['size' => 200, 'margin' => 4, 'error_correction' => 'low', 'url_allowlist' => ['example.com']];

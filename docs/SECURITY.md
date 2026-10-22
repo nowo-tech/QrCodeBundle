@@ -45,7 +45,7 @@ Before tagging a release, run `composer audit` (and address Critical/High findin
 |---------|--------|
 | PHP API | `QrCodeService`, `QrCodeDataUriRenderer`, `QrUrlPolicy` |
 | Twig | `qr_code_data_uri`, `qr_code_for_url` |
-| HTTP / admin UI | None |
+| HTTP / admin UI | Admin CRUD at `/admin/qr-code-profiles` (index, new, edit, delete, import YAML) when `use_database_config` profiles are enabled: role-gated by `security.access_roles` / `access_checker` (empty list denies everyone), CSRF-protected Symfony forms, paginated list (`web_ui.list_page_size`). No public QR endpoint. |
 | Config | `nowo_qr_code.*` (size, margin, error_correction, url_allowlist) |
 
 ## Residual risk
@@ -80,4 +80,4 @@ Confirm before each release (REQ-SEC-002):
 | Grade | **Pass (good)** |
 | Overall risk | **Low** |
 | Open Critical / High | None |
-| Notes | Host allowlist uses exact/subdomain matching; http(s)-only policy; no admin UI |
+| Notes | Host allowlist uses exact/subdomain matching; http(s)-only policy. This review predates the admin CRUD added in 1.2.0, so a re-audit covering it is due (REQ-SEC-004 freshness). |

@@ -25,6 +25,7 @@ services:
   Nowo\QrCodeBundle\Controller\QrCodeProfileAdminController:
     arguments:
       $useDatabaseConfig: '%nowo_qr_code.use_database_config%'
+      $listPageSize: '%nowo_qr_code.web_ui.list_page_size%'
     tags: ['controller.service_arguments']
 
   # Form Kit injects FormOptionsMerger into tagged form types (FormOptionsMergerInjectorCompilerPass).

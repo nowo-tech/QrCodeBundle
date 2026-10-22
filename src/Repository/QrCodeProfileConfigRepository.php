@@ -49,6 +49,24 @@ class QrCodeProfileConfigRepository extends ServiceEntityRepository
     }
 
     /**
+     * One page of profiles ordered by name (admin list, REQ-PERF-001).
+     *
+     * @return list<QrCodeProfileConfig>
+     */
+    public function findPageOrderedByName(int $limit, int $offset): array
+    {
+        /** @var list<QrCodeProfileConfig> $rows */
+        $rows = $this->createQueryBuilder('p')
+            ->orderBy('p.name', SortDirection::Ascending)
+            ->setMaxResults($limit)
+            ->setFirstResult($offset)
+            ->getQuery()
+            ->getResult();
+
+        return $rows;
+    }
+
+    /**
      * @return list<QrCodeProfileConfig>
      */
     public function findAllOrderedByName(): array
