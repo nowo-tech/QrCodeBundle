@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Table of contents
 
 - [[Unreleased]](#unreleased)
+- [[1.8.0] - 2026-10-22](#180---2026-10-22)
 - [[1.7.2] - 2026-10-18](#172---2026-10-18)
 - [[1.7.1] - 2026-10-13](#171---2026-10-13)
 - [[1.7.0] - 2026-10-13](#170---2026-10-13)
@@ -32,6 +33,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.8.0] - 2026-10-22
+
+Dependency refresh, paginated admin profile list, Symfony action forms, coverage over the whole src, raw-form gate and demo smoke workflow. See [UPGRADING](UPGRADING.md#to-180).
+
 ### Added
 
 - `nowo_qr_code.web_ui.list_page_size` (default 50): the admin profile list is paginated (`?page=N`) instead of loading every profile (REQ-PERF-001).
@@ -50,6 +55,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Documentation
 
 - Documentation: wave-1 REQ compliance — canonical issue and pull request templates, canonical FrankenPHP claim and demo section moved out of the README preamble, documentation list order (PSR under Additional documentation), CONTRIBUTING Code of Conduct link and Cursor Agent queue settings (REQ-IDE-006), DEMO-FRANKENPHP dev/production start and troubleshooting, demo compose project name `qr-code-bundle-demo-symfony-8`, tables of contents on long docs.
+
+[1.8.0]: https://github.com/nowo-tech/QrCodeBundle/releases/tag/v1.8.0
 
 ## [1.7.2] - 2026-10-18
 

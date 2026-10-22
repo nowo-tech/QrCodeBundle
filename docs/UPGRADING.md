@@ -3,6 +3,7 @@
 ## Table of contents
 
 - [Unreleased](#unreleased)
+- [To 1.8.0](#to-180)
 - [To 1.7.2](#to-172)
 - [To 1.7.1](#to-171)
 - [To 1.7.0](#to-170)
@@ -35,6 +36,14 @@
 - [[1.0.0] - 2026-07-30](#100---2026-07-30)
 
 ## Unreleased
+
+## To 1.8.0
+
+From **1.7.2**:
+
+```bash
+composer update nowo-tech/qr-code-bundle
+```
 
 - The admin profile list is paginated (`nowo_qr_code.web_ui.list_page_size`, default 50). If you override `admin/index.html.twig`, use the new `import_form`, `delete_forms` and `pagination` variables instead of building raw `<form>` tags with `csrf_token()`.
 
