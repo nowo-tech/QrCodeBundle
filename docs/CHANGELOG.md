@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Table of contents
 
 - [[Unreleased]](#unreleased)
+- [[1.8.1] - 2026-10-24](#181---2026-10-24)
 - [[1.8.0] - 2026-10-22](#180---2026-10-22)
 - [[1.7.2] - 2026-10-18](#172---2026-10-18)
 - [[1.7.1] - 2026-10-13](#171---2026-10-13)
@@ -33,9 +34,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.8.1] - 2026-10-24
+
+Bundle views render form bodies through the child loop (REQ-TWIG-003). See [UPGRADING](UPGRADING.md#to-181).
+
 ### Changed
 
 - Admin view `admin/form.html.twig` renders the profile form through the child loop (`{% for child in form %}` + `not child.rendered` + `form_row(child)`) instead of one `form_row(form.<field>)` per field (REQ-TWIG-003). Same fields and order (from `QrCodeProfileConfigType`); new fields now render without overriding the template.
+
+[1.8.1]: https://github.com/nowo-tech/QrCodeBundle/releases/tag/v1.8.1
 
 ## [1.8.0] - 2026-10-22
 
