@@ -20,11 +20,11 @@
     {% endif %}
 
     {{ form_start(form, {attr: {class: 'qr-form nowo-ui-form'}}) }}
-        {{ form_row(form.name) }}
-        {{ form_row(form.size) }}
-        {{ form_row(form.margin) }}
-        {{ form_row(form.errorCorrection) }}
-        {{ form_row(form.urlAllowlist) }}
+        {% for child in form %}
+            {% if not child.rendered %}
+                {{ form_row(child) }}
+            {% endif %}
+        {% endfor %}
 
         <div class="qr-form-actions nowo-ui-form-actions">
             <button type="submit" class="{{ ui.btn('primary', null, _css_fw) }} qr-btn qr-btn-primary nowo-ui-action-save">Save</button>

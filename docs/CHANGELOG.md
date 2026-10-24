@@ -33,6 +33,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Admin view `admin/form.html.twig` renders the profile form through the child loop (`{% for child in form %}` + `not child.rendered` + `form_row(child)`) instead of one `form_row(form.<field>)` per field (REQ-TWIG-003). Same fields and order (from `QrCodeProfileConfigType`); new fields now render without overriding the template.
+
 ## [1.8.0] - 2026-10-22
 
 Dependency refresh, paginated admin profile list, Symfony action forms, coverage over the whole src, raw-form gate and demo smoke workflow. See [UPGRADING](UPGRADING.md#to-180).
