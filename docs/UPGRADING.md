@@ -3,6 +3,7 @@
 ## Table of contents
 
 - [Unreleased](#unreleased)
+- [To 1.9.0](#to-190)
 - [To 1.8.1](#to-181)
 - [To 1.8.0](#to-180)
 - [To 1.7.2](#to-172)
@@ -37,6 +38,14 @@
 - [[1.0.0] - 2026-07-30](#100---2026-07-30)
 
 ## Unreleased
+
+## To 1.9.0
+
+From **1.8.1**:
+
+```bash
+composer update nowo-tech/qr-code-bundle
+```
 
 **URL validation is stricter.** `QrUrlPolicy` (QR codes for URLs, WalletQr) now rejects URLs containing `\`, control
 characters or spaces, URLs with userinfo (`user@host`, `user:pass@host`) and hosts that are not plain DNS names, IPv4

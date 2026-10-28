@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Table of contents
 
 - [[Unreleased]](#unreleased)
+- [[1.9.0] - 2026-10-28](#190---2026-10-28)
 - [[1.8.1] - 2026-10-24](#181---2026-10-24)
 - [[1.8.0] - 2026-10-22](#180---2026-10-22)
 - [[1.7.2] - 2026-10-18](#172---2026-10-18)
@@ -34,6 +35,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.9.0] - 2026-10-28
+
+Security: URLs whose authority PHP and QR scanners read differently (backslash, userinfo, control chars) are rejected. See [UPGRADING](UPGRADING.md#to-190).
+
 ### Security
 
 - **URL allowlist bypass through ambiguous authorities.** `QrUrlPolicy` took the host from PHP `parse_url()`, which
@@ -43,6 +48,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   backslash, control character or whitespace, with userinfo (`user@`, `user:pass@`), or whose host is not a plain DNS
   name / IPv4 / bracketed IPv6 literal (percent-encoded or Unicode hosts) are now rejected, with or without an
   allowlist. See [UPGRADING](UPGRADING.md#unreleased).
+
+[1.9.0]: https://github.com/nowo-tech/QrCodeBundle/releases/tag/v1.9.0
 
 ## [1.8.1] - 2026-10-24
 
