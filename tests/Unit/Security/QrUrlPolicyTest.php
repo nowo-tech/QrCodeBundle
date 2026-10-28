@@ -6,6 +6,7 @@ namespace Nowo\QrCodeBundle\Tests\Unit\Security;
 
 use Nowo\QrCodeBundle\Exception\InvalidQrUrlException;
 use Nowo\QrCodeBundle\Security\QrUrlPolicy;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 final class QrUrlPolicyTest extends TestCase
@@ -135,6 +136,41 @@ final class QrUrlPolicyTest extends TestCase
 
         self::assertTrue($policy->isAllowed('https://cdn.example.com/pass.pkpass'));
         self::assertFalse($policy->isAllowed('https://other.example.com/pass.pkpass'));
+    }
+
+    /**
+     * PHP parse_url() and phones / browsers read these authorities differently: they open evil.tld.
+     *
+     * @return iterable<string, array{string}>
+     */
+    public static function ambiguousAuthorities(): iterable
+    {
+        yield 'backslash before allowed suffix' => ['https://evil.tld\\.good.com/'];
+        yield 'backslash userinfo' => ['https://evil.tld\\@good.com/'];
+        yield 'userinfo' => ['https://evil.tld@good.com/'];
+        yield 'user and password' => ['https://u:p@good.com/'];
+        yield 'tab in authority' => ["https://good.com\t.evil.tld/"];
+        yield 'space' => ['https://good.com /x'];
+        yield 'percent-encoded host' => ['https://evil.tld%2egood.com/'];
+        yield 'newline' => ["https://good.com/\nx"];
+        yield 'DEL' => ["https://good.com/\x7Fx"];
+    }
+
+    #[DataProvider('ambiguousAuthorities')]
+    public function testAmbiguousAuthoritiesAreNeverAllowed(string $url): void
+    {
+        self::assertFalse((new QrUrlPolicy(['good.com']))->isAllowed($url));
+        self::assertFalse((new QrUrlPolicy())->isAllowed($url), 'also without an allowlist');
+    }
+
+    public function testPlainHostsAndIpLiteralsStillPass(): void
+    {
+        $policy = new QrUrlPolicy();
+
+        self::assertTrue($policy->isAllowed('https://sub.good.com:8443/p?q=a%20b#f'));
+        self::assertTrue($policy->isAllowed('https://192.0.2.1/x'));
+        self::assertTrue($policy->isAllowed('https://[2001:db8::1]/x'));
+        self::assertTrue($policy->isAllowed('https://xn--bcher-kva.de/'));
     }
 
     public function testEmptyPatternIsSkippedInAllowlist(): void

@@ -34,6 +34,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+
+- **URL allowlist bypass through ambiguous authorities.** `QrUrlPolicy` took the host from PHP `parse_url()`, which
+  reads backslashes and userinfo differently from browsers and QR scanners: `https://evil.tld\.good.com/` (host
+  `evil.tld\.good.com` for PHP) and `https://evil.tld\@good.com/` (host `good.com` for PHP) passed a `good.com`
+  allowlist but open `evil.tld` on a phone, defeating the anti-phishing allowlist for user-supplied URLs. URLs with a
+  backslash, control character or whitespace, with userinfo (`user@`, `user:pass@`), or whose host is not a plain DNS
+  name / IPv4 / bracketed IPv6 literal (percent-encoded or Unicode hosts) are now rejected, with or without an
+  allowlist. See [UPGRADING](UPGRADING.md#unreleased).
+
 ## [1.8.1] - 2026-10-24
 
 Bundle views render form bodies through the child loop (REQ-TWIG-003). See [UPGRADING](UPGRADING.md#to-181).

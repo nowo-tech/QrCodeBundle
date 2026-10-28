@@ -18,7 +18,6 @@ use function str_ends_with;
 use function str_starts_with;
 use function strtolower;
 
-use const PHP_URL_HOST;
 use const PHP_URL_PATH;
 use const PHP_URL_PORT;
 
@@ -62,8 +61,21 @@ final readonly class QrUrlPolicy
             return false;
         }
 
-        $host = parse_url($url, PHP_URL_HOST);
-        if (!is_string($host) || $host === '') {
+        // PHP's parse_url() and browsers / QR scanners disagree on backslashes, control characters, whitespace and
+        // userinfo: `https://evil.tld\.good.com/` (host "evil.tld\.good.com" for PHP) and `https://evil.tld\@good.com/`
+        // (host "good.com" for PHP) both open evil.tld on a phone. Such URLs are never encoded.
+        if (preg_match('/[\\\\\x00-\x20\x7F]/', $url) === 1) {
+            return false;
+        }
+
+        $parts = parse_url($url);
+        if (!is_array($parts) || isset($parts['user']) || isset($parts['pass'])) {
+            return false;
+        }
+
+        $host = $parts['host'] ?? null;
+        // Plain DNS names / IPv4, or a bracketed IPv6 literal; no percent-encoding or other characters in the host.
+        if (!is_string($host) || preg_match('/^(?:[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.?|\[[0-9A-Fa-f:.]+\])$/', $host) !== 1) {
             return false;
         }
 

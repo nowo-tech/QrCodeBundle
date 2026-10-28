@@ -21,7 +21,7 @@ Report vulnerabilities privately via [GitHub Security Advisories](https://github
 | Risk | Mitigation |
 |------|------------|
 | Phishing / unsafe QR payloads | `QrUrlPolicy` accepts only `http`/`https` and rejects `javascript:`, `data:`, and other schemes. |
-| Host allowlist bypass | Host patterns match exact host or subdomains only (not raw substrings). Path patterns (`host/path`) parse the URL and match host + path prefix (never a raw substring of the URL, so `https://evil.tld/?r=good.com/path` does not match `good.com/path`). Regex patterns use `#…` PCRE. |
+| Host allowlist bypass | Host patterns match exact host or subdomains only (not raw substrings). Path patterns (`host/path`) parse the URL and match host + path prefix (never a raw substring of the URL, so `https://evil.tld/?r=good.com/path` does not match `good.com/path`). Regex patterns use `#…` PCRE. Before matching, URLs whose authority browsers and `parse_url()` read differently are rejected: backslashes, control characters, whitespace, userinfo, percent-encoded / Unicode hosts (since the next release). |
 | Empty allowlist | Any http(s) URL may be encoded — treat QR content as **host-controlled**; do not pass untrusted end-user URLs without an allowlist. Flex `when@prod` sets `url_allowlist_required: true` so an empty or `example.com` placeholder fail compilation (since 1.4.6). |
 | Twig / XSS | Helpers emit data-URI strings; escape surrounding HTML as usual (`attr`/`html` contexts). |
 | Resource abuse | Bound `size`/`margin` in config; rate-limit generation if exposed to anonymous users. |

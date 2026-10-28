@@ -38,6 +38,11 @@
 
 ## Unreleased
 
+**URL validation is stricter.** `QrUrlPolicy` (QR codes for URLs, WalletQr) now rejects URLs containing `\`, control
+characters or spaces, URLs with userinfo (`user@host`, `user:pass@host`) and hosts that are not plain DNS names, IPv4
+or bracketed IPv6 literals. Encode internationalised domain names in punycode (`https://xn--bcher-kva.de/`) and
+percent-encode spaces in paths/queries before generating the QR code.
+
 ## To 1.8.1
 
 From **1.8.0**:
