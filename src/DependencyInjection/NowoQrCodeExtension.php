@@ -22,6 +22,7 @@ use function array_key_exists;
 use function class_exists;
 use function is_array;
 use function is_string;
+use function str_starts_with;
 
 /**
  * Dependency injection extension for the QR Code bundle.
@@ -231,6 +232,7 @@ final class NowoQrCodeExtension extends Extension implements PrependExtensionInt
     private function registerAccessChecker(ContainerBuilder $container, array $security): void
     {
         if ($security['allow_unauthenticated']) {
+            $this->refuseAllowUnauthenticatedInProduction($container);
             $accessCheckerId = 'nowo_qr_code.access_checker.allow_all';
             $container->setDefinition($accessCheckerId, new Definition(AllowAllQrCodeAccessChecker::class));
             $container->setAlias(QrCodeAccessCheckerInterface::class, $accessCheckerId);
@@ -278,5 +280,20 @@ final class NowoQrCodeExtension extends Extension implements PrependExtensionInt
         $bundles = $container->getParameter('kernel.bundles');
 
         return isset($bundles['SecurityBundle']);
+    }
+
+    /**
+     * `allow_unauthenticated` opens the QR code profile admin to anonymous users: a dev / demo switch, refused in the prod environment and in
+     * any non-debug kernel outside the test environments (test*), as in ContactFormBundle.
+     */
+    private function refuseAllowUnauthenticatedInProduction(ContainerBuilder $container): void
+    {
+        $environment = $container->hasParameter('kernel.environment') ? $container->getParameter('kernel.environment') : '';
+        $environment = is_string($environment) ? $environment : '';
+        $debug       = $container->hasParameter('kernel.debug') ? (bool) $container->getParameter('kernel.debug') : true;
+
+        if ($environment === 'prod' || (!$debug && !str_starts_with($environment, 'test'))) {
+            throw new LogicException('nowo_qr_code.security.allow_unauthenticated is a dev/demo switch: it opens the QR code profile admin to anonymous users and is refused in the prod environment and in non-debug kernels (test* environments excepted).');
+        }
     }
 }

@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Nowo\QrCodeBundle\Tests\Unit\DependencyInjection;
 
+use LogicException;
 use Nowo\QrCodeBundle\Config\ProfileResolver;
 use Nowo\QrCodeBundle\DependencyInjection\NowoQrCodeExtension;
 use Nowo\QrCodeBundle\Enum\CssFramework;
 use Nowo\QrCodeBundle\Service\QrCodeService;
 use Nowo\QrCodeBundle\Twig\Component\QrCode;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use ReflectionProperty;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -44,6 +46,33 @@ final class NowoQrCodeExtensionTest extends TestCase
         $this->assertFalse($container->getParameter('nowo_qr_code.url_allowlist_required'));
         $this->assertSame('@NowoQrCodeBundle/admin/layout.html.twig', $container->getParameter('nowo_qr_code.web_ui.layout_template'));
         $this->assertSame(CssFramework::Custom->value, $container->getParameter('nowo_qr_code.web_ui.css_framework'));
+    }
+
+    /**
+     * @return iterable<string, array{string, bool, bool}>
+     */
+    public static function allowUnauthenticatedKernels(): iterable
+    {
+        yield 'dev debug' => ['dev', true, true];
+        yield 'test without debug' => ['test', false, true];
+        yield 'prod' => ['prod', true, false];
+        yield 'staging without debug' => ['staging', false, false];
+    }
+
+    #[DataProvider('allowUnauthenticatedKernels')]
+    public function testAllowUnauthenticatedIsRefusedInProduction(string $environment, bool $debug, bool $allowed): void
+    {
+        $container = new ContainerBuilder();
+        $container->setParameter('kernel.environment', $environment);
+        $container->setParameter('kernel.debug', $debug);
+        if (!$allowed) {
+            $this->expectException(LogicException::class);
+            $this->expectExceptionMessage('dev/demo switch');
+        }
+
+        $this->extension->load([['use_database_config' => true, 'security' => ['allow_unauthenticated' => true]]], $container);
+
+        $this->assertTrue($container->hasDefinition('nowo_qr_code.access_checker.allow_all'));
     }
 
     public function testLoadNormalizesBootstrapAliasToBootstrap5(): void
