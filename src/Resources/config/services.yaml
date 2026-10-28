@@ -14,6 +14,7 @@ services:
   Nowo\QrCodeBundle\Service\QrCodeService:
     arguments:
       $profileResolver: '@Nowo\QrCodeBundle\Config\ProfileResolver'
+      $urlAllowlistRequired: '%nowo_qr_code.url_allowlist_required%'
 
   Nowo\QrCodeBundle\Twig\QrCodeExtension: ~
 

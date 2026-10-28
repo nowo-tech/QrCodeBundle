@@ -13,10 +13,14 @@ use Symfony\Component\Form\CallbackTransformer;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 use function explode;
 use function implode;
+use function is_array;
 use function is_string;
+use function preg_match;
+use function str_starts_with;
 use function trim;
 
 /**
@@ -70,10 +74,19 @@ final class QrCodeProfileConfigType extends AbstractType
                 'choices' => $errorChoices,
             ]);
             $this->addTextareaField('urlAllowlist', [
-                'label'    => 'URL allowlist',
-                'required' => false,
-                'help'     => 'One pattern per line. Empty = any http(s) URL.',
-                'attr'     => ['rows' => 5],
+                'label'       => 'URL allowlist',
+                'required'    => false,
+                'help'        => 'One pattern per line. Empty = any http(s) URL. Regex patterns (#…#) must compile and may not nest quantifiers.',
+                'attr'        => ['rows' => 5],
+                'constraints' => [new Assert\Callback(static function (mixed $patterns, ExecutionContextInterface $context): void {
+                    foreach (is_array($patterns) ? $patterns : [] as $pattern) {
+                        // Regex patterns run on every QR render: reject invalid ones and catastrophic backtracking.
+                        if (is_string($pattern) && str_starts_with($pattern, '#')
+                            && (@preg_match($pattern, '') === false || preg_match('/\((?:[^()\\\\]|\\\\.)*[+*}]\)[+*{]/', $pattern) === 1)) {
+                            $context->buildViolation('Invalid regex pattern: {{ pattern }}')->setParameter('{{ pattern }}', $pattern)->addViolation();
+                        }
+                    }
+                })],
             ]);
         });
 

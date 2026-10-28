@@ -51,6 +51,19 @@ final class QrCodeServiceTest extends TestCase
         $service->createDataUriForUrl('javascript:alert(1)');
     }
 
+    /** url_allowlist_required applies to every profile used for URLs, not only the YAML default checked at compile time. */
+    public function testRequiredAllowlistIsEnforcedOnEveryProfile(): void
+    {
+        $service = new QrCodeService($this->resolver(), urlAllowlistRequired: true);
+
+        self::assertStringStartsWith('data:image/png;base64,', $service->createDataUriForUrl('https://example.com/x', 'compact'));
+        self::assertStringStartsWith('data:image/png;base64,', $service->createDataUri('plain text'));
+
+        $this->expectException(InvalidQrUrlException::class);
+        $this->expectExceptionMessage('url_allowlist_required');
+        $service->createDataUriForUrl('https://example.com/x');
+    }
+
     private function resolver(): ProfileResolver
     {
         return new ProfileResolver(

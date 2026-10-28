@@ -9,6 +9,7 @@ use Nowo\FormKitBundle\Form\FormOptionsMerger;
 use Nowo\QrCodeBundle\Entity\QrCodeProfileConfig;
 use Nowo\QrCodeBundle\Enum\QrErrorCorrection;
 use Nowo\QrCodeBundle\Form\QrCodeProfileConfigType;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Form\Extension\Core\CoreExtension;
 use Symfony\Component\Form\Extension\Validator\ValidatorExtension;
@@ -52,6 +53,31 @@ final class QrCodeProfileConfigTypeTest extends TestCase
         self::assertSame(4, $entity->getMargin());
         self::assertSame('medium', $entity->getErrorCorrection());
         self::assertSame(['example.com', 'cdn.example.com'], $entity->getUrlAllowlist());
+    }
+
+    /**
+     * @return iterable<string, array{string, bool}>
+     */
+    public static function regexPatterns(): iterable
+    {
+        yield 'valid anchored regex' => ["#^cdn\\.example\\.com$#\nexample.com", true];
+        yield 'does not compile' => ['#^(cdn#', false];
+        yield 'nested quantifier' => ['#^(a+)+$#', false];
+    }
+
+    #[DataProvider('regexPatterns')]
+    public function testRegexAllowlistPatternsAreValidated(string $allowlist, bool $valid): void
+    {
+        $form = $this->factory->create(QrCodeProfileConfigType::class, new QrCodeProfileConfig());
+        $form->submit([
+            'name'            => 'wallet',
+            'size'            => 256,
+            'margin'          => 4,
+            'errorCorrection' => QrErrorCorrection::Medium->value,
+            'urlAllowlist'    => $allowlist,
+        ]);
+
+        self::assertSame($valid, $form->isValid());
     }
 
     public function testEmptyAllowlistBecomesEmptyArray(): void

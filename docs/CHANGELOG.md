@@ -35,6 +35,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+
+- **`url_allowlist_required` applies to every profile.** The compile-time check only saw the YAML default profile;
+  other YAML profiles and database profiles edited in the admin could encode any URL. `createDataUriForUrl()` now
+  refuses a profile without an allowlist when `url_allowlist_required` is true.
+- **Admin regex patterns are validated.** `#…#` allowlist patterns that do not compile or nest quantifiers (ReDoS on
+  every render) are rejected by the profile form; an invalid stored pattern never matches (no warning / 500).
+
 ## [1.9.0] - 2026-10-28
 
 Security: URLs whose authority PHP and QR scanners read differently (backslash, userinfo, control chars) are rejected. See [UPGRADING](UPGRADING.md#to-190).

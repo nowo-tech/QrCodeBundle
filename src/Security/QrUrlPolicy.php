@@ -95,7 +95,8 @@ final readonly class QrUrlPolicy
                 continue;
             }
             if (str_starts_with($pattern, '#')) {
-                if (preg_match($pattern, $host) === 1 || preg_match($pattern, $url) === 1) {
+                // @: an invalid admin-typed pattern never matches (no warning / 500 on render).
+                if (@preg_match($pattern, $host) === 1 || @preg_match($pattern, $url) === 1) {
                     return true;
                 }
                 continue;
