@@ -14,6 +14,8 @@ This bundle is **FrankenPHP worker mode friendly**.
 
 It supports workers that do **not** reset the Symfony kernel between requests. YAML-only setups are fully stateless; with `use_database_config: true`, profiles are read without the Doctrine identity map and closed EntityManagers are recovered (see [docs/FRANKENPHP-WORKER-AUDIT.md](docs/FRANKENPHP-WORKER-AUDIT.md)).
 
+![QR codes rendered by the Twig functions, the NowoQrCode Twig component and QrCodeService with the default and compact profiles](docs/images/demo/qr-codes.webp)
+
 ## Features
 
 - ✅ PNG QR codes as data URIs (`QrCodeService` / `QrCodeDataUriRenderer`)
@@ -81,6 +83,8 @@ make -C demo/symfony8 up
 ```
 
 See [docs/DEMO-FRANKENPHP.md](docs/DEMO-FRANKENPHP.md) (`FRANKENPHP_MODE=worker` default; PHP **8.5** + **gd**).
+
+The screenshot at the top comes from this demo. Refresh it with `make -C demo/symfony8 demo-screenshots`; `make -C demo/symfony8 test-e2e` runs the Playwright happy path.
 
 ## Documentation
 

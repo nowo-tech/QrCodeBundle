@@ -11,6 +11,7 @@ Thank you for your interest in contributing to QR Code Bundle! This document pro
   - [Contributing Code](#contributing-code)
 - [Project Structure](#project-structure)
 - [Demos](#demos)
+- [End-to-end tests and screenshots (REQ-DEMO-013)](#end-to-end-tests-and-screenshots-req-demo-013)
 - [Questions](#questions)
 - [Acknowledgments](#acknowledgments)
 - [AI co-author trailers](#ai-co-author-trailers)
@@ -201,7 +202,18 @@ QrCodeBundle/
 
 ## Demos
 
-This package does **not** currently ship a `demo/` tree. Demos are optional under the Nowo specs; when added, they must follow REQ-DEMO-* (FrankenPHP, path repo sync, smoke HTTP 200).
+The Symfony 8 FrankenPHP demo lives in `demo/symfony8` (`make -C demo/symfony8 up`, then `http://localhost:8012/demo`). See [DEMO-FRANKENPHP.md](DEMO-FRANKENPHP.md).
+
+## End-to-end tests and screenshots (REQ-DEMO-013)
+
+The demo ships a Playwright suite in `demo/symfony8/e2e/` (official Playwright image, nothing to install on the host):
+
+```bash
+make -C demo/symfony8 test-e2e          # starts the demo if needed, runs the happy-path specs
+make -C demo/symfony8 demo-screenshots  # recaptures docs/images/demo/*.webp (PNG → WebP via sharp)
+```
+
+Refresh the screenshots when the demo UI changes and commit only the `.webp` files.
 
 ## Questions
 
