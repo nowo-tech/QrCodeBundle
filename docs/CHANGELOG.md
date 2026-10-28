@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Table of contents
 
 - [[Unreleased]](#unreleased)
+- [[1.10.0] - 2026-10-28](#1100---2026-10-28)
 - [[1.9.1] - 2026-10-28](#191---2026-10-28)
 - [[1.9.0] - 2026-10-28](#190---2026-10-28)
 - [[1.8.1] - 2026-10-24](#181---2026-10-24)
@@ -36,11 +37,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.10.0] - 2026-10-28
+
+Security: allow_unauthenticated is refused in production (prod or non-debug kernels). See [UPGRADING](UPGRADING.md#to-1100).
+
 ### Security
 
 - **`allow_unauthenticated` refused in production.** The switch opens the QR code profile admin to anonymous users; the
   container now refuses to compile with it in the `prod` environment or in any non-debug kernel outside `test*`
   environments (as ContactFormBundle).
+
+[1.10.0]: https://github.com/nowo-tech/QrCodeBundle/releases/tag/v1.10.0
 
 ## [1.9.1] - 2026-10-28
 
