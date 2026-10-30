@@ -38,6 +38,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Admin routes registered without being imported (REQ-SF-004 rule 7):** with `use_database_config: true` on Symfony >= 7.3, the `#[Route]` on `QrCodeProfileAdminController` made the autoconfigured service carry the `routing.controller` tag, so a host with the default `controllers: { resource: routing.controllers }` got the `nowo_qr_code_admin_*` routes without importing `@NowoQrCodeBundle/Resources/config/routing.yaml` (still behind the admin access checker). The controller service is no longer autoconfigured (explicit `controller.service_arguments` + `container.service_subscriber` tags); the routes exist only where the host imports them. Regression test with a kernel that only loads `routing.controllers`.
+
 ## [1.11.0] - 2026-10-30
 
 QrCode: UiKit page-contract admin + translations, CsrfProtectionPass; SEC-004 BK: host-only #regex#, url#^…# opt-in, export-ignore, admin routes only with use_database_config See [UPGRADING](UPGRADING.md#to-1110).
