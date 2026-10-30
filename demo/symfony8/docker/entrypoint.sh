@@ -27,7 +27,11 @@ echo "FrankenPHP mode: $MODE"
 
 git config --global --add safe.directory /app 2>/dev/null || true
 git config --global --add safe.directory /var/qr-code-bundle 2>/dev/null || true
-mkdir -p /app/var/cache /app/var/log
+mkdir -p /app/var/cache /app/var/log /app/var/data
+# Database-backed QR profiles (dev / test demo, SQLite): create the table and seed it once vendor/ exists.
+if [ -f /app/vendor/autoload_runtime.php ] && [ "${APP_ENV:-dev}" != "prod" ]; then
+	php /app/bin/console app:demo:setup --no-interaction || echo "app:demo:setup failed (see above)" >&2
+fi
 chmod -R 777 /app/var 2>/dev/null || true
 
 exec frankenphp run --config /etc/frankenphp/Caddyfile --adapter caddyfile

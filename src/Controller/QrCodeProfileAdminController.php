@@ -12,6 +12,9 @@ use Nowo\QrCodeBundle\Form\QrCodeProfileConfigType;
 use Nowo\QrCodeBundle\Repository\QrCodeProfileConfigRepository;
 use Nowo\QrCodeBundle\Security\QrCodeAccessCheckerInterface;
 use Nowo\QrCodeBundle\Service\QrCodeProfileAdminService;
+use Nowo\QrCodeBundle\Ui\QrCodePageFactory;
+use Nowo\QrCodeBundle\Ui\QrCodePages;
+use Nowo\UiKitBundle\View\Pagination;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\FormFactoryInterface;
@@ -19,12 +22,14 @@ use Symfony\Component\Form\FormView;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 use function ceil;
 use function max;
 use function min;
-use function sprintf;
+use function strtr;
 
 /**
  * CRUD admin for database-backed QR profiles.
@@ -40,6 +45,8 @@ class QrCodeProfileAdminController extends AbstractController
         private readonly bool $useDatabaseConfig,
         private readonly int $listPageSize = 50,
         private readonly ?FormFactoryInterface $formFactory = null,
+        private readonly ?QrCodePageFactory $pageFactory = null,
+        private readonly ?TranslatorInterface $translator = null,
     ) {
     }
 
@@ -56,20 +63,22 @@ class QrCodeProfileAdminController extends AbstractController
 
         $deleteForms = [];
         foreach ($profiles as $profile) {
-            $deleteForms[(int) $profile->getId()] = $this->actionForm(
-                $this->generateUrl('nowo_qr_code_admin_delete', ['id' => $profile->getId()]),
-                'delete_qr_profile_' . $profile->getId(),
-            );
+            $deleteForms[(int) $profile->getId()] = $this->deleteForm($profile);
         }
 
-        return $this->render('@NowoQrCodeBundle/admin/index.html.twig', [
+        $pages = $this->pages();
+
+        return $this->render($pages->template('index'), $pages->context([
+            'page' => $pages->index(
+                $profiles,
+                Pagination::fromTotal($total, $page, $this->listPageSize, [$this->listPageSize], $this->listPageSize, 'nowo_qr_code_admin_index'),
+                $deleteForms,
+                $this->actionForm($this->generateUrl('nowo_qr_code_admin_import_yaml'), 'import_qr_yaml'),
+            ),
             'profiles'            => $profiles,
-            'pagination'          => ['page' => $page, 'total_pages' => $totalPages, 'total' => $total],
-            'import_form'         => $this->actionForm($this->generateUrl('nowo_qr_code_admin_import_yaml'), 'import_qr_yaml'),
-            'delete_forms'        => $deleteForms,
             'yaml_profiles'       => $this->adminService->yamlProfileNames(),
             'use_database_config' => $this->useDatabaseConfig,
-        ]);
+        ]));
     }
 
     #[Route(path: '/import-yaml', name: 'import_yaml', methods: ['POST'])]
@@ -78,7 +87,7 @@ class QrCodeProfileAdminController extends AbstractController
         $this->denyUnlessGranted();
 
         if (!$this->isCsrfTokenValid('import_qr_yaml', (string) $request->request->get('_token'))) {
-            $this->addFlash('error', 'Invalid CSRF token.');
+            $this->addFlash('error', $this->trans('nowo_qr_code.admin.flash.invalid_csrf'));
 
             return $this->redirectToRoute('nowo_qr_code_admin_index');
         }
@@ -87,8 +96,8 @@ class QrCodeProfileAdminController extends AbstractController
         $this->addFlash(
             'success',
             $touched > 0
-                ? sprintf('Imported/updated %d profile(s) from YAML.', $touched)
-                : 'No YAML profiles found to import.',
+                ? $this->trans('nowo_qr_code.admin.flash.imported', ['%count%' => $touched])
+                : $this->trans('nowo_qr_code.admin.flash.import_none'),
         );
 
         return $this->redirectToRoute('nowo_qr_code_admin_index');
@@ -123,14 +132,14 @@ class QrCodeProfileAdminController extends AbstractController
         $this->denyUnlessGranted();
 
         if (!$this->isCsrfTokenValid('delete_qr_profile_' . $profile->getId(), (string) $request->request->get('_token'))) {
-            $this->addFlash('error', 'Invalid CSRF token.');
+            $this->addFlash('error', $this->trans('nowo_qr_code.admin.flash.invalid_csrf'));
 
             return $this->redirectToRoute('nowo_qr_code_admin_index');
         }
 
         $this->entityManager->remove($profile);
         $this->entityManager->flush();
-        $this->addFlash('success', sprintf('Profile "%s" deleted.', $profile->getName()));
+        $this->addFlash('success', $this->trans('nowo_qr_code.admin.flash.deleted', ['%name%' => $profile->getName()]));
 
         return $this->redirectToRoute('nowo_qr_code_admin_index');
     }
@@ -143,17 +152,51 @@ class QrCodeProfileAdminController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $this->entityManager->persist($profile);
             $this->entityManager->flush();
-            $this->addFlash('success', $isNew ? 'Profile created.' : 'Profile updated.');
+            $this->addFlash('success', $this->trans($isNew ? 'nowo_qr_code.admin.flash.created' : 'nowo_qr_code.admin.flash.updated'));
 
             return $this->redirectToRoute('nowo_qr_code_admin_index');
         }
 
-        return $this->render('@NowoQrCodeBundle/admin/form.html.twig', [
-            'form'                => $form,
+        $pages = $this->pages();
+
+        return $this->render($pages->template('form'), $pages->context([
+            'page'                => $pages->form($form->createView(), $profile, $isNew, $isNew ? null : $this->deleteForm($profile)),
             'profile'             => $profile,
             'is_new'              => $isNew,
             'use_database_config' => $this->useDatabaseConfig,
-        ]);
+        ]), new Response(status: $form->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK));
+    }
+
+    private function deleteForm(QrCodeProfileConfig $profile): FormView
+    {
+        return $this->actionForm(
+            $this->generateUrl('nowo_qr_code_admin_delete', ['id' => $profile->getId()]),
+            'delete_qr_profile_' . $profile->getId(),
+        );
+    }
+
+    private function pages(): QrCodePageFactory
+    {
+        if ($this->pageFactory instanceof QrCodePageFactory) {
+            return $this->pageFactory;
+        }
+
+        /** @var UrlGeneratorInterface $router */
+        $router = $this->container->get('router');
+
+        return new QrCodePageFactory($router);
+    }
+
+    /**
+     * Admin copy of the bundle catalogue (`NowoQrCodeBundle`); the key itself without a translator.
+     *
+     * @param array<string, int|string> $params
+     */
+    private function trans(string $key, array $params = []): string
+    {
+        return $this->translator instanceof TranslatorInterface
+            ? $this->translator->trans($key, $params, QrCodePages::DOMAIN)
+            : strtr($key, $params);
     }
 
     /**

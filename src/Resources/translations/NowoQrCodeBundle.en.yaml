@@ -1,0 +1,63 @@
+# NowoQrCodeBundle admin UI (en). Override any key in translations/NowoQrCodeBundle.en.yaml (REQ-I18N-001).
+nowo_qr_code:
+    admin:
+        actions:
+            delete: "Delete"
+            edit: "Edit"
+        allowlist_any: "Any http(s) URL"
+        back: "Back to profiles"
+        badge:
+            db_only: "Database only"
+            overrides_yaml: "Overrides YAML"
+        columns:
+            actions: "Actions"
+            error_correction: "Error correction"
+            margin: "Margin"
+            name: "Name"
+            size: "Size"
+            url_allowlist: "URL allowlist"
+        confirm:
+            cancel: "Cancel"
+            delete_confirm: "Delete profile"
+            delete_message: "The profile \"%name%\" will be deleted. QR codes that use it fall back to the YAML profile with the same name, if there is one."
+            delete_title: "Delete this profile?"
+        error_correction:
+            high: "High (30%)"
+            low: "Low (7%)"
+            medium: "Medium (15%)"
+            quartile: "Quartile (25%)"
+        flash:
+            created: "Profile created."
+            deleted: "Profile \"%name%\" deleted."
+            import_none: "No YAML profiles found to import."
+            imported: "Imported or updated %count% profile(s) from YAML."
+            invalid_csrf: "Invalid CSRF token."
+            updated: "Profile updated."
+        form:
+            cancel: "Cancel"
+            db_config_off: "use_database_config is false: enable it so that database profiles override YAML at runtime."
+            edit_title: "Edit QR profile"
+            fields:
+                error_correction:
+                    label: "Error correction"
+                margin:
+                    label: "Margin (px)"
+                name:
+                    help: "Must match a YAML profile name to override it; a new name adds a database-only profile."
+                    label: "Profile name"
+                size:
+                    label: "Size (px)"
+                url_allowlist:
+                    help: "One pattern per line. Empty = any http(s) URL. Regex patterns (#…#) must compile and may not nest quantifiers."
+                    label: "URL allowlist"
+            new_intro: "Database-backed QR code settings"
+            new_title: "New QR profile"
+            save: "Save"
+        index:
+            db_config_off: "use_database_config is false: the rows below are editable but do not override YAML until you enable it."
+            empty: "No database profiles yet. Create one or import them from YAML."
+            import: "Import from YAML"
+            intro: "Database profiles override the YAML profiles with the same name (use_database_config)."
+            new: "New profile"
+            title: "QR Code profiles"
+            yaml_baseline: "YAML baseline:"

@@ -4,6 +4,7 @@
 
 - [Service](#service)
 - [Database profiles (optional)](#database-profiles-optional)
+- [Translations](#translations)
 - [Low-level renderer](#low-level-renderer)
 - [Twig](#twig)
   - [Functions](#functions)
@@ -42,7 +43,32 @@ Omit the profile argument (or pass `null`) to use `default_profile`. An unknown 
 
 When `use_database_config: true`, rows in `qr_code_profile` override YAML profiles that share the same **name**. See [CONFIGURATION.md](CONFIGURATION.md#database-overrides-optional).
 
-Admin CRUD: `/admin/qr-code-profiles` (requires Doctrine + form component and route import).
+Admin CRUD: `/admin/qr-code-profiles` (requires Doctrine + form component and route import). The pages follow the
+UiKit page contract (list and form scaffolds in `nowo_ui_kit.layouts.admin`); deletes go through the UiKit confirm
+`<dialog>`. Pages, data blocks and overrides: [TEMPLATES.md](TEMPLATES.md).
+
+## Translations
+
+The admin UI is translated in the **`NowoQrCodeBundle`** domain (REQ-I18N-003). Supported locales: **en** (reference),
+**es**, **fr**, **it**, **pt**, **de**, **nl** (`src/Resources/translations/NowoQrCodeBundle.<locale>.yaml`, same keys
+in every locale; `make validate-translations` checks syntax, the seven locales and key parity).
+
+To override a text, create the same domain file in the application — the application catalogue wins and the bundle is
+the fallback for keys you do not define (REQ-I18N-001):
+
+1. Use the domain `NowoQrCodeBundle`.
+2. Create `translations/NowoQrCodeBundle.<locale>.yaml` (e.g. `translations/NowoQrCodeBundle.es.yaml`).
+3. Override only the keys you need, then `php bin/console cache:clear`.
+
+```yaml
+# translations/NowoQrCodeBundle.es.yaml
+nowo_qr_code:
+    admin:
+        index:
+            title: "Perfiles QR de la tienda"
+        actions:
+            delete: "Borrar"
+```
 
 Under FrankenPHP worker mode without kernel reset, DB-backed render and admin stay correct without Doctrine `kernel.reset` — see [FRANKENPHP-WORKER-AUDIT.md](FRANKENPHP-WORKER-AUDIT.md).
 
@@ -103,4 +129,4 @@ php bin/console ux:install button --kit=shadcn
 
 `NowoQrCode` follows Toolkit-friendly `{# @prop #}` documentation in its Twig template so it fits the same design-system workflow. The toolkit does **not** replace this bundle’s component; it complements layout/UI primitives around the QR image.
 
-See [CONFIGURATION.md](CONFIGURATION.md) for profiles and [Twig overrides](CONFIGURATION.md#twig-template-overrides-req-twig-001).
+See [CONFIGURATION.md](CONFIGURATION.md) for profiles and [Twig overrides](TEMPLATES.md#overriding-templates-req-twig-001).

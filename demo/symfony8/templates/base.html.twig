@@ -27,15 +27,25 @@
         }
         .qr-cell img { max-width: 100%; height: auto; image-rendering: pixelated; }
         .qr-cell .label { font-size: .8rem; color: #6b7280; margin-top: .5rem; }
+        .qr-demo-nav .nav-link.active { color: #fff; }
     </style>
+    {% block stylesheets %}{% endblock %}
 </head>
 <body>
     <nav class="navbar navbar-dark bg-dark mb-4">
         <div class="container">
             <a class="navbar-brand" href="{{ path('app_demo_index') }}">QR Code Bundle Demo</a>
+            {% set _route = app.request.attributes.get('_route')|default('') %}
+            <ul class="navbar-nav flex-row gap-3 me-auto ms-3 qr-demo-nav">
+                <li class="nav-item"><a class="nav-link{{ _route == 'app_demo_index' ? ' active' }}" href="{{ path('app_demo_index') }}">QR codes</a></li>
+                {% if app.environment != 'prod' %}
+                    <li class="nav-item"><a class="nav-link{{ _route starts with 'nowo_qr_code_admin' ? ' active' }}" href="{{ path('nowo_qr_code_admin_index') }}" data-testid="nav-admin">Profiles admin</a></li>
+                {% endif %}
+            </ul>
             <span class="navbar-text text-white-50 small">Symfony 8 · FrankenPHP</span>
         </div>
     </nav>
     {% block body %}{% endblock %}
+    {% block javascripts %}{% endblock %}
 </body>
 </html>

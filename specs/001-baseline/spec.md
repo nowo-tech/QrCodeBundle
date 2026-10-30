@@ -113,6 +113,8 @@ As an operator, I manage QR profiles at `/admin/qr-code-profiles` so YAML defaul
 ### Admin CRUD
 
 - **FR-ADM-001**: `/admin/qr-code-profiles` MUST provide list/create/edit/delete with Twig admin views and `QrCodeProfileAdminService` seed/import helpers.
+- **FR-ADM-002** (REQ-UI-003): the admin pages MUST extend the UiKit list / form scaffolds, fed by UiKit view models built in `QrCodePageFactory`, inside `nowo_ui_kit.layouts.admin` (or `web_ui.layout_template`; a 1.x layout is wrapped in a deprecated bridge); deletes MUST use the UiKit confirm contract (no inline `confirm()`); labels MUST be `NowoQrCodeBundle` translation keys (7 locales); a `PageContractTestCase` test MUST cover every page; `docs/TEMPLATES.md` MUST list pages, scaffolds, view models and data blocks.
+- **FR-ADM-003** (REQ-SEC-005): with `use_database_config: true` the container MUST refuse to compile without CSRF protection (token manager + form CSRF extension enabled).
 
 ### Twig
 

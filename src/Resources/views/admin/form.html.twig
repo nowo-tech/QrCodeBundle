@@ -1,34 +1,16 @@
-{% extends '@NowoQrCodeBundle/admin/base.html.twig' %}
-{% import '@NowoUiKitBundle/macros/ui.html.twig' as ui %}
-{% set _css_fw = nowo_qr_code_css_framework|default('custom') %}
+{#
+  QR profile create / edit (REQ-UI-003): UiKit form scaffold. Variable: page (View\FormPage from
+  QrCodePageFactory::form(): header new_title / edit_title (intro = profile name on edit) with a back link to the list;
+  form = QrCodeProfileConfigType; submit nowo_qr_code.admin.form.save; cancel = list; on edit the delete zone (POST +
+  CSRF FormView behind a Confirm)). Also: profile, is_new, use_database_config.
+  Data block filled: nowo_ui_form_body (database-config notice, then the REQ-TWIG-003 child loop).
+#}
+{% extends '@NowoUiKit/page/form.html.twig' %}
+{% trans_default_domain 'NowoQrCodeBundle' %}
 
-{% block title %}{{ is_new ? 'New QR profile' : 'Edit QR profile' }}{% endblock %}
-
-{% block body %}
-    <div class="qr-header nowo-ui-header">
-        <div>
-            <h1>{{ is_new ? 'New profile' : 'Edit profile' }}</h1>
-            <p class="qr-lead">{% if not is_new %}<code>{{ profile.name }}</code>{% else %}Database-backed QR settings{% endif %}</p>
-        </div>
-        <a class="{{ ui.btn('secondary', null, _css_fw) }} qr-btn nowo-ui-action-cancel" href="{{ path('nowo_qr_code_admin_index') }}">Back</a>
-    </div>
-
-    {% if not use_database_config %}
-        <div class="qr-alert qr-alert-warn nowo-ui-alert">
-            <code>use_database_config</code> is <strong>false</strong>. Enable it for these rows to override YAML at runtime.
-        </div>
+{% block nowo_ui_form_body %}
+    {% if not use_database_config|default(false) %}
+        <div class="{{ nowo_ui_class('flash_warning', page.bundle) }}" role="status" data-testid="qr-code-db-config-off">{{ 'nowo_qr_code.admin.form.db_config_off'|trans }}</div>
     {% endif %}
-
-    {{ form_start(form, {attr: {class: 'qr-form nowo-ui-form'}}) }}
-        {% for child in form %}
-            {% if not child.rendered %}
-                {{ form_row(child) }}
-            {% endif %}
-        {% endfor %}
-
-        <div class="qr-form-actions nowo-ui-form-actions">
-            <button type="submit" class="{{ ui.btn('primary', null, _css_fw) }} qr-btn qr-btn-primary nowo-ui-action-save">Save</button>
-            <a class="{{ ui.btn('secondary', null, _css_fw) }} qr-btn nowo-ui-action-cancel" href="{{ path('nowo_qr_code_admin_index') }}">Cancel</a>
-        </div>
-    {{ form_end(form) }}
+    {{ parent() }}
 {% endblock %}

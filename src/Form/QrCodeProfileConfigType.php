@@ -37,14 +37,14 @@ final class QrCodeProfileConfigType extends AbstractType
     {
         $errorChoices = [];
         foreach (QrErrorCorrection::cases() as $case) {
-            $errorChoices[$case->value] = $case->value;
+            $errorChoices['nowo_qr_code.admin.error_correction.' . $case->value] = $case->value;
         }
 
         $this->withBuilder($builder, function () use ($errorChoices): void {
             $this->addTextField('name', [
-                'label'       => 'Profile name',
+                'label'       => 'nowo_qr_code.admin.form.fields.name.label',
                 'placeholder' => false,
-                'help'        => 'Must match a YAML profile name to override it; new names add DB-only profiles.',
+                'help'        => 'nowo_qr_code.admin.form.fields.name.help',
                 'constraints' => [
                     new Assert\NotBlank(),
                     new Assert\Length(max: 64),
@@ -52,7 +52,7 @@ final class QrCodeProfileConfigType extends AbstractType
                 ],
             ]);
             $this->addIntegerField('size', [
-                'label'       => 'Size (px)',
+                'label'       => 'nowo_qr_code.admin.form.fields.size.label',
                 'placeholder' => false,
                 'help'        => false,
                 'constraints' => [
@@ -61,7 +61,7 @@ final class QrCodeProfileConfigType extends AbstractType
                 ],
             ]);
             $this->addIntegerField('margin', [
-                'label'       => 'Margin (px)',
+                'label'       => 'nowo_qr_code.admin.form.fields.margin.label',
                 'placeholder' => false,
                 'help'        => false,
                 'constraints' => [
@@ -70,13 +70,15 @@ final class QrCodeProfileConfigType extends AbstractType
                 ],
             ]);
             $this->addChoiceField('errorCorrection', [
-                'label'   => 'Error correction',
+                'label'   => 'nowo_qr_code.admin.form.fields.error_correction.label',
+                'help'    => false,
                 'choices' => $errorChoices,
             ]);
             $this->addTextareaField('urlAllowlist', [
-                'label'       => 'URL allowlist',
+                'label'       => 'nowo_qr_code.admin.form.fields.url_allowlist.label',
+                'placeholder' => false,
                 'required'    => false,
-                'help'        => 'One pattern per line. Empty = any http(s) URL. Regex patterns (#…#) must compile and may not nest quantifiers.',
+                'help'        => 'nowo_qr_code.admin.form.fields.url_allowlist.help',
                 'attr'        => ['rows' => 5],
                 'constraints' => [new Assert\Callback(static function (mixed $patterns, ExecutionContextInterface $context): void {
                     foreach (is_array($patterns) ? $patterns : [] as $pattern) {
@@ -113,7 +115,8 @@ final class QrCodeProfileConfigType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => QrCodeProfileConfig::class,
+            'data_class'         => QrCodeProfileConfig::class,
+            'translation_domain' => 'NowoQrCodeBundle',
         ]);
     }
 }

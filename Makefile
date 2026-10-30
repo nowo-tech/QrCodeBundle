@@ -12,7 +12,7 @@ endif
 COMPOSE     := $(COMPOSE_BIN) -f $(COMPOSE_FILE)
 SERVICE_PHP := php
 
-.PHONY: check-no-raw-html-form help up down down-dev build shell install ensure-up test test-coverage test-coverage-100 coverage-check coverage-php-percent cs-check cs-fix qa clean release-check release-check-demos demo-smoke composer-sync rector rector-dry phpstan igor update validate assets setup-hooks check-no-cursor-coauthor check-open-prs strip-cursor-coauthor-from-history update-deps check-twig-extra
+.PHONY: check-no-raw-html-form help up down down-dev build shell install ensure-up test test-coverage test-coverage-100 coverage-check coverage-php-percent cs-check cs-fix qa clean release-check release-check-demos demo-smoke composer-sync rector rector-dry phpstan igor update validate assets setup-hooks check-no-cursor-coauthor check-open-prs strip-cursor-coauthor-from-history update-deps check-twig-extra validate-translations
 
 help:
 	@echo "QR Code Bundle - Development Commands"
@@ -45,6 +45,7 @@ help:
 	@echo "  update        Update composer.lock (composer update)"
 	@echo "  update-deps   Update bundle and demo Composer locks (Docker)"
 	@echo "  validate      Run composer validate --strict"
+	@echo "  validate-translations  Check translation YAML syntax, required locales and key parity (REQ-MAKE-004)"
 	@echo "  setup-hooks   Install .githooks (REQ-GIT-001)"
 	@echo "  check-no-cursor-coauthor  Fail if Cursor co-author trailers in history"
 	@echo "  check-open-prs            Fail if unresolved open GitHub PRs remain (REQ-REL-003)"
@@ -147,7 +148,7 @@ check-twig-extra:
 # Run Igor worker-state audit (REQ-CS-008)
 igor: ensure-up
 	$(COMPOSE) exec -T php composer igor
-release-check: ensure-up check-no-cursor-coauthor check-open-prs check-twig-extra check-no-raw-html-form composer-sync cs-fix cs-check rector-dry phpstan igor coverage-check release-check-demos
+release-check: ensure-up check-no-cursor-coauthor check-open-prs check-twig-extra check-no-raw-html-form composer-sync validate-translations cs-fix cs-check rector-dry phpstan igor coverage-check release-check-demos
 
 release-check-demos:
 	@if [ -f demo/Makefile ]; then $(MAKE) -C demo release-check; else echo "No demo/Makefile — skip release-check-demos"; fi
@@ -158,6 +159,9 @@ demo-smoke:
 composer-sync: ensure-up
 	$(COMPOSE) exec -T $(SERVICE_PHP) composer validate --strict
 	$(COMPOSE) exec -T $(SERVICE_PHP) composer install --no-interaction --prefer-dist
+
+validate-translations: ensure-up
+	$(COMPOSE) exec -T $(SERVICE_PHP) php .scripts/validate-translations.php
 
 clean: ensure-up
 	$(COMPOSE) exec -T $(SERVICE_PHP) sh -c "rm -rf vendor .phpunit.cache coverage coverage.xml .php-cs-fixer.cache"

@@ -37,6 +37,54 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+Admin pages on the UiKit page contract (REQ-UI-003), admin translations in seven locales, fail-closed CSRF gate. See
+[UPGRADING](UPGRADING.md#unreleased).
+
+### Changed
+
+- **UiKit page contract (REQ-UI-003).** The profile admin pages extend the UiKit scaffolds: `admin/index.html.twig` the
+  list scaffold (`View\ListPage`), `admin/form.html.twig` the form scaffold (`View\FormPage`, delete zone on edit),
+  fed by view models built in the new `Nowo\QrCodeBundle\Ui\QrCodePageFactory`. The layout is
+  `nowo_ui_kit.layouts.admin` (`web_ui.layout_template`, now `null` by default); delete runs through the UiKit confirm
+  `<dialog>` (no inline `onsubmit="confirm()"`), pagination / flashes / empty state / page header come from the UiKit
+  partials. Requires `nowo-tech/ui-kit-bundle` ^2.17.3 and `nowo-tech/form-kit-bundle` ^2.15.
+- **Admin UI translated.** Titles, columns, actions, confirm dialog, flashes and form labels / help are
+  `NowoQrCodeBundle` keys (`nowo_qr_code.admin.*`) with catalogues for en, es, fr, it, pt, de and nl
+  (`make validate-translations`: syntax, required locales, key parity; also in CI).
+- The FormKit profile `qr_code` seeded by the bundle no longer carries Bootstrap classes (`form-control`, `mb-2`,
+  `form-select`, …): fields get `nowo-ui-input`, the host form theme styles them; it only applies the help /
+  placeholder convention keys the catalogue defines (`convention_requires_translation`), so no raw
+  `qr_code_profile_config.*` keys reach the form.
+- The bundle no longer seeds `nowo_ui_kit.css_framework` / `icon_set`: only a host-set (deprecated)
+  `web_ui.css_framework` is copied to `nowo_ui_kit.css_framework`.
+- Demo: database profiles on SQLite (seeded by `bin/console app:demo:setup`) and the admin in `dev`, Bootstrap 5 form
+  theme, host admin layout `templates/layouts/admin.html.twig`; Playwright e2e for the admin (list, create, edit,
+  delete through the confirm dialog, invalid form 422, YAML import) and two new README screenshots.
+
+### Added
+
+- `web_ui.templates.<page>` (`index`, `form`): per-page template overrides; unknown page ids fail the compilation.
+- `docs/TEMPLATES.md`: pages, scaffolds, view models, data blocks, overridable subpaths (REQ-TWIG-001 freeze rule).
+- `PageContractTest` (UiKit `PageContractTestCase`, strict missing-translation rule) and `LegacyLayoutBridgeTest`.
+
+### Deprecated
+
+- `web_ui.css_framework` (set `nowo_ui_kit.css_framework`) and the Twig globals `nowo_qr_code_layout_template` /
+  `nowo_qr_code_css_framework` (the pages no longer read them); removed in 2.0.
+- A `web_ui.layout_template` without the UiKit canonical blocks (a 1.x layout rendering `body`) is wrapped in the
+  bridge `admin/_legacy_layout.html.twig` and triggers a deprecation; the bridge is removed in 2.0.
+
+### Removed
+
+- `admin/layout.html.twig` (standalone full-HTML layout with inline CSS) and `admin/base.html.twig` (page shell); the
+  1.x default `web_ui.layout_template` value `@NowoQrCodeBundle/admin/layout.html.twig` is mapped to `null`.
+
+### Security
+
+- **CSRF fails closed.** With `use_database_config: true` the container refuses to compile without CSRF protection
+  (`security.csrf.token_manager`, the form CSRF extension, `framework.form.csrf_protection` not disabled): the new / edit
+  form check could otherwise be silently off (REQ-SEC-005).
+
 ## [1.10.0] - 2026-10-28
 
 Security: allow_unauthenticated is refused in production (prod or non-debug kernels). See [UPGRADING](UPGRADING.md#to-1100).

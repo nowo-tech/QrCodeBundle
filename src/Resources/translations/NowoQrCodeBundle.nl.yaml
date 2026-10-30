@@ -1,0 +1,63 @@
+# NowoQrCodeBundle admin UI (nl). Override any key in translations/NowoQrCodeBundle.nl.yaml (REQ-I18N-001).
+nowo_qr_code:
+    admin:
+        actions:
+            delete: "Verwijderen"
+            edit: "Bewerken"
+        allowlist_any: "Elke http(s)-URL"
+        back: "Terug naar profielen"
+        badge:
+            db_only: "Alleen database"
+            overrides_yaml: "Overschrijft YAML"
+        columns:
+            actions: "Acties"
+            error_correction: "Foutcorrectie"
+            margin: "Marge"
+            name: "Naam"
+            size: "Grootte"
+            url_allowlist: "Toegestane URL's"
+        confirm:
+            cancel: "Annuleren"
+            delete_confirm: "Profiel verwijderen"
+            delete_message: "Het profiel \"%name%\" wordt verwijderd. QR-codes die het gebruiken vallen terug op het YAML-profiel met dezelfde naam, als dat bestaat."
+            delete_title: "Dit profiel verwijderen?"
+        error_correction:
+            high: "Hoog (30%)"
+            low: "Laag (7%)"
+            medium: "Gemiddeld (15%)"
+            quartile: "Kwartiel (25%)"
+        flash:
+            created: "Profiel aangemaakt."
+            deleted: "Profiel \"%name%\" verwijderd."
+            import_none: "Geen YAML-profielen om te importeren."
+            imported: "%count% profiel(en) uit YAML geïmporteerd of bijgewerkt."
+            invalid_csrf: "Ongeldig CSRF-token."
+            updated: "Profiel bijgewerkt."
+        form:
+            cancel: "Annuleren"
+            db_config_off: "use_database_config is false: schakel het in zodat databaseprofielen YAML tijdens runtime overschrijven."
+            edit_title: "QR-profiel bewerken"
+            fields:
+                error_correction:
+                    label: "Foutcorrectie"
+                margin:
+                    label: "Marge (px)"
+                name:
+                    help: "Moet overeenkomen met de naam van een YAML-profiel om het te overschrijven; een nieuwe naam voegt een profiel toe dat alleen in de database staat."
+                    label: "Profielnaam"
+                size:
+                    label: "Grootte (px)"
+                url_allowlist:
+                    help: "Eén patroon per regel. Leeg = elke http(s)-URL. Regex-patronen (#…#) moeten compileren en mogen geen kwantoren nesten."
+                    label: "Toegestane URL's"
+            new_intro: "QR-code-instellingen uit de database"
+            new_title: "Nieuw QR-profiel"
+            save: "Opslaan"
+        index:
+            db_config_off: "use_database_config is false: de rijen zijn bewerkbaar maar overschrijven YAML pas als u het inschakelt."
+            empty: "Nog geen databaseprofielen. Maak er een aan of importeer ze uit YAML."
+            import: "Importeren uit YAML"
+            intro: "Databaseprofielen overschrijven YAML-profielen met dezelfde naam (use_database_config)."
+            new: "Nieuw profiel"
+            title: "QR-codeprofielen"
+            yaml_baseline: "YAML-basis:"

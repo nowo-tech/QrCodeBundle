@@ -116,28 +116,41 @@ $qrCodeService->createDataUriForUrl('https://example.com/pass', 'compact');
 
 ## Admin Web UI (layout and CSS)
 
-Admin CRUD pages (when `use_database_config` is enabled) extend `@NowoQrCodeBundle/admin/base.html.twig`, which extends `web_ui.layout_template` (Twig global `nowo_qr_code_layout_template`) and stacks `nowo_ui_styles` / `nowo_ui_scripts` with `{{ parent() }}`. Prefer pointing `layout_template` at your project layout (or a thin bridge that maps the `body` block) instead of copying list/form templates. The default `admin/layout.html.twig` is a full HTML demo document (no `parent()`).
+Admin CRUD pages (when `use_database_config` is enabled) follow the UiKit page contract (REQ-UI-003): they extend the
+UiKit list / form scaffolds, fed by view models, inside **`nowo_ui_kit.layouts.admin`** (your host layout or a one-file
+bridge) and themed once through **`nowo_ui_kit.theme`** / **`nowo_ui_kit.css_framework`**. Pages, data blocks and view
+models: [TEMPLATES.md](TEMPLATES.md).
 
 | Key | Default | Meaning |
 | --- | --- | --- |
-| `web_ui.layout_template` | `@NowoQrCodeBundle/admin/layout.html.twig` | Root Twig layout (global `nowo_qr_code_layout_template`) |
-| `web_ui.css_framework` | `custom` | Host CSS stack hint (global `nowo_qr_code_css_framework`). Values: `bootstrap5` (alias `bootstrap`), `bootstrap4`, `tabler`, `tailwind`, `foundation`, `custom`, `none` |
+| `web_ui.layout_template` | `null` | Layout the admin pages extend. `null` = `nowo_ui_kit.layouts.admin`. A 1.x layout (no UiKit canonical blocks, renders `body`) is wrapped in a deprecated bridge; the removed 1.x default `@NowoQrCodeBundle/admin/layout.html.twig` maps to `null` |
+| `web_ui.templates.<page>` | `{}` | Per-page template override, pages `index` and `form` (unknown ids fail the container compilation). Extend `@!NowoQrCodeBundle/admin/<page>.html.twig` and override a data block |
+| `web_ui.css_framework` | `null` | **Deprecated since 1.11**: set `nowo_ui_kit.css_framework`. When set (and the host did not set `nowo_ui_kit.css_framework`) it is copied there (`bootstrap` → `bootstrap5`) |
 | `web_ui.list_page_size` | `50` | Profiles per page on the admin list (`?page=N`, 1–500) (REQ-PERF-001) |
 
 ```yaml
+nowo_ui_kit:
+    css_framework: bootstrap5
+    layouts:
+        admin: 'layouts/admin.html.twig'   # host layout rendering the UiKit canonical blocks (or a bridge)
+
 nowo_qr_code:
     web_ui:
-        layout_template: 'base.html.twig'   # host layout or one-file bridge
-        css_framework: custom               # or bootstrap5 | tailwind | …
+        layout_template: null              # null = nowo_ui_kit.layouts.admin
         list_page_size: 50
+        # templates: { index: 'admin/qr/index.html.twig' }
 ```
 
 **Host integration**
 
-1. Set `web_ui.layout_template` to a Twig template that provides `stylesheets`, `javascripts`, and `body` (or bridge those blocks into your app chrome).
-2. Bundle pages go through `admin/base.html.twig`, which calls `{{ parent() }}` so host CSS/JS still load; override nested `nowo_ui_styles` / `nowo_ui_scripts` only when needed.
-3. Semantic hooks use `nowo-ui-*` classes (`nowo-ui-container`, `nowo-ui-header`, `nowo-ui-toolbar`, `nowo-ui-table`, …) alongside legacy `qr-*` classes. With `css_framework: custom`, style via those hooks; with Bootstrap/etc., load the framework in the host layout.
-4. Alias `bootstrap` is normalized to `bootstrap5` at compile time.
+1. Set `nowo_ui_kit.layouts.admin` once (a layout that renders the UiKit canonical blocks — `nowo_ui_page_header`,
+   `nowo_ui_flashes`, `nowo_ui_content`, `nowo_ui_modals`, … — e.g. one that `use`s `@NowoUiKit/layout/_bridge.html.twig`).
+2. Theme `nowo_ui_kit.theme` (classes, attributes, partials, tokens) once; per-bundle exceptions go under
+   `nowo_ui_kit.theme.bundles.NowoQrCodeBundle`.
+3. The admin labels come from the `NowoQrCodeBundle` translation domain (en, es, fr, it, pt, de, nl); override keys in
+   `translations/NowoQrCodeBundle.<locale>.yaml` (REQ-I18N-001).
+4. The admin fails closed without CSRF protection: with `use_database_config: true` the container refuses to compile
+   unless `framework.csrf_protection` and `framework.form.csrf_protection` are enabled (`symfony/security-csrf`).
 
 ### Flat legacy config (BC)
 
@@ -179,20 +192,14 @@ Only `http` and `https` schemes are accepted. Schemes such as `javascript:` and 
 | `nowo_qr_code.default_profile` | Default profile name |
 | `nowo_qr_code.profiles` | Full profiles map |
 | `nowo_qr_code.size` / `margin` / `error_correction` / `url_allowlist` | Convenience mirrors of the **default** profile |
-| `nowo_qr_code.web_ui.layout_template` | Admin layout Twig path |
-| `nowo_qr_code.web_ui.css_framework` | Normalized CSS framework (`bootstrap` → `bootstrap5`) |
+| `nowo_qr_code.web_ui.layout_template` | Admin layout override (`null` = `nowo_ui_kit.layouts.admin`) |
+| `nowo_qr_code.web_ui.templates` | Per-page template overrides (`index`, `form`) |
+| `nowo_qr_code.web_ui.css_framework` | Deprecated: normalized `web_ui.css_framework` (`bootstrap` → `bootstrap5`), `null` when unset |
 
-Twig globals (when TwigBundle is present): `nowo_qr_code_layout_template`, `nowo_qr_code_css_framework`.
+Twig globals `nowo_qr_code_layout_template` and `nowo_qr_code_css_framework` (`custom` when unset) are **deprecated
+since 1.11**: the pages no longer read them (REQ-UI-003); they are removed in 2.0.
 
 ## Twig template overrides (REQ-TWIG-001)
 
-Namespace: **`NowoQrCodeBundle`**. Application files under `templates/bundles/NowoQrCodeBundle/` **always win** and freeze that subpath until removed or merged (prefer config / surgical overrides for upgrade-safe customisation).
-
-| Subpath | Purpose |
-| --- | --- |
-| `admin/base.html.twig` | Page shell: extends `layout_template`, stacks `nowo_ui_styles` / `nowo_ui_scripts` with `{{ parent() }}` |
-| `admin/layout.html.twig` | Default standalone full-HTML demo chrome |
-| `admin/index.html.twig` / `admin/form.html.twig` | Admin CRUD pages (extend `admin/base.html.twig`) |
-| `components/qr_code.html.twig` | Markup for the `NowoQrCode` Twig UX component |
-
-Procedure: copy the vendor file to `templates/bundles/NowoQrCodeBundle/<subpath>`, clear Twig cache if needed. Prefer `web_ui.layout_template` / nested blocks over forking full pages.
+Namespace: **`NowoQrCodeBundle`**. Freeze rule, upgrade-safe alternatives, recovery procedure and the full subpath
+table: [TEMPLATES.md](TEMPLATES.md#overriding-templates-req-twig-001).

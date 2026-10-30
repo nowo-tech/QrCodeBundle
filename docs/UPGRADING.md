@@ -3,6 +3,10 @@
 ## Table of contents
 
 - [Unreleased](#unreleased)
+  - [Template contract](#template-contract)
+  - [Layout](#layout)
+  - [Configuration](#configuration)
+  - [Template overrides](#template-overrides)
 - [To 1.10.0](#to-1100)
 - [To 1.9.1](#to-191)
 - [To 1.9.0](#to-190)
@@ -40,6 +44,53 @@
 - [[1.0.0] - 2026-07-30](#100---2026-07-30)
 
 ## Unreleased
+
+```bash
+composer update nowo-tech/qr-code-bundle nowo-tech/ui-kit-bundle nowo-tech/form-kit-bundle
+```
+
+Requires `nowo-tech/ui-kit-bundle` **^2.17.3** and `nowo-tech/form-kit-bundle` **^2.15**. Nothing changes for apps
+that only render QR codes (`use_database_config: false`). For the admin (`use_database_config: true`):
+
+### Template contract
+
+| Before (1.10) | Now |
+| --- | --- |
+| `admin/index.html.twig` / `admin/form.html.twig` extend `admin/base.html.twig` → `web_ui.layout_template`, fill `body` | They extend `@NowoUiKit/page/list.html.twig` / `page/form.html.twig` (variable `page`: `View\ListPage` / `View\FormPage`) and fill the data blocks `nowo_ui_list_filters`, `nowo_ui_list_row`, `nowo_ui_form_body` |
+| `admin/base.html.twig`, `admin/layout.html.twig` | Removed |
+| Variables `profiles`, `pagination` (array), `import_form`, `delete_forms`, `yaml_profiles`, `use_database_config`; `form`, `profile`, `is_new` | `page` (view model: header actions, columns, row actions with their CSRF FormViews, `View\Pagination`, empty state / form, delete action) + `profiles`, `yaml_profiles`, `use_database_config`, `profile`, `is_new` |
+| Delete: `onsubmit="return confirm(…)"` | UiKit confirm `<dialog>` (`View\Confirm`) |
+| Hard-coded English | `NowoQrCodeBundle` translation keys |
+
+Pages, view-model fields and data blocks: [TEMPLATES.md](TEMPLATES.md).
+
+### Layout
+
+1. Point **`nowo_ui_kit.layouts.admin`** at your admin layout (it must render the UiKit canonical blocks, e.g. by
+   `use`-ing `@NowoUiKit/layout/_bridge.html.twig`; see the demo `templates/layouts/admin.html.twig`) and leave
+   `nowo_qr_code.web_ui.layout_template` unset (`null`). The old default `@NowoQrCodeBundle/admin/layout.html.twig` is
+   mapped to `null`.
+2. A `web_ui.layout_template` written for 1.x (renders `body`, `title`, `stylesheets`, `javascripts`, e.g. your
+   `base.html.twig`) keeps working through the deprecated bridge `admin/_legacy_layout.html.twig` (deprecation notice;
+   removed in 2.0).
+3. Load your CSS framework and form theme in the host (the removed layout shipped inline CSS); set
+   `twig.form_themes` (e.g. `bootstrap_5_layout.html.twig`) — the `qr_code` FormKit profile no longer adds Bootstrap
+   classes.
+
+### Configuration
+
+- `web_ui.css_framework` is deprecated: set `nowo_ui_kit.css_framework` (a host-set value is still copied there). The
+  bundle no longer seeds `nowo_ui_kit.css_framework` / `icon_set` when you did not set them.
+- New `web_ui.templates.<page>` (`index`, `form`) for a thin `{% extends '@!NowoQrCodeBundle/admin/<page>.html.twig' %}`
+  override of one data block.
+- The admin now **requires CSRF protection**: enable `framework.csrf_protection` and `framework.form.csrf_protection`
+  (`composer require symfony/security-csrf`), or the container does not compile while `use_database_config` is true.
+
+### Template overrides
+
+Copies of the old `templates/bundles/NowoQrCodeBundle/admin/*.html.twig` are frozen 1.x markup: delete them, then
+re-apply only what you still need through `nowo_ui_kit.theme`, translations (`translations/NowoQrCodeBundle.<locale>.yaml`)
+or `web_ui.templates.<page>` (see [TEMPLATES.md](TEMPLATES.md#overriding-templates-req-twig-001)).
 
 ## To 1.10.0
 

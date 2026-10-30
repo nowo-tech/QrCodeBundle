@@ -11,6 +11,12 @@ use Nowo\QrCodeBundle\Entity\QrCodeProfileConfig;
 use Nowo\QrCodeBundle\Repository\QrCodeProfileConfigRepository;
 use Nowo\QrCodeBundle\Security\QrCodeAccessCheckerInterface;
 use Nowo\QrCodeBundle\Service\QrCodeProfileAdminService;
+use Nowo\QrCodeBundle\Ui\QrCodePageFactory;
+use Nowo\QrCodeBundle\Ui\QrCodePages;
+use Nowo\UiKitBundle\View\Action;
+use Nowo\UiKitBundle\View\FormPage;
+use Nowo\UiKitBundle\View\ListPage;
+use Nowo\UiKitBundle\View\Pagination;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use ReflectionProperty;
@@ -28,7 +34,13 @@ use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Security\Csrf\CsrfTokenManager;
+use Symfony\Component\Translation\Loader\YamlFileLoader;
+use Symfony\Component\Translation\Translator;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Environment;
+
+use function array_map;
+use function dirname;
 
 final class QrCodeProfileAdminControllerTest extends TestCase
 {
@@ -106,10 +118,47 @@ final class QrCodeProfileAdminControllerTest extends TestCase
         $response = $controller->index(new Request(['page' => '2']));
 
         self::assertSame('ok', $response->getContent());
-        self::assertSame(['page' => 2, 'total_pages' => 3, 'total' => 5], $captured['pagination']);
-        self::assertInstanceOf(FormView::class, $captured['import_form']);
-        self::assertSame([1, 2], array_keys($captured['delete_forms']));
-        self::assertSame('POST', $captured['delete_forms'][1]->vars['method']);
+        $page = $captured['page'];
+        self::assertInstanceOf(ListPage::class, $page);
+        self::assertInstanceOf(Pagination::class, $page->pagination);
+        self::assertSame([2, 2, 5, 3], [$page->pagination->page, $page->pagination->perPage, $page->pagination->total, $page->pagination->totalPages]);
+        self::assertSame($profiles, $captured['profiles']);
+        self::assertSame(['create', 'import'], array_map(static fn (Action $a): string => $a->kind, $page->header->actions));
+        self::assertInstanceOf(FormView::class, $page->header->actions[1]->form);
+        $rowActions = $page->rowActions($profiles[0]);
+        self::assertSame(['edit', 'delete'], array_map(static fn (Action $a): string => $a->kind, $rowActions));
+        self::assertInstanceOf(FormView::class, $rowActions[1]->form);
+        self::assertSame('POST', $rowActions[1]->form->vars['method']);
+        self::assertNull($captured['nowo_qr_code_legacy_layout']);
+    }
+
+    public function testIndexUsesTheInjectedPageFactoryAndTemplateOverride(): void
+    {
+        $repository = $this->createStub(QrCodeProfileConfigRepository::class);
+        $repository->method('findPageOrderedByName')->willReturn([]);
+        $accessChecker = $this->createStub(QrCodeAccessCheckerInterface::class);
+        $accessChecker->method('canAccess')->willReturn(true);
+        $router = $this->createStub(UrlGeneratorInterface::class);
+        $router->method('generate')->willReturn('/x');
+        $factory     = new QrCodePageFactory($router, new QrCodePages(null, ['index' => 'host/qr_index.html.twig']));
+        $formFactory = Forms::createFormFactoryBuilder()->addExtension(new CsrfExtension(new CsrfTokenManager()))->getFormFactory();
+        $controller  = new QrCodeProfileAdminController($repository, $this->entityManager, new QrCodeProfileAdminService($repository, $this->entityManager, [], 'default'), $accessChecker, false, 50, $formFactory, $factory);
+
+        $view = null;
+        $twig = $this->createMock(Environment::class);
+        $twig->method('render')->willReturnCallback(static function (string $template) use (&$view): string {
+            $view = $template;
+
+            return 'ok';
+        });
+        $container = new Container();
+        $container->set('twig', $twig);
+        $container->set('router', $router);
+        $controller->setContainer($container);
+
+        $controller->index(new Request());
+
+        self::assertSame('host/qr_index.html.twig', $view);
     }
 
     public function testIndexWithoutFormFactoryFails(): void
@@ -163,7 +212,7 @@ final class QrCodeProfileAdminControllerTest extends TestCase
 
         $controller->importYaml(new Request(request: ['_token' => 'ok']));
 
-        self::assertSame(['Imported/updated 1 profile(s) from YAML.'], $this->session->getFlashBag()->get('success'));
+        self::assertSame(['Imported or updated 1 profile(s) from YAML.'], $this->session->getFlashBag()->get('success'));
     }
 
     public function testNewRendersTheFormUntilSubmitted(): void
@@ -196,6 +245,59 @@ final class QrCodeProfileAdminControllerTest extends TestCase
         self::assertSame(['Profile created.'], $this->session->getFlashBag()->get('success'));
     }
 
+    public function testFlashesFallBackToTheKeysWithoutTranslator(): void
+    {
+        $this->createController(false, translate: false)->importYaml(new Request(request: ['_token' => 'bad']));
+
+        self::assertSame(['nowo_qr_code.admin.flash.invalid_csrf'], $this->session->getFlashBag()->get('error'));
+    }
+
+    public function testEditRendersTheFormPageWithTheDeleteZone(): void
+    {
+        $profile = (new QrCodeProfileConfig())->setName('custom');
+        (new ReflectionProperty(QrCodeProfileConfig::class, 'id'))->setValue($profile, 7);
+        $form = $this->formStub(true, false);
+
+        $captured      = [];
+        $repository    = $this->createStub(QrCodeProfileConfigRepository::class);
+        $accessChecker = $this->createStub(QrCodeAccessCheckerInterface::class);
+        $accessChecker->method('canAccess')->willReturn(true);
+        $controller = new QrCodeProfileAdminController($repository, $this->entityManager, new QrCodeProfileAdminService($repository, $this->entityManager, [], 'default'), $accessChecker, true, 50, Forms::createFormFactoryBuilder()->addExtension(new CsrfExtension(new CsrfTokenManager()))->getFormFactory());
+        $twig       = $this->createMock(Environment::class);
+        $twig->method('render')->willReturnCallback(static function (string $view, array $context) use (&$captured): string {
+            $captured = $context;
+
+            return 'form-page';
+        });
+        $container = new Container();
+        $container->set('twig', $twig);
+        $router = $this->createStub(UrlGeneratorInterface::class);
+        $router->method('generate')->willReturn('/admin/qr-code-profiles/7/delete');
+        $container->set('router', $router);
+        $formFactory = $this->createStub(FormFactoryInterface::class);
+        $formFactory->method('create')->willReturn($form);
+        $container->set('form.factory', $formFactory);
+        $controller->setContainer($container);
+
+        $response = $controller->edit(new Request(), $profile);
+
+        self::assertSame(422, $response->getStatusCode());
+        $page = $captured['page'];
+        self::assertInstanceOf(FormPage::class, $page);
+        self::assertInstanceOf(Action::class, $page->deleteAction);
+        self::assertSame('delete', $page->deleteAction->kind);
+        self::assertFalse($captured['is_new']);
+    }
+
+    private function translator(): Translator
+    {
+        $translator = new Translator('en');
+        $translator->addLoader('yaml', new YamlFileLoader());
+        $translator->addResource('yaml', dirname(__DIR__, 3) . '/src/Resources/translations/NowoQrCodeBundle.en.yaml', 'en', 'NowoQrCodeBundle');
+
+        return $translator;
+    }
+
     /**
      * @return FormInterface<mixed>
      */
@@ -213,14 +315,14 @@ final class QrCodeProfileAdminControllerTest extends TestCase
      * @param array<string, array{size: int, margin: int, error_correction: string, url_allowlist: list<string>}> $yamlProfiles
      * @param FormInterface<mixed>|null $form
      */
-    private function createController(bool $csrfValid, array $yamlProfiles = [], ?FormInterface $form = null): QrCodeProfileAdminController
+    private function createController(bool $csrfValid, array $yamlProfiles = [], ?FormInterface $form = null, bool $translate = true): QrCodeProfileAdminController
     {
         $accessChecker = $this->createStub(QrCodeAccessCheckerInterface::class);
         $accessChecker->method('canAccess')->willReturn(true);
 
         $repository = $this->createStub(QrCodeProfileConfigRepository::class);
 
-        $controller = new class($repository, $this->entityManager, new QrCodeProfileAdminService($repository, $this->entityManager, $yamlProfiles, 'default'), $accessChecker, true, $csrfValid) extends QrCodeProfileAdminController {
+        $controller = new class($repository, $this->entityManager, new QrCodeProfileAdminService($repository, $this->entityManager, $yamlProfiles, 'default'), $accessChecker, true, $csrfValid, $translate ? $this->translator() : null) extends QrCodeProfileAdminController {
             public function __construct(
                 QrCodeProfileConfigRepository $repository,
                 EntityManagerInterface $entityManager,
@@ -228,8 +330,9 @@ final class QrCodeProfileAdminControllerTest extends TestCase
                 QrCodeAccessCheckerInterface $accessChecker,
                 bool $useDatabaseConfig,
                 private readonly bool $csrfValid,
+                ?TranslatorInterface $translator,
             ) {
-                parent::__construct($repository, $entityManager, $adminService, $accessChecker, $useDatabaseConfig);
+                parent::__construct($repository, $entityManager, $adminService, $accessChecker, $useDatabaseConfig, translator: $translator);
             }
 
             protected function isCsrfTokenValid(string $id, ?string $token): bool

@@ -29,10 +29,12 @@ With Symfony Flex, the recipe under `.symfony/recipe/nowo-tech/qr-code-bundle/` 
 To store profiles in Doctrine (override YAML by name) and use `/admin/qr-code-profiles` (requires `doctrine/orm` ^3.7):
 
 ```bash
-composer require doctrine/orm doctrine/doctrine-bundle symfony/form symfony/validator
+composer require doctrine/orm doctrine/doctrine-bundle symfony/form symfony/validator symfony/security-csrf
 ```
 
-Then set `use_database_config: true` and create the `qr_code_profile` table. See [Configuration](CONFIGURATION.md#database-overrides-optional) and [Upgrading](UPGRADING.md).
+Then set `use_database_config: true` and create the `qr_code_profile` table. The admin needs CSRF protection
+(`framework.csrf_protection` + `framework.form.csrf_protection`; the container refuses to compile otherwise) and renders
+in `nowo_ui_kit.layouts.admin` (UiKit page contract, see [TEMPLATES.md](TEMPLATES.md)). See [Configuration](CONFIGURATION.md#database-overrides-optional) and [Upgrading](UPGRADING.md).
 
 ## Without Flex
 

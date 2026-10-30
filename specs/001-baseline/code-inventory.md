@@ -2,7 +2,7 @@
 
 **Baseline spec**: [`spec.md`](spec.md)  
 **Package**: `nowo-tech/qr-code-bundle`  
-**Last audited**: 2026-09-25
+**Last audited**: 2026-10-30
 
 This file proves that **every production source artifact** under `src/` is referenced by the baseline specification. Test-only files under `tests/` are out of Packagist scope unless promoted in the spec.
 
@@ -16,6 +16,7 @@ This file proves that **every production source artifact** under `src/` is refer
 | `DependencyInjection/TablePrefixListener.php` | Doctrine table prefix | FR-DB-001 |
 | `DependencyInjection/UrlAllowlistValidationPass.php` | Compile-time allowlist gate | FR-SEC-004 |
 | `DependencyInjection/Compiler/TwigPathsPass.php` | Twig namespace + overrides | FR-TWIG-001, FR-TWIG-002 |
+| `DependencyInjection/Compiler/CsrfProtectionPass.php` | Fail-closed CSRF gate for the admin | FR-ADM-003 |
 
 ## Configuration & profiles
 
@@ -29,7 +30,7 @@ This file proves that **every production source artifact** under `src/` is refer
 | Source file | Spec section | Requirement IDs |
 | --- | --- | --- |
 | `Enum/QrErrorCorrection.php` | Error-correction enum | FR-QR-002 |
-| `Enum/CssFramework.php` | Admin Web UI framework enum | FR-ADM-001 |
+| `Enum/CssFramework.php` | Deprecated `web_ui.css_framework` values | FR-ADM-001 |
 | `QrCode/QrCodeDataUriRenderer.php` | PNG data URI renderer | FR-QR-001, FR-QR-002 |
 | `Service/QrCodeService.php` | Public API | FR-SVC-001 |
 
@@ -59,6 +60,8 @@ This file proves that **every production source artifact** under `src/` is refer
 | `Controller/QrCodeProfileAdminController.php` | Admin routes + CRUD | FR-ADM-001, FR-SEC-004 |
 | `Service/QrCodeProfileAdminService.php` | Seed/import/sync profiles | FR-ADM-001, FR-DB-002 |
 | `Form/QrCodeProfileConfigType.php` | Admin form type | FR-ADM-001 |
+| `Ui/QrCodePages.php` | Layout / per-page template resolution, 1.x layout bridge | FR-ADM-002 |
+| `Ui/QrCodePageFactory.php` | UiKit view models of the admin pages | FR-ADM-002 |
 
 ## Twig & UX component
 
@@ -81,22 +84,28 @@ This file proves that **every production source artifact** under `src/` is refer
 | Source file | Spec section | Requirement IDs |
 | --- | --- | --- |
 | `Resources/views/components/qr_code.html.twig` | Component template | FR-UX-001, FR-TWIG-001 |
-| `Resources/views/admin/base.html.twig` | Admin page shell (UiKit) | FR-ADM-001, FR-TWIG-002 |
-| `Resources/views/admin/layout.html.twig` | Admin layout shell | FR-ADM-001, FR-TWIG-002 |
-| `Resources/views/admin/index.html.twig` | Admin profile list | FR-ADM-001 |
-| `Resources/views/admin/form.html.twig` | Admin create/edit form | FR-ADM-001 |
+| `Resources/views/admin/_legacy_layout.html.twig` | Deprecated 1.x layout bridge | FR-ADM-002, FR-TWIG-002 |
+| `Resources/views/admin/index.html.twig` | Admin profile list (UiKit list scaffold) | FR-ADM-001, FR-ADM-002 |
+| `Resources/views/admin/form.html.twig` | Admin create/edit form (UiKit form scaffold) | FR-ADM-001, FR-ADM-002 |
+
+## Translations (`src/Resources/translations/`)
+
+| Source file | Spec section | Requirement IDs |
+| --- | --- | --- |
+| `Resources/translations/NowoQrCodeBundle.{en,es,fr,it,pt,de,nl}.yaml` | Admin UI catalogue | FR-ADM-002 |
 
 ## Coverage summary
 
 | Category | Files | Mapped |
 | --- | ---: | ---: |
-| Bundle & DI | 6 | 6 |
+| Bundle & DI | 7 | 7 |
 | Configuration & profiles | 2 | 2 |
 | Rendering & public API | 4 | 4 |
 | Security & URL policy | 6 | 6 |
 | Entity & persistence | 3 | 3 |
-| Admin CRUD | 3 | 3 |
+| Admin CRUD | 5 | 5 |
 | Twig & UX component | 2 | 2 |
 | Symfony config | 4 | 4 |
-| Twig views | 5 | 5 |
-| **Total production sources** | **35** | **35** |
+| Twig views | 4 | 4 |
+| Translations | 7 | 7 |
+| **Total production sources** | **44** | **44** |

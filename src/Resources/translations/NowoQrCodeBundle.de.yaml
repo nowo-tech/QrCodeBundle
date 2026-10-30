@@ -1,0 +1,63 @@
+# NowoQrCodeBundle admin UI (de). Override any key in translations/NowoQrCodeBundle.de.yaml (REQ-I18N-001).
+nowo_qr_code:
+    admin:
+        actions:
+            delete: "Löschen"
+            edit: "Bearbeiten"
+        allowlist_any: "Jede http(s)-URL"
+        back: "Zurück zu den Profilen"
+        badge:
+            db_only: "Nur Datenbank"
+            overrides_yaml: "Überschreibt YAML"
+        columns:
+            actions: "Aktionen"
+            error_correction: "Fehlerkorrektur"
+            margin: "Rand"
+            name: "Name"
+            size: "Größe"
+            url_allowlist: "Erlaubte URLs"
+        confirm:
+            cancel: "Abbrechen"
+            delete_confirm: "Profil löschen"
+            delete_message: "Das Profil „%name%“ wird gelöscht. QR-Codes, die es verwenden, greifen auf das gleichnamige YAML-Profil zurück, falls vorhanden."
+            delete_title: "Dieses Profil löschen?"
+        error_correction:
+            high: "Hoch (30 %)"
+            low: "Niedrig (7 %)"
+            medium: "Mittel (15 %)"
+            quartile: "Quartil (25 %)"
+        flash:
+            created: "Profil erstellt."
+            deleted: "Profil „%name%“ gelöscht."
+            import_none: "Keine YAML-Profile zum Importieren gefunden."
+            imported: "%count% Profil(e) aus YAML importiert oder aktualisiert."
+            invalid_csrf: "Ungültiges CSRF-Token."
+            updated: "Profil aktualisiert."
+        form:
+            cancel: "Abbrechen"
+            db_config_off: "use_database_config ist false: Aktivieren Sie es, damit Datenbankprofile YAML zur Laufzeit überschreiben."
+            edit_title: "QR-Profil bearbeiten"
+            fields:
+                error_correction:
+                    label: "Fehlerkorrektur"
+                margin:
+                    label: "Rand (px)"
+                name:
+                    help: "Muss einem YAML-Profilnamen entsprechen, um es zu überschreiben; ein neuer Name fügt ein reines Datenbankprofil hinzu."
+                    label: "Profilname"
+                size:
+                    label: "Größe (px)"
+                url_allowlist:
+                    help: "Ein Muster pro Zeile. Leer = jede http(s)-URL. Regex-Muster (#…#) müssen kompilieren und dürfen keine Quantoren verschachteln."
+                    label: "Erlaubte URLs"
+            new_intro: "QR-Code-Einstellungen aus der Datenbank"
+            new_title: "Neues QR-Profil"
+            save: "Speichern"
+        index:
+            db_config_off: "use_database_config ist false: Die Zeilen sind bearbeitbar, überschreiben YAML aber erst, wenn Sie es aktivieren."
+            empty: "Noch keine Datenbankprofile. Legen Sie eines an oder importieren Sie sie aus YAML."
+            import: "Aus YAML importieren"
+            intro: "Datenbankprofile überschreiben gleichnamige YAML-Profile (use_database_config)."
+            new: "Neues Profil"
+            title: "QR-Code-Profile"
+            yaml_baseline: "YAML-Basis:"

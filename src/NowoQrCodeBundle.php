@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Nowo\QrCodeBundle;
 
 use Doctrine\Bundle\DoctrineBundle\DependencyInjection\Compiler\DoctrineOrmMappingsPass;
+use Nowo\QrCodeBundle\DependencyInjection\Compiler\CsrfProtectionPass;
 use Nowo\QrCodeBundle\DependencyInjection\Compiler\TwigPathsPass;
 use Nowo\QrCodeBundle\DependencyInjection\NowoQrCodeExtension;
 use Nowo\QrCodeBundle\DependencyInjection\UrlAllowlistValidationPass;
@@ -25,6 +26,7 @@ final class NowoQrCodeBundle extends Bundle
         parent::build($container);
         $container->addCompilerPass(new TwigPathsPass());
         $container->addCompilerPass(new UrlAllowlistValidationPass());
+        $container->addCompilerPass(new CsrfProtectionPass());
 
         $entityDir = __DIR__ . '/Entity';
         if (class_exists(DoctrineOrmMappingsPass::class) && is_dir($entityDir)) {
