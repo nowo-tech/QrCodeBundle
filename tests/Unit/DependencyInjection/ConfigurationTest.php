@@ -6,6 +6,7 @@ namespace Nowo\QrCodeBundle\Tests\Unit\DependencyInjection;
 
 use Nowo\QrCodeBundle\DependencyInjection\Configuration;
 use Nowo\QrCodeBundle\Enum\CssFramework;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\Config\Definition\Processor;
@@ -203,6 +204,41 @@ final class ConfigurationTest extends TestCase
         $this->processor->processConfiguration($this->configuration, [[
             'profiles' => [
                 'default' => ['error_correction' => 'invalid'],
+            ],
+        ]]);
+    }
+
+    public function testValidRegexAllowlistPatternsAreAccepted(): void
+    {
+        $patterns = ['#^cdn\\.example\\.com$#', 'url#^https://cdn\\.example\\.com/passes/#', 'example.com', 'example.com/app/'];
+        $config   = $this->processor->processConfiguration($this->configuration, [[
+            'url_allowlist' => $patterns,
+        ]]);
+
+        $this->assertSame($patterns, $config['profiles']['default']['url_allowlist']);
+    }
+
+    /**
+     * @return iterable<string, array{string, string}>
+     */
+    public static function invalidRegexPatterns(): iterable
+    {
+        yield 'host regex with a slash' => ['#^https://good\\.com/#', 'match the host only'];
+        yield 'unanchored full-URL regex' => ['url#good\\.com#', 'must use the # delimiter and be anchored'];
+        yield 'host regex does not compile' => ['#^(cdn#', 'Invalid regex pattern'];
+        yield 'nested quantifier' => ['#^(a+)+$#', 'Invalid regex pattern'];
+        yield 'full-URL regex does not compile' => ['url#^(good#', 'Invalid regex pattern'];
+    }
+
+    #[DataProvider('invalidRegexPatterns')]
+    public function testInvalidRegexAllowlistPatternsAreRejected(string $pattern, string $message): void
+    {
+        $this->expectException(InvalidConfigurationException::class);
+        $this->expectExceptionMessage($message);
+
+        $this->processor->processConfiguration($this->configuration, [[
+            'profiles' => [
+                'default' => ['url_allowlist' => ['example.com', $pattern]],
             ],
         ]]);
     }

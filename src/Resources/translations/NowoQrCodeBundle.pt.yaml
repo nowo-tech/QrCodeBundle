@@ -48,7 +48,7 @@ nowo_qr_code:
                 size:
                     label: "Tamanho (px)"
                 url_allowlist:
-                    help: "Um padrão por linha. Vazio = qualquer URL http(s). Os padrões regex (#…#) têm de compilar e não podem aninhar quantificadores."
+                    help: "Um padrão por linha. Vazio = qualquer URL http(s). #…# é uma regex apenas sobre o host; url#^…# é uma regex sobre o URL completo e tem de começar por ^. As regex têm de compilar e não podem aninhar quantificadores."
                     label: "URLs permitidos"
             new_intro: "Definições de códigos QR guardadas na base de dados"
             new_title: "Novo perfil QR"

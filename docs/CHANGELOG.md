@@ -84,6 +84,17 @@ Admin pages on the UiKit page contract (REQ-UI-003), admin translations in seven
 - **CSRF fails closed.** With `use_database_config: true` the container refuses to compile without CSRF protection
   (`security.csrf.token_manager`, the form CSRF extension, `framework.form.csrf_protection` not disabled): the new / edit
   form check could otherwise be silently off (REQ-SEC-005).
+- **`url_allowlist` regexes match the host only (SEC-004 Appendix BK, L1).** A `#…#` pattern was tried against the
+  host and then the full URL, so `#good\.com#` allowed `https://evil.tld/?x=good.com`. `#…#` now applies to the
+  parsed host only; full-URL regexes need the explicit prefix `url#` and must be anchored (`url#^https://…#`; an
+  unanchored one never matches). Both the YAML configuration and the admin form reject invalid patterns (non-compiling,
+  nested quantifiers, `/` in a host regex, unanchored `url#` regex). See [UPGRADING](UPGRADING.md#url-allowlist-regexes).
+- **Dist archive trimmed (SEC-004 Appendix BK, L2).** `.gitattributes` `export-ignore`s the demo, tests, CI, specs,
+  tooling and dev configuration: `composer require` no longer installs them under `vendor/`.
+- **Admin routes only in database mode (SEC-004 Appendix BK, I1).** `@NowoQrCodeBundle/Resources/config/routing.yaml`
+  (imported by the Flex recipe) now goes through `Routing\AdminRouteLoader`, which imports the admin routes only when
+  `use_database_config` is `true`: with the default `false`, `/admin/qr-code-profiles` is a 404 instead of a 500.
+- `QrCodeProfileAdminController` is `final` (SEC-004 Appendix BK, I5).
 
 ## [1.10.0] - 2026-10-28
 

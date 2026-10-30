@@ -1,3 +1,4 @@
+# Admin CRUD routes; imported only when nowo_qr_code.use_database_config is true (Routing\AdminRouteLoader).
 nowo_qr_code_admin:
-    resource: ../../Controller/
-    type: attribute
+    resource: .
+    type: nowo_qr_code_admin

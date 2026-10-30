@@ -6,6 +6,7 @@ namespace Nowo\QrCodeBundle\DependencyInjection;
 
 use Nowo\QrCodeBundle\Enum\CssFramework;
 use Nowo\QrCodeBundle\Enum\QrErrorCorrection;
+use Nowo\QrCodeBundle\Security\UrlAllowlistPattern;
 use Nowo\QrCodeBundle\Ui\QrCodePages;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
@@ -18,6 +19,7 @@ use function array_keys;
 use function array_map;
 use function implode;
 use function is_array;
+use function is_string;
 use function sprintf;
 
 /**
@@ -170,8 +172,20 @@ final class Configuration implements ConfigurationInterface
                             ->end()
                             ->arrayNode('url_allowlist')
                                 ->defaultValue([])
-                                ->info('Optional host/URL patterns for createDataUriForUrl. Host patterns match exact host or subdomains; patterns with / match URL substrings; #… are regex. Empty = any http(s) URL.')
+                                ->info('Optional URL patterns for createDataUriForUrl. Host names match the exact host or subdomains; [scheme://]host[:port]/path-prefix patterns match the parsed URL (host + path prefix); #…# is a regex on the host only; url#^…# is an anchored regex on the full URL. Empty = any http(s) URL.')
                                 ->scalarPrototype()->end()
+                                ->validate()
+                                    ->always(static function (array $patterns): array {
+                                        foreach ($patterns as $pattern) {
+                                            $error = is_string($pattern) ? UrlAllowlistPattern::validate($pattern) : null;
+                                            if ($error !== null) {
+                                                throw new InvalidConfigurationException($error);
+                                            }
+                                        }
+
+                                        return $patterns;
+                                    })
+                                ->end()
                             ->end()
                         ->end()
                     ->end()

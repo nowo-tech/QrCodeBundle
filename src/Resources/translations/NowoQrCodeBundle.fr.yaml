@@ -48,7 +48,7 @@ nowo_qr_code:
                 size:
                     label: "Taille (px)"
                 url_allowlist:
-                    help: "Un motif par ligne. Vide = toute URL http(s). Les motifs regex (#…#) doivent compiler et ne peuvent pas imbriquer de quantificateurs."
+                    help: "Un motif par ligne. Vide = toute URL http(s). #…# est une regex sur l'hôte uniquement ; url#^…# est une regex sur l'URL complète et doit commencer par ^. Les regex doivent compiler et ne peuvent pas imbriquer de quantificateurs."
                     label: "Liste d'URL autorisées"
             new_intro: "Réglages des codes QR stockés en base de données"
             new_title: "Nouveau profil QR"

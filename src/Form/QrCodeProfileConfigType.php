@@ -8,6 +8,7 @@ use Nowo\FormKitBundle\Attribute\FormKitConfig;
 use Nowo\FormKitBundle\Form\FormOptionsTrait;
 use Nowo\QrCodeBundle\Entity\QrCodeProfileConfig;
 use Nowo\QrCodeBundle\Enum\QrErrorCorrection;
+use Nowo\QrCodeBundle\Security\UrlAllowlistPattern;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\CallbackTransformer;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -19,8 +20,6 @@ use function explode;
 use function implode;
 use function is_array;
 use function is_string;
-use function preg_match;
-use function str_starts_with;
 use function trim;
 
 /**
@@ -81,11 +80,11 @@ final class QrCodeProfileConfigType extends AbstractType
                 'help'        => 'nowo_qr_code.admin.form.fields.url_allowlist.help',
                 'attr'        => ['rows' => 5],
                 'constraints' => [new Assert\Callback(static function (mixed $patterns, ExecutionContextInterface $context): void {
+                    // Same rules as the YAML config: host-only `#…#`, anchored `url#^…#`, compiling, no nested quantifiers.
                     foreach (is_array($patterns) ? $patterns : [] as $pattern) {
-                        // Regex patterns run on every QR render: reject invalid ones and catastrophic backtracking.
-                        if (is_string($pattern) && str_starts_with($pattern, '#')
-                            && (@preg_match($pattern, '') === false || preg_match('/\((?:[^()\\\\]|\\\\.)*[+*}]\)[+*{]/', $pattern) === 1)) {
-                            $context->buildViolation('Invalid regex pattern: {{ pattern }}')->setParameter('{{ pattern }}', $pattern)->addViolation();
+                        $error = is_string($pattern) ? UrlAllowlistPattern::validate($pattern) : null;
+                        if ($error !== null) {
+                            $context->buildViolation($error)->addViolation();
                         }
                     }
                 })],

@@ -26,7 +26,9 @@ use const PHP_URL_PORT;
  *
  * Allowlist patterns:
  * - Empty list: any http(s) URL with a host is allowed.
- * - Pattern starting with `#`: PCRE applied to host, then full URL.
+ * - Pattern starting with `#` (`#…#`): PCRE applied to the parsed host only.
+ * - Pattern starting with `url#` (`url#^…#`): PCRE applied to the full URL (explicit opt-in); it must be anchored
+ *   at the start (`^` / `\A`), otherwise it never matches.
  * - Pattern containing `/`: `[scheme://]host[:port]/path-prefix` — the URL is parsed; the host must match exactly
  *   (or be a subdomain, as below), the port/scheme must match when given, and the URL path must start with the
  *   pattern path. A pattern with an empty host (e.g. `/wallet/`) matches that path prefix on any host.
@@ -36,7 +38,8 @@ use const PHP_URL_PORT;
 final readonly class QrUrlPolicy
 {
     /**
-     * @param list<string> $hostAllowlist Host patterns, `[scheme://]host[:port]/path-prefix` patterns, or `#regex`.
+     * @param list<string> $hostAllowlist Host patterns, `[scheme://]host[:port]/path-prefix` patterns, `#host-regex#`
+     *                                    or `url#^full-url-regex#`.
      *                                    Empty = any http(s) URL with a non-empty host (no public/private host or IP check is performed).
      */
     public function __construct(
@@ -94,9 +97,18 @@ final readonly class QrUrlPolicy
             if ($pattern === '') {
                 continue;
             }
-            if (str_starts_with($pattern, '#')) {
+            if (UrlAllowlistPattern::isHostRegex($pattern)) {
+                // Host only: a full-URL match would let `#good\.com#` allow `https://evil.tld/?x=good.com`.
                 // @: an invalid admin-typed pattern never matches (no warning / 500 on render).
-                if (@preg_match($pattern, $host) === 1 || @preg_match($pattern, $url) === 1) {
+                if (@preg_match($pattern, $host) === 1) {
+                    return true;
+                }
+                continue;
+            }
+            $urlRegex = UrlAllowlistPattern::urlRegex($pattern);
+            if ($urlRegex !== null) {
+                // Explicit full-URL opt-in; an unanchored regex never matches (substring matches are unsafe).
+                if (UrlAllowlistPattern::isAnchoredUrlRegex($urlRegex) && @preg_match($urlRegex, $url) === 1) {
                     return true;
                 }
                 continue;

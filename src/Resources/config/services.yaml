@@ -18,6 +18,13 @@ services:
 
   Nowo\QrCodeBundle\Twig\QrCodeExtension: ~
 
+  # Imports the admin routes only in database mode (otherwise 404 instead of a 500 on /admin/qr-code-profiles).
+  Nowo\QrCodeBundle\Routing\AdminRouteLoader:
+    arguments:
+      $useDatabaseConfig: '%nowo_qr_code.use_database_config%'
+      $env: '%kernel.environment%'
+    tags: ['routing.loader']
+
   # Form Kit injects FormOptionsMerger into tagged form types (FormOptionsMergerInjectorCompilerPass).
   Nowo\QrCodeBundle\Form\:
     resource: '../../Form/'

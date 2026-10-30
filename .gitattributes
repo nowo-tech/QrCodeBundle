@@ -1,0 +1,26 @@
+# Keep the Composer dist archive (`git archive`, GitHub zipball) to the runtime bundle: src/, docs, LICENSE,
+# composer.json, README. Demo, tests, CI, specs, tooling and dev configuration stay in the repository only.
+/.cursor export-ignore
+/.cursorignore export-ignore
+/.dockerignore export-ignore
+/.editorconfig export-ignore
+/.gitattributes export-ignore
+/.githooks export-ignore
+/.github export-ignore
+/.gitignore export-ignore
+/.php-cs-fixer.dist.php export-ignore
+/.scripts export-ignore
+/.specify export-ignore
+/.twig-cs-fixer.php export-ignore
+/composer.lock export-ignore
+/demo export-ignore
+/docker-compose.yml export-ignore
+/Dockerfile export-ignore
+/docs/images export-ignore
+/igor.json export-ignore
+/Makefile export-ignore
+/phpstan.neon.dist export-ignore
+/phpunit.xml.dist export-ignore
+/rector.php export-ignore
+/specs export-ignore
+/tests export-ignore

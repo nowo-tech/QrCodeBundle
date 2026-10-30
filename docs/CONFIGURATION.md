@@ -73,7 +73,8 @@ nowo_qr_code:
 1. `composer require doctrine/orm doctrine/doctrine-bundle symfony/form symfony/validator`
 2. Set `use_database_config: true`
 3. Create schema for `qr_code_profile` (apply `table_prefix` if configured)
-4. Ensure routes import `@NowoQrCodeBundle/Resources/config/routing.yaml`
+4. Ensure routes import `@NowoQrCodeBundle/Resources/config/routing.yaml` (the Flex recipe does). It loads the admin
+   routes only while `use_database_config` is `true`; otherwise it imports nothing and `/admin/qr-code-profiles` is a 404.
 5. Open `/admin/qr-code-profiles` — use **Import from YAML** or create rows manually
 6. Protect the admin path in the host firewall (required when `allow_unauthenticated` is `false`; SecurityBundle is enforced at compile time):
 
@@ -179,7 +180,16 @@ Used by `QrCodeService::createDataUriForUrl` and Twig `qr_code_for_url` **for th
 | Empty list | Any `http`/`https` URL with a host is allowed |
 | Host name (no `/`) | Exact host **or** subdomain (e.g. `example.com` matches `cdn.example.com`, **not** `evil-example.com`) |
 | Contains `/` | `[scheme://]host[:port]/path-prefix` on the **parsed** URL: host exact or subdomain, scheme/port when given, URL path starts with the pattern path. Empty host (e.g. `/wallet/`) = that path prefix on any host. Paths with dot segments (`..`, `.`) never match. |
-| Starts with `#` | PCRE applied to host, then full URL |
+| Starts with `#` (`#…#`) | PCRE applied to the parsed **host only** (e.g. `#^(cdn\|img)\.example\.com$#`). A `/` in the pattern is rejected: hosts never contain `/` |
+| Starts with `url#` (`url#^…#`) | Explicit opt-in: PCRE applied to the **full URL**. Must be anchored at the start (`url#^https://cdn\.example\.com/#`); an unanchored one is rejected at configuration time and never matches at render time |
+
+Regex patterns (`#…#`, `url#…#`) are validated when the configuration is processed and when the admin form is
+submitted: they must compile and may not nest quantifiers (catastrophic backtracking). Prefer anchored regexes
+(`^…$`): an unanchored host regex such as `#good\.com#` also matches `good.com.evil.tld`.
+
+> **Changed in 1.11.0 (security):** `#…#` regexes used to be tried against the host **and then the full URL**, so
+> `#good\.com#` allowed `https://evil.tld/?x=good.com`. They now match the host only; use `url#^…#` for full-URL
+> regexes. See [UPGRADING](UPGRADING.md#unreleased).
 
 Only `http` and `https` schemes are accepted. Schemes such as `javascript:` and `data:` are always rejected.
 

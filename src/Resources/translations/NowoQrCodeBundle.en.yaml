@@ -48,7 +48,7 @@ nowo_qr_code:
                 size:
                     label: "Size (px)"
                 url_allowlist:
-                    help: "One pattern per line. Empty = any http(s) URL. Regex patterns (#…#) must compile and may not nest quantifiers."
+                    help: "One pattern per line. Empty = any http(s) URL. #…# is a regex on the host only; url#^…# is a regex on the full URL and must start with ^. Regexes must compile and may not nest quantifiers."
                     label: "URL allowlist"
             new_intro: "Database-backed QR code settings"
             new_title: "New QR profile"

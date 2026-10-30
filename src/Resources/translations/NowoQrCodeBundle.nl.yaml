@@ -48,7 +48,7 @@ nowo_qr_code:
                 size:
                     label: "Grootte (px)"
                 url_allowlist:
-                    help: "Eén patroon per regel. Leeg = elke http(s)-URL. Regex-patronen (#…#) moeten compileren en mogen geen kwantoren nesten."
+                    help: "Eén patroon per regel. Leeg = elke http(s)-URL. #…# is een regex alleen op de host; url#^…# is een regex op de volledige URL en moet met ^ beginnen. Regex-patronen moeten compileren en mogen geen kwantoren nesten."
                     label: "Toegestane URL's"
             new_intro: "QR-code-instellingen uit de database"
             new_title: "Nieuw QR-profiel"
