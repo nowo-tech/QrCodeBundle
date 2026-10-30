@@ -3,6 +3,7 @@
 ## Table of contents
 
 - [Unreleased](#unreleased)
+- [To 1.11.1](#to-1111)
 - [To 1.11.0](#to-1110)
   - [Template contract](#template-contract)
   - [Layout](#layout)
@@ -47,6 +48,14 @@
 - [[1.0.0] - 2026-07-30](#100---2026-07-30)
 
 ## Unreleased
+
+## To 1.11.1
+
+From **1.11.0**:
+
+```bash
+composer update nowo-tech/qr-code-bundle
+```
 
 No action needed when you import `@NowoQrCodeBundle/Resources/config/routing.yaml` (as documented). If `/admin/qr-code-profiles` only appeared through Symfony's default `controllers: { resource: routing.controllers }` (Symfony >= 7.3), add that import: the bundle controller is no longer registered there (REQ-SF-004 rule 7).
 
