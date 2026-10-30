@@ -63,6 +63,12 @@ final class QrCodeProfileConfigTypeTest extends TestCase
         yield 'valid anchored regex' => ["#^cdn\\.example\\.com$#\nexample.com", true];
         yield 'does not compile' => ['#^(cdn#', false];
         yield 'nested quantifier' => ['#^(a+)+$#', false];
+        yield 'host regex with a slash' => ['#^https://good\\.com/#', false];
+        yield 'anchored full-URL regex' => ['url#^https://good\\.com/passes/#', true];
+        yield 'full-URL regex with \\A anchor' => ['url#\\Ahttps://good\\.com/#', true];
+        yield 'unanchored full-URL regex' => ['url#good\\.com#', false];
+        yield 'full-URL regex does not compile' => ['url#^(good#', false];
+        yield 'full-URL regex nested quantifier' => ['url#^https://(a+)+$#', false];
     }
 
     #[DataProvider('regexPatterns')]

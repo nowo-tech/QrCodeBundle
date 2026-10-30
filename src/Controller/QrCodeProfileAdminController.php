@@ -19,6 +19,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormView;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -35,7 +36,7 @@ use function strtr;
  * CRUD admin for database-backed QR profiles.
  */
 #[Route(path: '/admin/qr-code-profiles', name: 'nowo_qr_code_admin_')]
-class QrCodeProfileAdminController extends AbstractController
+final class QrCodeProfileAdminController extends AbstractController
 {
     public function __construct(
         private readonly QrCodeProfileConfigRepository $repository,
@@ -82,7 +83,7 @@ class QrCodeProfileAdminController extends AbstractController
     }
 
     #[Route(path: '/import-yaml', name: 'import_yaml', methods: ['POST'])]
-    public function importYaml(Request $request): Response
+    public function importYaml(Request $request): RedirectResponse
     {
         $this->denyUnlessGranted();
 
@@ -127,7 +128,7 @@ class QrCodeProfileAdminController extends AbstractController
     }
 
     #[Route(path: '/{id}/delete', name: 'delete', requirements: ['id' => '\d+'], methods: ['POST'])]
-    public function delete(Request $request, QrCodeProfileConfig $profile): Response
+    public function delete(Request $request, QrCodeProfileConfig $profile): RedirectResponse
     {
         $this->denyUnlessGranted();
 

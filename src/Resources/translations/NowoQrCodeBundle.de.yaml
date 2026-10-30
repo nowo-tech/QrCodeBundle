@@ -48,7 +48,7 @@ nowo_qr_code:
                 size:
                     label: "Größe (px)"
                 url_allowlist:
-                    help: "Ein Muster pro Zeile. Leer = jede http(s)-URL. Regex-Muster (#…#) müssen kompilieren und dürfen keine Quantoren verschachteln."
+                    help: "Ein Muster pro Zeile. Leer = jede http(s)-URL. #…# ist ein Regex nur auf den Host; url#^…# ist ein Regex auf die ganze URL und muss mit ^ beginnen. Regex-Muster müssen kompilieren und dürfen keine Quantoren verschachteln."
                     label: "Erlaubte URLs"
             new_intro: "QR-Code-Einstellungen aus der Datenbank"
             new_title: "Neues QR-Profil"

@@ -34,9 +34,9 @@ use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Security\Csrf\CsrfTokenManager;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Translation\Loader\YamlFileLoader;
 use Symfony\Component\Translation\Translator;
-use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Environment;
 
 use function array_map;
@@ -64,7 +64,6 @@ final class QrCodeProfileAdminControllerTest extends TestCase
             (new QrCodeProfileConfig())->setName('custom'),
         );
 
-        self::assertInstanceOf(RedirectResponse::class, $response);
         self::assertSame('/admin/qr-code-profiles', $response->getTargetUrl());
         self::assertSame(['Invalid CSRF token.'], $this->session->getFlashBag()->get('error'));
         self::assertSame([], $this->session->getFlashBag()->get('success'));
@@ -79,7 +78,7 @@ final class QrCodeProfileAdminControllerTest extends TestCase
 
         $response = $this->createController(true)->delete(new Request(request: ['_token' => 'ok']), $profile);
 
-        self::assertInstanceOf(RedirectResponse::class, $response);
+        self::assertSame('/admin/qr-code-profiles', $response->getTargetUrl());
         self::assertSame(['Profile "custom" deleted.'], $this->session->getFlashBag()->get('success'));
         self::assertSame([], $this->session->getFlashBag()->get('error'));
     }
@@ -193,7 +192,7 @@ final class QrCodeProfileAdminControllerTest extends TestCase
     {
         $response = $this->createController(false)->importYaml(new Request(request: ['_token' => 'bad']));
 
-        self::assertInstanceOf(RedirectResponse::class, $response);
+        self::assertSame('/admin/qr-code-profiles', $response->getTargetUrl());
         self::assertSame(['Invalid CSRF token.'], $this->session->getFlashBag()->get('error'));
     }
 
@@ -201,7 +200,7 @@ final class QrCodeProfileAdminControllerTest extends TestCase
     {
         $response = $this->createController(true)->importYaml(new Request(request: ['_token' => 'ok']));
 
-        self::assertInstanceOf(RedirectResponse::class, $response);
+        self::assertSame('/admin/qr-code-profiles', $response->getTargetUrl());
         self::assertSame(['No YAML profiles found to import.'], $this->session->getFlashBag()->get('success'));
     }
 
@@ -322,24 +321,7 @@ final class QrCodeProfileAdminControllerTest extends TestCase
 
         $repository = $this->createStub(QrCodeProfileConfigRepository::class);
 
-        $controller = new class($repository, $this->entityManager, new QrCodeProfileAdminService($repository, $this->entityManager, $yamlProfiles, 'default'), $accessChecker, true, $csrfValid, $translate ? $this->translator() : null) extends QrCodeProfileAdminController {
-            public function __construct(
-                QrCodeProfileConfigRepository $repository,
-                EntityManagerInterface $entityManager,
-                QrCodeProfileAdminService $adminService,
-                QrCodeAccessCheckerInterface $accessChecker,
-                bool $useDatabaseConfig,
-                private readonly bool $csrfValid,
-                ?TranslatorInterface $translator,
-            ) {
-                parent::__construct($repository, $entityManager, $adminService, $accessChecker, $useDatabaseConfig, translator: $translator);
-            }
-
-            protected function isCsrfTokenValid(string $id, ?string $token): bool
-            {
-                return $this->csrfValid;
-            }
-        };
+        $controller = new QrCodeProfileAdminController($repository, $this->entityManager, new QrCodeProfileAdminService($repository, $this->entityManager, $yamlProfiles, 'default'), $accessChecker, true, translator: $translate ? $this->translator() : null);
 
         $request = new Request();
         $request->setSession($this->session);
@@ -352,6 +334,9 @@ final class QrCodeProfileAdminControllerTest extends TestCase
         $container = new Container();
         $container->set('request_stack', $requestStack);
         $container->set('router', $router);
+        $csrf = $this->createStub(CsrfTokenManagerInterface::class);
+        $csrf->method('isTokenValid')->willReturn($csrfValid);
+        $container->set('security.csrf.token_manager', $csrf);
         if ($form instanceof FormInterface) {
             $formFactory = $this->createStub(FormFactoryInterface::class);
             $formFactory->method('create')->willReturn($form);

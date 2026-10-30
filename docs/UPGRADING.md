@@ -7,6 +7,8 @@
   - [Layout](#layout)
   - [Configuration](#configuration)
   - [Template overrides](#template-overrides)
+  - [URL allowlist regexes](#url-allowlist-regexes)
+  - [Admin routes](#admin-routes)
 - [To 1.10.0](#to-1100)
 - [To 1.9.1](#to-191)
 - [To 1.9.0](#to-190)
@@ -91,6 +93,32 @@ Pages, view-model fields and data blocks: [TEMPLATES.md](TEMPLATES.md).
 Copies of the old `templates/bundles/NowoQrCodeBundle/admin/*.html.twig` are frozen 1.x markup: delete them, then
 re-apply only what you still need through `nowo_ui_kit.theme`, translations (`translations/NowoQrCodeBundle.<locale>.yaml`)
 or `web_ui.templates.<page>` (see [TEMPLATES.md](TEMPLATES.md#overriding-templates-req-twig-001)).
+
+### URL allowlist regexes
+
+Security fix (SEC-004 Appendix BK, L1). A `#…#` entry in `url_allowlist` (YAML profile or admin form) was matched
+against the host **and then the full URL**, so an unanchored `#good\.com#` allowed `https://evil.tld/?x=good.com`.
+
+| Before (1.10) | Now |
+| --- | --- |
+| `#…#` matched the host, then the full URL | `#…#` matches the parsed host only |
+| Full-URL regex: `#^https://cdn\.example\.com/#` | `url#^https://cdn\.example\.com/#` (explicit `url` prefix, anchored with `^` or `\A`) |
+| YAML regexes were not validated | YAML and admin form reject non-compiling regexes, nested quantifiers, `/` in a `#…#` host regex and unanchored `url#` regexes |
+
+What to do:
+
+1. Host regexes (`#^cdn\.example\.com$#`) keep working; anchor them (`^…$`) if they are not.
+2. A YAML regex written for the full URL (it contains `/`) now fails container compilation with a hint: prefix it with
+   `url` (`url#^https://…#`) or replace it with a path pattern (`cdn.example.com/passes/`).
+3. Database profiles are not re-validated on upgrade: a stored `#…/…#` regex silently stops matching (URLs are
+   rejected, fail-closed). Edit the profile in `/admin/qr-code-profiles` and switch it to `url#^…#` or a path pattern.
+
+### Admin routes
+
+`@NowoQrCodeBundle/Resources/config/routing.yaml` (imported by the Flex recipe) now imports the admin routes only while
+`use_database_config` is `true`; with `false` the paths are a 404 instead of a 500. Nothing to do. If you imported the
+controller directly (`resource: '@NowoQrCodeBundle/Controller/'`, `type: attribute`), switch to `routing.yaml`.
+`QrCodeProfileAdminController` is now `final`: decorate or replace the route instead of extending it.
 
 ## To 1.10.0
 

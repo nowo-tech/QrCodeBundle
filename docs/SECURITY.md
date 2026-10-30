@@ -21,7 +21,7 @@ Report vulnerabilities privately via [GitHub Security Advisories](https://github
 | Risk | Mitigation |
 |------|------------|
 | Phishing / unsafe QR payloads | `QrUrlPolicy` accepts only `http`/`https` and rejects `javascript:`, `data:`, and other schemes. |
-| Host allowlist bypass | Host patterns match exact host or subdomains only (not raw substrings). Path patterns (`host/path`) parse the URL and match host + path prefix (never a raw substring of the URL, so `https://evil.tld/?r=good.com/path` does not match `good.com/path`). Regex patterns use `#…` PCRE. Before matching, URLs whose authority browsers and `parse_url()` read differently are rejected: backslashes, control characters, whitespace, userinfo, percent-encoded / Unicode hosts (since the next release). |
+| Host allowlist bypass | Host patterns match exact host or subdomains only (not raw substrings). Path patterns (`host/path`) parse the URL and match host + path prefix (never a raw substring of the URL, so `https://evil.tld/?r=good.com/path` does not match `good.com/path`). Regex patterns `#…#` are PCRE on the parsed host only; full-URL regexes need the explicit, anchored `url#^…#` form (since 1.11.0). Before matching, URLs whose authority browsers and `parse_url()` read differently are rejected: backslashes, control characters, whitespace, userinfo, percent-encoded / Unicode hosts (since 1.9.0). |
 | Empty allowlist | Any http(s) URL may be encoded — treat QR content as **host-controlled**; do not pass untrusted end-user URLs without an allowlist. Flex `when@prod` sets `url_allowlist_required: true` so an empty or `example.com` placeholder fail compilation (since 1.4.6). |
 | Twig / XSS | Helpers emit data-URI strings; escape surrounding HTML as usual (`attr`/`html` contexts). |
 | Resource abuse | Bound `size`/`margin` in config; rate-limit generation if exposed to anonymous users. |
@@ -67,7 +67,6 @@ Confirm before each release (REQ-SEC-002):
 | No-secret logs | Do not log full URLs that may contain tokens/PII |
 | Cryptography | N/A (no crypto in this bundle) |
 | Permissions / exposure | Admin CRUD at `/admin/qr-code-profiles` is role-gated (`security.access_roles`; an empty list denies everyone, fail-closed); keep `allow_unauthenticated` false in production. QR generation APIs remain in-process (no public QR endpoint). |
-
 | Limits / DoS | `size`/`margin` bounded; rate-limit if exposed publicly |
 | AI security audit (REQ-SEC-004) | Pass recorded in monorepo `BUNDLES_SECURITY_ANALYSIS.md` |
 
@@ -75,9 +74,10 @@ Confirm before each release (REQ-SEC-002):
 
 | Field | Value |
 |-------|--------|
-| Date | 2026-07-30 |
-| Method | Cursor / Nowo static AI security review |
+| Date | 2026-10-30 |
+| Method | Claude Code static security review |
+| Scope | `main` at `28e8ae4` (1.11.0) |
 | Grade | **Pass (good)** |
 | Overall risk | **Low** |
-| Open Critical / High | None |
-| Notes | Host allowlist uses exact/subdomain matching; http(s)-only policy. This review predates the admin CRUD added in 1.2.0, so a re-audit covering it is due (REQ-SEC-004 freshness). |
+| Open Critical / High / Medium | None |
+| Notes | Monorepo `BUNDLES_SECURITY_ANALYSIS.md` Appendix BK. Low findings fixed in 1.11.0: L1 (`#…#` allowlist regexes also matched the full URL, so `#good\.com#` allowed `https://evil.tld/?x=good.com`; now host-only, full-URL regexes need the anchored `url#^…#` opt-in) and L2 (dist archive shipped demo/tests/tooling; now `export-ignore`d). Also: admin routes only imported with `use_database_config` (404 instead of 500), admin controller `final`. |

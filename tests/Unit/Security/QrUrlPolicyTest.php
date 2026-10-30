@@ -130,12 +130,56 @@ final class QrUrlPolicyTest extends TestCase
         self::assertFalse($policy->isAllowed('https://evil.example.com/pass.pkpass'));
     }
 
-    public function testHostAllowlistRegexOnUrl(): void
+    /**
+     * SEC-004 Appendix BK L1: `#…#` used to be tried on the full URL too, so a host regex matched the query string.
+     */
+    public function testHostRegexNeverMatchesTheRestOfTheUrl(): void
+    {
+        $policy = new QrUrlPolicy(['#good\\.com#']);
+
+        self::assertTrue($policy->isAllowed('https://good.com/x'));
+        self::assertFalse($policy->isAllowed('https://evil.tld/?x=good.com'));
+        self::assertFalse($policy->isAllowed('https://evil.tld/good.com/'));
+        self::assertFalse($policy->isAllowed('https://evil.tld/#good.com'));
+    }
+
+    public function testFullUrlRegexWithoutUrlPrefixNoLongerMatches(): void
     {
         $policy = new QrUrlPolicy(['#^https://cdn\\.example\\.com/#']);
 
-        self::assertTrue($policy->isAllowed('https://cdn.example.com/pass.pkpass'));
-        self::assertFalse($policy->isAllowed('https://other.example.com/pass.pkpass'));
+        self::assertFalse($policy->isAllowed('https://cdn.example.com/pass.pkpass'));
+    }
+
+    public function testUrlPrefixedRegexMatchesTheFullUrl(): void
+    {
+        $policy = new QrUrlPolicy(['url#^https://cdn\\.example\\.com/passes/#']);
+
+        self::assertTrue($policy->isAllowed('https://cdn.example.com/passes/a.pkpass'));
+        self::assertFalse($policy->isAllowed('https://cdn.example.com/other/a.pkpass'));
+        self::assertFalse($policy->isAllowed('http://cdn.example.com/passes/a.pkpass'));
+        self::assertFalse($policy->isAllowed('https://evil.tld/?x=https://cdn.example.com/passes/'));
+    }
+
+    public function testUrlPrefixedRegexAcceptsBackslashAAnchor(): void
+    {
+        $policy = new QrUrlPolicy(['url#\\Ahttps://cdn\\.example\\.com/#']);
+
+        self::assertTrue($policy->isAllowed('https://cdn.example.com/x'));
+    }
+
+    public function testUnanchoredUrlPrefixedRegexNeverMatches(): void
+    {
+        $policy = new QrUrlPolicy(['url#cdn\\.example\\.com#']);
+
+        self::assertFalse($policy->isAllowed('https://cdn.example.com/x'));
+        self::assertFalse($policy->isAllowed('https://evil.tld/?x=cdn.example.com'));
+    }
+
+    public function testInvalidUrlPrefixedRegexNeverMatches(): void
+    {
+        $policy = new QrUrlPolicy(['url#^(#']);
+
+        self::assertFalse($policy->isAllowed('https://cdn.example.com/x'));
     }
 
     /**

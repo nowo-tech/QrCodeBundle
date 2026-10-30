@@ -48,7 +48,7 @@ nowo_qr_code:
                 size:
                     label: "Tamaño (px)"
                 url_allowlist:
-                    help: "Un patrón por línea. Vacío = cualquier URL http(s). Los patrones regex (#…#) deben compilar y no pueden anidar cuantificadores."
+                    help: "Un patrón por línea. Vacío = cualquier URL http(s). #…# es una regex solo sobre el host; url#^…# es una regex sobre la URL completa y debe empezar por ^. Las regex deben compilar y no pueden anidar cuantificadores."
                     label: "Lista de URL permitidas"
             new_intro: "Ajustes de códigos QR guardados en base de datos"
             new_title: "Nuevo perfil QR"
