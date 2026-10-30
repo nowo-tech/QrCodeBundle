@@ -48,6 +48,8 @@
 
 ## Unreleased
 
+No action needed when you import `@NowoQrCodeBundle/Resources/config/routing.yaml` (as documented). If `/admin/qr-code-profiles` only appeared through Symfony's default `controllers: { resource: routing.controllers }` (Symfony >= 7.3), add that import: the bundle controller is no longer registered there (REQ-SF-004 rule 7).
+
 ## To 1.11.0
 
 From **1.10.0**:

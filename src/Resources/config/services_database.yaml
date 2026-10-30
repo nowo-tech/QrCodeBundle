@@ -31,11 +31,15 @@ services:
 
   Nowo\QrCodeBundle\Ui\QrCodePageFactory: ~
 
+  # Not autoconfigured (REQ-SF-004 rule 7): on Symfony >= 7.3 a #[Route] class is autoconfigured with the
+  # routing.controller tag, and the host's default `routing.controllers` resource would then expose the admin
+  # without the host importing routing.yaml. Routes are opt-in only; the AbstractController tags are explicit.
   Nowo\QrCodeBundle\Controller\QrCodeProfileAdminController:
+    autoconfigure: false
     arguments:
       $useDatabaseConfig: '%nowo_qr_code.use_database_config%'
       $listPageSize: '%nowo_qr_code.web_ui.list_page_size%'
-    tags: ['controller.service_arguments']
+    tags: ['controller.service_arguments', 'container.service_subscriber']
 
   # Form Kit injects FormOptionsMerger into tagged form types (FormOptionsMergerInjectorCompilerPass).
   Nowo\QrCodeBundle\Form\:
