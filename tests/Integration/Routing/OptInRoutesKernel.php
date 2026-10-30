@@ -81,6 +81,8 @@ final class OptInRoutesKernel extends Kernel
             'csrf_protection'       => ['enabled' => true],
             'php_errors'            => ['log' => true],
         ]);
+        // Newer symfony/ux-twig-component releases (resolved by the CI update lanes) require the defaults map.
+        $container->extension('twig_component', ['defaults' => ['Nowo\\QrCodeBundle\\Twig\\Component\\' => 'components/']]);
         $container->extension('doctrine', [
             'dbal' => ['url' => 'sqlite:///:memory:'],
             'orm'  => [],
