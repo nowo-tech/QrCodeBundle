@@ -1,91 +1,46 @@
-{% extends '@NowoQrCodeBundle/admin/base.html.twig' %}
-{% import '@NowoUiKitBundle/macros/ui.html.twig' as ui %}
-{% set _css_fw = nowo_qr_code_css_framework|default('custom') %}
+{#
+  QR Code profiles (REQ-UI-003): UiKit list scaffold. Variable: page (View\ListPage from QrCodePageFactory::index():
+  header nowo_qr_code.admin.index.title with the actions New profile and Import from YAML (POST + CSRF FormView);
+  columns name, size, margin, error correction, URL allowlist; rows = list<QrCodeProfileConfig>; row actions Edit /
+  Delete (POST + CSRF FormView behind a Confirm); Pagination (web_ui.list_page_size); EmptyState
+  nowo_qr_code.admin.index.empty with New profile). Also: yaml_profiles (list<string>), use_database_config (bool).
+  Data blocks filled: nowo_ui_list_filters (database-config notice + YAML baseline, then the default region),
+  nowo_ui_list_row (cells).
+#}
+{% extends '@NowoUiKit/page/list.html.twig' %}
+{% trans_default_domain 'NowoQrCodeBundle' %}
 
-{% block title %}QR Code profiles{% endblock %}
-
-{% block body %}
-    <div class="qr-header nowo-ui-header">
-        <div>
-            <h1>QR Code profiles</h1>
-            <p class="qr-lead">Database profiles override YAML when they share the same name (<code>use_database_config</code>).</p>
-        </div>
-        <a class="{{ ui.btn('primary', null, _css_fw) }} qr-btn qr-btn-primary nowo-ui-action-create" href="{{ path('nowo_qr_code_admin_new') }}">New profile</a>
-    </div>
-
-    {% if not use_database_config %}
-        <div class="qr-alert qr-alert-warn nowo-ui-alert">
-            <code>use_database_config</code> is <strong>false</strong>. Rows below are editable but will not override YAML until you enable it.
-        </div>
+{% block nowo_ui_list_filters %}
+    {% set _b = page.bundle %}
+    {% if not use_database_config|default(false) %}
+        <div class="{{ nowo_ui_class('flash_warning', _b) }}" role="status" data-testid="qr-code-db-config-off">{{ 'nowo_qr_code.admin.index.db_config_off'|trans }}</div>
     {% endif %}
+    <p class="{{ nowo_ui_class('muted', _b) }} nowo-qr-code-yaml-baseline" data-testid="qr-code-yaml-baseline">
+        {{ 'nowo_qr_code.admin.index.yaml_baseline'|trans }}
+        {% for name in yaml_profiles|default([]) %}<code class="{{ nowo_ui_class('code', _b) }}">{{ name }}</code>{% if not loop.last %}, {% endif %}{% else %}—{% endfor %}
+    </p>
+    {{ parent() }}
+{% endblock %}
 
-    <div class="qr-toolbar nowo-ui-toolbar">
-        {{ form_start(import_form) }}
-            <button type="submit" class="{{ ui.btn('secondary', null, _css_fw) }} qr-btn">Import from YAML</button>
-        {{ form_end(import_form) }}
-        <span class="qr-muted">YAML baseline: {% for name in yaml_profiles %}<code>{{ name }}</code>{% if not loop.last %}, {% endif %}{% else %}—{% endfor %}</span>
-    </div>
-
-    <div class="nowo-ui-table-wrap">
-        <table class="qr-table nowo-ui-table">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Size</th>
-                    <th>Margin</th>
-                    <th>Error correction</th>
-                    <th>Allowlist</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-            {% for profile in profiles %}
-                <tr>
-                    <td>
-                        <strong><code>{{ profile.name }}</code></strong>
-                        {% if profile.name in yaml_profiles %}
-                            <span class="qr-badge">overrides YAML</span>
-                        {% else %}
-                            <span class="qr-badge">DB only</span>
-                        {% endif %}
-                    </td>
-                    <td>{{ profile.size }}</td>
-                    <td>{{ profile.margin }}</td>
-                    <td><code>{{ profile.errorCorrection }}</code></td>
-                    <td class="qr-muted">
-                        {% if profile.urlAllowlist is empty %}
-                            (any http/https)
-                        {% else %}
-                            {{ profile.urlAllowlist|join(', ') }}
-                        {% endif %}
-                    </td>
-                    <td class="qr-actions">
-                        <div class="{{ ui.row_actions(_css_fw) }}">
-                            <a class="{{ ui.btn('secondary', 'sm', _css_fw) }} qr-btn nowo-ui-action-edit" href="{{ path('nowo_qr_code_admin_edit', {id: profile.id}) }}">Edit</a>
-                            {{ form_start(delete_forms[profile.id], {attr: {onsubmit: "return confirm('Delete this profile?');"}}) }}
-                                <button type="submit" class="{{ ui.btn('danger', 'sm', _css_fw) }} qr-link-danger nowo-ui-action-delete">Delete</button>
-                            {{ form_end(delete_forms[profile.id]) }}
-                        </div>
-                    </td>
-                </tr>
-            {% else %}
-                <tr>
-                    <td colspan="6">No database profiles yet. Create one or import from YAML.</td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
-    {% if pagination.total_pages > 1 %}
-        <nav class="qr-pagination nowo-ui-pagination" aria-label="Profiles pages">
-            {% if pagination.page > 1 %}
-                <a class="{{ ui.btn('secondary', 'sm', _css_fw) }} qr-btn" href="{{ path('nowo_qr_code_admin_index', {page: pagination.page - 1}) }}">Previous</a>
-            {% endif %}
-            <span class="qr-muted">Page {{ pagination.page }} of {{ pagination.total_pages }} ({{ pagination.total }} profiles)</span>
-            {% if pagination.page < pagination.total_pages %}
-                <a class="{{ ui.btn('secondary', 'sm', _css_fw) }} qr-btn" href="{{ path('nowo_qr_code_admin_index', {page: pagination.page + 1}) }}">Next</a>
-            {% endif %}
-        </nav>
-    {% endif %}
+{% block nowo_ui_list_row %}
+    {% set _b = page.bundle %}
+    {% set _cell = nowo_ui_class('table_cell', _b) %}
+    <td class="{{ _cell }}" data-label="{{ 'nowo_qr_code.admin.columns.name'|trans }}" data-required="1">
+        <code class="{{ nowo_ui_class('code', _b) }}">{{ row.name }}</code>
+        {% if row.name in yaml_profiles|default([]) %}
+            <span class="{{ nowo_ui_class('badge_info', _b) }}">{{ 'nowo_qr_code.admin.badge.overrides_yaml'|trans }}</span>
+        {% else %}
+            <span class="{{ nowo_ui_class('badge_neutral', _b) }}">{{ 'nowo_qr_code.admin.badge.db_only'|trans }}</span>
+        {% endif %}
+    </td>
+    <td class="{{ _cell }} nowo-ui-cell--end" data-label="{{ 'nowo_qr_code.admin.columns.size'|trans }}">{{ row.size }}</td>
+    <td class="{{ _cell }} nowo-ui-cell--end" data-label="{{ 'nowo_qr_code.admin.columns.margin'|trans }}" data-nowo-ui-priority="2">{{ row.margin }}</td>
+    <td class="{{ _cell }}" data-label="{{ 'nowo_qr_code.admin.columns.error_correction'|trans }}" data-nowo-ui-priority="2">{{ ('nowo_qr_code.admin.error_correction.' ~ row.errorCorrection)|trans }}</td>
+    <td class="{{ _cell }}" data-label="{{ 'nowo_qr_code.admin.columns.url_allowlist'|trans }}" data-nowo-ui-priority="3">
+        {% if row.urlAllowlist is empty %}
+            <span class="{{ nowo_ui_class('muted', _b) }}">{{ 'nowo_qr_code.admin.allowlist_any'|trans }}</span>
+        {% else %}
+            {% for pattern in row.urlAllowlist %}<code class="{{ nowo_ui_class('code', _b) }}">{{ pattern }}</code>{% if not loop.last %} {% endif %}{% endfor %}
+        {% endif %}
+    </td>
 {% endblock %}

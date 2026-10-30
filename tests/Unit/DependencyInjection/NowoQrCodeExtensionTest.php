@@ -44,8 +44,9 @@ final class NowoQrCodeExtensionTest extends TestCase
         $this->assertSame('high', $container->getParameter('nowo_qr_code.error_correction'));
         $this->assertSame([], $container->getParameter('nowo_qr_code.url_allowlist'));
         $this->assertFalse($container->getParameter('nowo_qr_code.url_allowlist_required'));
-        $this->assertSame('@NowoQrCodeBundle/admin/layout.html.twig', $container->getParameter('nowo_qr_code.web_ui.layout_template'));
-        $this->assertSame(CssFramework::Custom->value, $container->getParameter('nowo_qr_code.web_ui.css_framework'));
+        $this->assertNull($container->getParameter('nowo_qr_code.web_ui.layout_template'));
+        $this->assertSame([], $container->getParameter('nowo_qr_code.web_ui.templates'));
+        $this->assertNull($container->getParameter('nowo_qr_code.web_ui.css_framework'));
     }
 
     /**
@@ -118,7 +119,7 @@ final class NowoQrCodeExtensionTest extends TestCase
         $container->registerExtension(new NowoQrCodeExtension());
         $container->loadFromExtension('nowo_qr_code', [
             'web_ui' => [
-                'layout_template' => '@NowoQrCodeBundle/admin/layout.html.twig',
+                'layout_template' => '@App/admin/layout.html.twig',
             ],
         ]);
 
@@ -126,7 +127,7 @@ final class NowoQrCodeExtensionTest extends TestCase
 
         $twigConfig = $container->getExtensionConfig('twig');
         self::assertSame(
-            '@@NowoQrCodeBundle/admin/layout.html.twig',
+            '@@App/admin/layout.html.twig',
             $twigConfig[0]['globals']['nowo_qr_code_layout_template'],
         );
     }
@@ -245,12 +246,22 @@ final class NowoQrCodeExtensionTest extends TestCase
 
         (new NowoQrCodeExtension())->prepend($container);
 
-        $seed = $container->getExtensionConfig('nowo_ui_kit')[0];
-        self::assertSame('bootstrap5', $seed['css_framework']);
-        self::assertSame('bootstrap-icons', $seed['icon_set']);
+        self::assertSame(['css_framework' => 'bootstrap5'], $container->getExtensionConfig('nowo_ui_kit')[0]);
     }
 
-    public function testPrependSeedsOnlyMissingUiKitIconSet(): void
+    public function testPrependSeedsNothingWithoutTheDeprecatedCssFramework(): void
+    {
+        $container = new ContainerBuilder();
+        $container->registerExtension($this->createExtension('nowo_ui_kit'));
+        $container->registerExtension(new NowoQrCodeExtension());
+        $container->loadFromExtension('nowo_qr_code', []);
+
+        (new NowoQrCodeExtension())->prepend($container);
+
+        self::assertSame([], $container->getExtensionConfig('nowo_ui_kit'));
+    }
+
+    public function testPrependKeepsTheHostUiKitCssFramework(): void
     {
         $container = new ContainerBuilder();
         $container->registerExtension($this->createExtension('nowo_ui_kit'));
@@ -266,7 +277,7 @@ final class NowoQrCodeExtensionTest extends TestCase
 
         (new NowoQrCodeExtension())->prepend($container);
 
-        self::assertSame(['icon_set' => 'bootstrap-icons'], $container->getExtensionConfig('nowo_ui_kit')[0]);
+        self::assertSame([['css_framework' => 'tabler']], $container->getExtensionConfig('nowo_ui_kit'));
     }
 
     public function testPrependDoesNotOverrideHostUiKitWhenFullyConfigured(): void

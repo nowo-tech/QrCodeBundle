@@ -42,24 +42,18 @@ final class NowoQrCodeExtension extends Extension implements PrependExtensionInt
                 $layoutTemplate = '@' . $layoutTemplate;
             }
 
-            $cssFramework = CssFramework::from($config['web_ui']['css_framework'])->normalized()->value;
-
+            // Deprecated since 1.11 (REQ-UI-003: the pages extend UiKit scaffolds and read neither); kept for one minor
+            // for host templates that still reference them.
             $container->prependExtensionConfig('twig', [
                 'globals' => [
                     'nowo_qr_code_layout_template' => $layoutTemplate,
-                    'nowo_qr_code_css_framework'   => $cssFramework,
+                    'nowo_qr_code_css_framework'   => $this->cssFramework($config['web_ui']['css_framework']) ?? CssFramework::Custom->value,
                 ],
             ]);
         }
 
         $this->prependUiKitDefaults($container);
     }
-
-    /**
-     * When UiKit is installed, seed nowo_ui_kit.css_framework / icon_set from web_ui
-     * so kit macros resolve the same stack. Does not override keys the host already set.
-     * web_ui.icon_set is optional — defaults to bootstrap-icons when seeding UiKit.
-     */
 
     /**
      * When FormKit is installed, register the qr_code profile. Forms select it via #[FormKitConfig].
@@ -94,27 +88,13 @@ final class NowoQrCodeExtension extends Extension implements PrependExtensionInt
                 'qr_code' => [
                     'alias'              => 'qr_code',
                     'translation_domain' => 'NowoQrCodeBundle',
-                    'defaults'           => [
-                        'attr'     => ['class' => 'nowo-ui-input form-control'],
-                        'row_attr' => ['class' => 'mb-2'],
-                    ],
-                    'field_types' => [
-                        'checkbox' => [
-                            'attr'     => ['class' => 'form-check-input'],
-                            'row_attr' => ['class' => 'form-check mb-2'],
-                        ],
-                        'choice' => [
-                            'attr' => ['class' => 'form-select'],
-                        ],
-                        'entity' => [
-                            'attr' => ['class' => 'form-select'],
-                        ],
-                        'file' => [
-                            'attr' => ['class' => 'nowo-ui-input form-control'],
-                        ],
-                        'textarea' => [
-                            'attr' => ['class' => 'nowo-ui-input form-control'],
-                        ],
+                    // Placeholder / help convention keys only where the catalogue has them (no raw keys).
+                    'convention_requires_translation' => true,
+                    // REQ-UI-003: no framework utility classes in bundle markup; the host form theme (or this profile,
+                    // which the host may redefine) styles the fields. `nowo-ui-input` is the UiKit semantic hook.
+                    'defaults' => [
+                        'attr'     => ['class' => 'nowo-ui-input'],
+                        'row_attr' => [],
                     ],
                 ],
             ];
@@ -125,44 +105,35 @@ final class NowoQrCodeExtension extends Extension implements PrependExtensionInt
         }
     }
 
+    /**
+     * When UiKit is installed and the host set the deprecated web_ui.css_framework (REQ-UI-003: the CSS stack is
+     * inherited from nowo_ui_kit), copy it to nowo_ui_kit.css_framework unless the host set that key there.
+     */
     private function prependUiKitDefaults(ContainerBuilder $container): void
     {
         if (!$container->hasExtension('nowo_ui_kit')) {
             return;
         }
 
-        $hostHasCssFramework = false;
-        $hostHasIconSet      = false;
         foreach ($container->getExtensionConfig('nowo_ui_kit') as $cfg) {
-            if (is_array($cfg)) {
-                if (array_key_exists('css_framework', $cfg)) {
-                    $hostHasCssFramework = true;
-                }
-                if (array_key_exists('icon_set', $cfg)) {
-                    $hostHasIconSet = true;
-                }
+            if (is_array($cfg) && array_key_exists('css_framework', $cfg)) {
+                return;
             }
         }
 
-        if ($hostHasCssFramework && $hostHasIconSet) {
-            return;
+        $config    = $this->processConfiguration(new Configuration(), $container->getExtensionConfig($this->getAlias()));
+        $framework = $this->cssFramework($config['web_ui']['css_framework']);
+        if ($framework !== null) {
+            $container->prependExtensionConfig('nowo_ui_kit', ['css_framework' => $framework]);
         }
+    }
 
-        $config   = $this->processConfiguration(new Configuration(), $container->getExtensionConfig($this->getAlias()));
-        $webUi    = is_array($config['web_ui'] ?? null) ? $config['web_ui'] : [];
-        $defaults = [];
-
-        if (!$hostHasCssFramework) {
-            $fw                        = (string) ($webUi['css_framework'] ?? 'custom');
-            $defaults['css_framework'] = $fw === 'bootstrap' ? 'bootstrap5' : $fw;
-        }
-        if (!$hostHasIconSet) {
-            $defaults['icon_set'] = (string) ($webUi['icon_set'] ?? 'bootstrap-icons');
-        }
-
-        if ($defaults !== []) {
-            $container->prependExtensionConfig('nowo_ui_kit', $defaults);
-        }
+    /**
+     * Normalised deprecated web_ui.css_framework (bootstrap => bootstrap5), null when not set.
+     */
+    private function cssFramework(mixed $value): ?string
+    {
+        return is_string($value) ? CssFramework::from($value)->normalized()->value : null;
     }
 
     public function load(array $configs, ContainerBuilder $container): void
@@ -172,7 +143,7 @@ final class NowoQrCodeExtension extends Extension implements PrependExtensionInt
 
         $defaultProfile = $config['default_profile'];
         $default        = $config['profiles'][$defaultProfile];
-        $cssFramework   = CssFramework::from($config['web_ui']['css_framework'])->normalized()->value;
+        $cssFramework   = $this->cssFramework($config['web_ui']['css_framework']);
 
         $config['web_ui']['css_framework'] = $cssFramework;
 
@@ -190,6 +161,7 @@ final class NowoQrCodeExtension extends Extension implements PrependExtensionInt
         $container->setParameter('nowo_qr_code.security.access_checker', $config['security']['access_checker']);
         $container->setParameter('nowo_qr_code.security.allow_unauthenticated', $config['security']['allow_unauthenticated']);
         $container->setParameter('nowo_qr_code.web_ui.layout_template', $config['web_ui']['layout_template']);
+        $container->setParameter('nowo_qr_code.web_ui.templates', $config['web_ui']['templates']);
         $container->setParameter('nowo_qr_code.web_ui.css_framework', $cssFramework);
         $container->setParameter('nowo_qr_code.web_ui.list_page_size', $config['web_ui']['list_page_size']);
 

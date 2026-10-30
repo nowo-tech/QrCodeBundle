@@ -13,6 +13,8 @@ make up
 
 - `/` — Redirects to `/demo`
 - `/demo` — QR samples (Twig helpers, UX component, `QrCodeService`)
+- `/admin/qr-code-profiles` — Database profiles admin (dev / test only: SQLite under `var/data/`, seeded by
+  `bin/console app:demo:setup` from the entrypoint; UiKit page contract in `templates/layouts/admin.html.twig`)
 
 ## Web Profiler toolbar
 

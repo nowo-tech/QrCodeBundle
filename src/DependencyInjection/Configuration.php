@@ -6,13 +6,17 @@ namespace Nowo\QrCodeBundle\DependencyInjection;
 
 use Nowo\QrCodeBundle\Enum\CssFramework;
 use Nowo\QrCodeBundle\Enum\QrErrorCorrection;
+use Nowo\QrCodeBundle\Ui\QrCodePages;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 
+use function array_diff;
 use function array_key_exists;
+use function array_keys;
 use function array_map;
+use function implode;
 use function is_array;
 use function sprintf;
 
@@ -25,6 +29,9 @@ use function sprintf;
  */
 final class Configuration implements ConfigurationInterface
 {
+    /** 1.x default layout (removed in 1.11; mapped to null = nowo_ui_kit.layouts.admin). */
+    public const LEGACY_DEFAULT_LAYOUT = '@NowoQrCodeBundle/admin/layout.html.twig';
+
     public function getConfigTreeBuilder(): TreeBuilder
     {
         $treeBuilder = new TreeBuilder('nowo_qr_code');
@@ -88,16 +95,39 @@ final class Configuration implements ConfigurationInterface
                 ->end()
                 ->arrayNode('web_ui')
                     ->addDefaultsIfNotSet()
+                    ->beforeNormalization()
+                        ->ifArray()
+                        ->then(static function (array $v): array {
+                            // The 1.x default layout was removed (REQ-UI-003): null = nowo_ui_kit.layouts.admin.
+                            if (($v['layout_template'] ?? null) === self::LEGACY_DEFAULT_LAYOUT) {
+                                $v['layout_template'] = null;
+                            }
+
+                            return $v;
+                        })
+                    ->end()
                     ->children()
                         ->scalarNode('layout_template')
-                            ->defaultValue('@NowoQrCodeBundle/admin/layout.html.twig')
-                            ->cannotBeEmpty()
-                            ->info('Twig layout extended by admin/base.html.twig (global nowo_qr_code_layout_template). Set to your app layout or a one-file bridge.')
+                            ->defaultNull()
+                            ->info('Layout the admin pages extend (REQ-UI-003). Null (default) = nowo_ui_kit.layouts.admin. A 1.x layout without the UiKit canonical blocks is wrapped in a deprecated bridge.')
+                        ->end()
+                        ->arrayNode('templates')
+                            ->info('Per-page template overrides (page id => template): index, form. Extend @!NowoQrCodeBundle/... and override a data block.')
+                            ->useAttributeAsKey('page')
+                            ->normalizeKeys(false)
+                            ->scalarPrototype()->cannotBeEmpty()->end()
+                            ->validate()
+                                ->ifTrue(static fn (array $v): bool => array_diff(array_keys($v), array_keys(QrCodePages::TEMPLATES)) !== [])
+                                ->then(static function (array $v): never {
+                                    throw new InvalidConfigurationException(sprintf('Unknown web_ui.templates page(s) "%s"; known: %s.', implode('", "', array_diff(array_keys($v), array_keys(QrCodePages::TEMPLATES))), implode(', ', array_keys(QrCodePages::TEMPLATES))));
+                                })
+                            ->end()
                         ->end()
                         ->enumNode('css_framework')
                             ->values(CssFramework::values())
-                            ->defaultValue(CssFramework::Custom->value)
-                            ->info('Host CSS stack hint: bootstrap5 (alias bootstrap) | bootstrap4 | tabler | tailwind | foundation | custom | none. Default custom matches the demo standalone layout.')
+                            ->defaultNull()
+                            ->setDeprecated('nowo-tech/qr-code-bundle', '1.11', 'The "%path%" option is deprecated, set "nowo_ui_kit.css_framework" instead (REQ-UI-003).')
+                            ->info('Deprecated since 1.11: the CSS stack is inherited from nowo_ui_kit.css_framework (copied there when the host did not set it).')
                         ->end()
                         ->integerNode('list_page_size')
                             ->defaultValue(50)

@@ -10,6 +10,7 @@
 # Symfony / runtime
 /var/cache/*
 /var/log/*
+/var/data/
 !/var/cache/.gitkeep
 !/var/log/.gitkeep
 

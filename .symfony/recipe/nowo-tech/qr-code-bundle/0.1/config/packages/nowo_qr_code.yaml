@@ -5,9 +5,10 @@ nowo_qr_code:
     security:
         access_roles: [ROLE_ADMIN]
         allow_unauthenticated: false
+    # Admin pages use the UiKit page contract: layout = nowo_ui_kit.layouts.admin, CSS stack = nowo_ui_kit.css_framework.
     web_ui:
-        layout_template: '@NowoQrCodeBundle/admin/layout.html.twig'
-        css_framework: custom
+        layout_template: null
+        list_page_size: 50
     default_profile: default
     profiles:
         default:

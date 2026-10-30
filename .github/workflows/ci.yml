@@ -88,6 +88,9 @@ jobs:
           fi
           echo "✅ All tests passed successfully"
 
+      - name: Validate translations (REQ-MAKE-004 / REQ-I18N-002)
+        run: php .scripts/validate-translations.php
+
       - name: Validate coverage (PHP 8.2 with Symfony 7.4 only)
         if: matrix.php == '8.2' && matrix.symfony == '7.4'
         env:

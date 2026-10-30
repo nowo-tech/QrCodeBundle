@@ -22,6 +22,15 @@ services:
 
   Nowo\QrCodeBundle\EventSubscriber\ClosedEntityManagerSubscriber: ~
 
+  # UiKit page contract (REQ-UI-003): layout / per-page template resolution and the page view models.
+  Nowo\QrCodeBundle\Ui\QrCodePages:
+    arguments:
+      $layoutTemplate: '%nowo_qr_code.web_ui.layout_template%'
+      $templates: '%nowo_qr_code.web_ui.templates%'
+      $twig: '@?twig'
+
+  Nowo\QrCodeBundle\Ui\QrCodePageFactory: ~
+
   Nowo\QrCodeBundle\Controller\QrCodeProfileAdminController:
     arguments:
       $useDatabaseConfig: '%nowo_qr_code.use_database_config%'

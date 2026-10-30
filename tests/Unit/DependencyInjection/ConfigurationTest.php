@@ -42,8 +42,37 @@ final class ConfigurationTest extends TestCase
         $this->assertSame('', $config['doctrine']['table_prefix']);
         $this->assertSame(['ROLE_ADMIN'], $config['security']['access_roles']);
         $this->assertFalse($config['security']['allow_unauthenticated']);
-        $this->assertSame('@NowoQrCodeBundle/admin/layout.html.twig', $config['web_ui']['layout_template']);
-        $this->assertSame(CssFramework::Custom->value, $config['web_ui']['css_framework']);
+        $this->assertNull($config['web_ui']['layout_template']);
+        $this->assertSame([], $config['web_ui']['templates']);
+        $this->assertNull($config['web_ui']['css_framework']);
+    }
+
+    public function testTheRemoved1xDefaultLayoutMapsToTheUiKitLayout(): void
+    {
+        $config = $this->processor->processConfiguration($this->configuration, [[
+            'web_ui' => ['layout_template' => Configuration::LEGACY_DEFAULT_LAYOUT],
+        ]]);
+
+        $this->assertNull($config['web_ui']['layout_template']);
+    }
+
+    public function testPerPageTemplateOverrides(): void
+    {
+        $config = $this->processor->processConfiguration($this->configuration, [[
+            'web_ui' => ['templates' => ['index' => 'admin/qr/index.html.twig', 'form' => 'admin/qr/form.html.twig']],
+        ]]);
+
+        $this->assertSame(['index' => 'admin/qr/index.html.twig', 'form' => 'admin/qr/form.html.twig'], $config['web_ui']['templates']);
+    }
+
+    public function testUnknownPerPageTemplateIsRejected(): void
+    {
+        $this->expectException(InvalidConfigurationException::class);
+        $this->expectExceptionMessage('Unknown web_ui.templates page(s) "show"; known: index, form.');
+
+        $this->processor->processConfiguration($this->configuration, [[
+            'web_ui' => ['templates' => ['show' => 'x.html.twig']],
+        ]]);
     }
 
     public function testWebUiCssFrameworkAccepted(): void

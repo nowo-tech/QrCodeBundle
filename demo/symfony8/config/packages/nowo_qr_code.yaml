@@ -13,3 +13,15 @@ nowo_qr_code:
             error_correction: medium
             url_allowlist:
                 - example.com
+
+# Database-backed profiles + the admin CRUD (/admin/qr-code-profiles) in the dev demo (SQLite, seeded by
+# bin/console app:demo:setup). allow_unauthenticated is a dev / demo switch: the bundle refuses it in prod.
+when@dev: &qr_code_admin
+    nowo_qr_code:
+        use_database_config: true
+        security:
+            allow_unauthenticated: true
+        web_ui:
+            list_page_size: 10
+
+when@test: *qr_code_admin

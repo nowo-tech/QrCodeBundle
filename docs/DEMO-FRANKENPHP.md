@@ -71,7 +71,9 @@ docker compose -f demo/symfony8/docker-compose.yml exec php composer install --n
 docker compose -f demo/symfony8/docker-compose.yml exec php php bin/console cache:clear --env=prod
 ```
 
-Twig Inspector, Hot Reload and the Web Profiler are dev-only bundles and are not loaded in `prod`.
+Twig Inspector, Hot Reload and the Web Profiler are dev-only bundles and are not loaded in `prod`. The database
+profiles and the admin (`use_database_config`, `allow_unauthenticated`) are enabled in `dev` / `test` only: in `prod`
+the demo renders the YAML profiles and the admin routes are not imported.
 
 ## Troubleshooting
 
@@ -82,6 +84,7 @@ Twig Inspector, Hot Reload and the Web Profiler are dev-only bundles and are not
 | Port already in use | Change `PORT` in `demo/symfony8/.env` (default **8012**) and run `make -C demo/symfony8 up` again. |
 | Blank QR / `gd` errors | The demo image ships PHP **8.5** + **gd**; rebuild it with `make -C demo/symfony8 build` after Dockerfile changes. |
 | `composer install` fails with curl error 6 | Docker/WSL DNS issue; the compose file pins public DNS servers — retry, or check the host network. |
+| Admin pages fail with a missing `qr_code_profile` table | The entrypoint creates the SQLite table and seeds it (`bin/console app:demo:setup`, idempotent) once `vendor/` exists; run it by hand (`docker compose -f demo/symfony8/docker-compose.yml exec php php bin/console app:demo:setup`) or recreate the container. Delete `demo/symfony8/var/data/` to start from the seed again. |
 | Bundle changes not picked up | Run `make -C demo/symfony8 update-bundle` (re-syncs the mounted bundle, autoload and cache). |
 
 ## What the demo shows
@@ -89,4 +92,8 @@ Twig Inspector, Hot Reload and the Web Profiler are dev-only bundles and are not
 - Twig helpers `qr_code_data_uri` / `qr_code_for_url` with profiles `default` and `compact`
 - UX component `<twig:NowoQrCode>`
 - PHP `QrCodeService::createDataUri` / `createDataUriForUrl`
+- Database profiles (`use_database_config`, SQLite under `var/data/`, seeded with six profiles; `default` / `compact`
+  override the YAML ones) and the admin `/admin/qr-code-profiles` on the UiKit page contract (`nowo_ui_kit.layouts.admin`
+  = `templates/layouts/admin.html.twig`, Bootstrap 5 form theme): list, create, edit, delete through the confirm
+  dialog, YAML import
 - Web Profiler + Nowo Twig Inspector in `dev`

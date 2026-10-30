@@ -14,7 +14,9 @@ This bundle is **FrankenPHP worker mode friendly**.
 
 It supports workers that do **not** reset the Symfony kernel between requests. YAML-only setups are fully stateless; with `use_database_config: true`, profiles are read without the Doctrine identity map and closed EntityManagers are recovered (see [docs/FRANKENPHP-WORKER-AUDIT.md](docs/FRANKENPHP-WORKER-AUDIT.md)).
 
-![QR codes rendered by the Twig functions, the NowoQrCode Twig component and QrCodeService with the default and compact profiles](docs/images/demo/qr-codes.webp)
+| QR codes (Twig functions, Twig component, `QrCodeService`) | Database profiles admin (UiKit list) | Profile form (UiKit form + delete zone) |
+| --- | --- | --- |
+| ![QR codes rendered by the Twig functions, the NowoQrCode Twig component and QrCodeService with the default and compact profiles](docs/images/demo/qr-codes.webp) | ![Admin list of the database QR profiles: YAML overrides and database-only profiles with size, margin, error correction and URL allowlist](docs/images/demo/qr-code-profiles.webp) | ![Edit form of the wallet-pass QR profile with the danger zone](docs/images/demo/qr-code-profile-edit.webp) |
 
 ## Features
 
@@ -80,17 +82,19 @@ $safeUri = $qrCodeService->createDataUriForUrl('https://example.com/path', 'comp
 ```bash
 make -C demo/symfony8 up
 # http://localhost:8012/demo
+# http://localhost:8012/admin/qr-code-profiles (dev: database profiles on SQLite, seeded)
 ```
 
 See [docs/DEMO-FRANKENPHP.md](docs/DEMO-FRANKENPHP.md) (`FRANKENPHP_MODE=worker` default; PHP **8.5** + **gd**).
 
-The screenshot at the top comes from this demo. Refresh it with `make -C demo/symfony8 demo-screenshots`; `make -C demo/symfony8 test-e2e` runs the Playwright happy path.
+The screenshots at the top come from this demo. Refresh them with `make -C demo/symfony8 demo-screenshots`; `make -C demo/symfony8 test-e2e` runs the Playwright happy paths (QR rendering and the profile admin: list, create, edit, delete through the confirm dialog, YAML import).
 
 ## Documentation
 
 - [Installation](docs/INSTALLATION.md)
 - [Configuration](docs/CONFIGURATION.md)
 - [Usage](docs/USAGE.md)
+- [Templates (UiKit page contract)](docs/TEMPLATES.md)
 - [Contributing](docs/CONTRIBUTING.md)
 - [Code of Conduct](CODE_OF_CONDUCT.md)
 - [Changelog](docs/CHANGELOG.md)

@@ -1,0 +1,9 @@
+# Demo storage for the database-backed QR profiles (nowo_qr_code.use_database_config): a SQLite file, no DB container.
+# The entrypoint creates the schema and seeds the demo profiles (bin/console app:demo:setup).
+doctrine:
+    dbal:
+        url: 'sqlite:///%kernel.project_dir%/var/data/qr_code_demo_%kernel.environment%.sqlite'
+        profiling_collect_backtrace: '%kernel.debug%'
+    orm:
+        naming_strategy: doctrine.orm.naming_strategy.underscore
+        auto_mapping: true

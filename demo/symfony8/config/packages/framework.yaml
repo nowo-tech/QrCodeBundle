@@ -2,6 +2,13 @@ framework:
     secret: '%env(APP_SECRET)%'
     http_method_override: false
     session: true
+    # The QR profile admin fails closed without CSRF protection (form + delete / import tokens).
+    csrf_protection: true
+    form:
+        csrf_protection: true
+    translator:
+        default_path: '%kernel.project_dir%/translations'
+        fallbacks: ['en']
     php_errors:
         log: true
 

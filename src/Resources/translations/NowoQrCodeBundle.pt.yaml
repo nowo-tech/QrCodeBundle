@@ -1,0 +1,63 @@
+# NowoQrCodeBundle admin UI (pt). Override any key in translations/NowoQrCodeBundle.pt.yaml (REQ-I18N-001).
+nowo_qr_code:
+    admin:
+        actions:
+            delete: "Eliminar"
+            edit: "Editar"
+        allowlist_any: "Qualquer URL http(s)"
+        back: "Voltar aos perfis"
+        badge:
+            db_only: "Só base de dados"
+            overrides_yaml: "Substitui YAML"
+        columns:
+            actions: "Ações"
+            error_correction: "Correção de erros"
+            margin: "Margem"
+            name: "Nome"
+            size: "Tamanho"
+            url_allowlist: "URLs permitidos"
+        confirm:
+            cancel: "Cancelar"
+            delete_confirm: "Eliminar perfil"
+            delete_message: "O perfil \"%name%\" será eliminado. Os códigos QR que o usam passam para o perfil YAML com o mesmo nome, se existir."
+            delete_title: "Eliminar este perfil?"
+        error_correction:
+            high: "Alta (30%)"
+            low: "Baixa (7%)"
+            medium: "Média (15%)"
+            quartile: "Quartil (25%)"
+        flash:
+            created: "Perfil criado."
+            deleted: "Perfil \"%name%\" eliminado."
+            import_none: "Não há perfis YAML para importar."
+            imported: "%count% perfil(is) importado(s) ou atualizado(s) a partir de YAML."
+            invalid_csrf: "Token CSRF inválido."
+            updated: "Perfil atualizado."
+        form:
+            cancel: "Cancelar"
+            db_config_off: "use_database_config é false: ative-o para que os perfis da base de dados substituam o YAML em execução."
+            edit_title: "Editar perfil QR"
+            fields:
+                error_correction:
+                    label: "Correção de erros"
+                margin:
+                    label: "Margem (px)"
+                name:
+                    help: "Tem de coincidir com o nome de um perfil YAML para o substituir; um nome novo adiciona um perfil só na base de dados."
+                    label: "Nome do perfil"
+                size:
+                    label: "Tamanho (px)"
+                url_allowlist:
+                    help: "Um padrão por linha. Vazio = qualquer URL http(s). Os padrões regex (#…#) têm de compilar e não podem aninhar quantificadores."
+                    label: "URLs permitidos"
+            new_intro: "Definições de códigos QR guardadas na base de dados"
+            new_title: "Novo perfil QR"
+            save: "Guardar"
+        index:
+            db_config_off: "use_database_config é false: as linhas são editáveis mas só substituem o YAML quando o ativar."
+            empty: "Ainda não há perfis na base de dados. Crie um ou importe-os do YAML."
+            import: "Importar do YAML"
+            intro: "Os perfis da base de dados substituem os perfis YAML com o mesmo nome (use_database_config)."
+            new: "Novo perfil"
+            title: "Perfis de código QR"
+            yaml_baseline: "Base YAML:"

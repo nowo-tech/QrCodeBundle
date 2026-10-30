@@ -1,0 +1,6 @@
+# QR profile admin CRUD: only where use_database_config is enabled (dev / test demo).
+when@dev: &qr_code_admin_routes
+    nowo_qr_code_admin:
+        resource: '@NowoQrCodeBundle/Resources/config/routing.yaml'
+
+when@test: *qr_code_admin_routes
