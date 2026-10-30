@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Table of contents
 
 - [[Unreleased]](#unreleased)
+- [[1.11.0] - 2026-10-30](#1110---2026-10-30)
 - [[1.10.0] - 2026-10-28](#1100---2026-10-28)
 - [[1.9.1] - 2026-10-28](#191---2026-10-28)
 - [[1.9.0] - 2026-10-28](#190---2026-10-28)
@@ -36,6 +37,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [[1.0.0] - 2026-07-30](#100---2026-07-30)
 
 ## [Unreleased]
+
+## [1.11.0] - 2026-10-30
+
+QrCode: UiKit page-contract admin + translations, CsrfProtectionPass; SEC-004 BK: host-only #regex#, url#^…# opt-in, export-ignore, admin routes only with use_database_config See [UPGRADING](UPGRADING.md#to-1110).
 
 Admin pages on the UiKit page contract (REQ-UI-003), admin translations in seven locales, fail-closed CSRF gate. See
 [UPGRADING](UPGRADING.md#unreleased).
@@ -95,6 +100,8 @@ Admin pages on the UiKit page contract (REQ-UI-003), admin translations in seven
   (imported by the Flex recipe) now goes through `Routing\AdminRouteLoader`, which imports the admin routes only when
   `use_database_config` is `true`: with the default `false`, `/admin/qr-code-profiles` is a 404 instead of a 500.
 - `QrCodeProfileAdminController` is `final` (SEC-004 Appendix BK, I5).
+
+[1.11.0]: https://github.com/nowo-tech/QrCodeBundle/releases/tag/v1.11.0
 
 ## [1.10.0] - 2026-10-28
 

@@ -3,6 +3,7 @@
 ## Table of contents
 
 - [Unreleased](#unreleased)
+- [To 1.11.0](#to-1110)
   - [Template contract](#template-contract)
   - [Layout](#layout)
   - [Configuration](#configuration)
@@ -46,6 +47,14 @@
 - [[1.0.0] - 2026-07-30](#100---2026-07-30)
 
 ## Unreleased
+
+## To 1.11.0
+
+From **1.10.0**:
+
+```bash
+composer update nowo-tech/qr-code-bundle
+```
 
 ```bash
 composer update nowo-tech/qr-code-bundle nowo-tech/ui-kit-bundle nowo-tech/form-kit-bundle
