@@ -28,6 +28,12 @@ updates:
           - "rector/rector"
     commit-message:
       prefix: "chore(deps):"
+    ignore:
+      # endroid/qr-code 6.1+ requires PHP ^8.4 (6.2 requires ^8.5). The bundle supports PHP >=8.2 and its lock
+      # resolves for config.platform.php 8.2.0, so the lock stays on 6.0.x. composer.json keeps "^6.0" so
+      # applications on PHP 8.4+ can still install 6.1+. Drop this when the PHP floor reaches 8.4.
+      - dependency-name: "endroid/qr-code"
+        versions: [">= 6.1"]
 
   # Maintain dependencies for GitHub Actions
   - package-ecosystem: "github-actions"
