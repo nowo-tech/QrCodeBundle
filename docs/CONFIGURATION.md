@@ -48,6 +48,7 @@ nowo_qr_code:
     use_database_config: true
     doctrine:
         table_prefix: ''          # optional; e.g. app_ → app_qr_code_profile
+        entity_manager: null      # 1.11.2+: manager of QrCodeProfileConfig; null = getManagerForClass()
     security:
         access_roles: [ROLE_ADMIN]
         allow_unauthenticated: false
@@ -64,6 +65,7 @@ nowo_qr_code:
 | --- | --- | --- |
 | `use_database_config` | `false` | When `true`, loads Doctrine services + admin CRUD; requires `doctrine/orm` ^3.7 |
 | `doctrine.table_prefix` | `''` | Prefixed onto table `qr_code_profile` |
+| `doctrine.entity_manager` | `null` | Since 1.11.2. Entity manager that manages `QrCodeProfileConfig`. On every main request the bundle resets it when a failed flush left it closed (FrankenPHP worker mode without kernel reset) and detaches stale profile rows from it. Other managers of the host, closed or open, are never touched. `null` resolves it with `ManagerRegistry::getManagerForClass()`. |
 | `security.access_roles` | `[ROLE_ADMIN]` | Roles allowed to use `/admin/qr-code-profiles`. Empty list = **deny everyone** (fail-closed); use `allow_unauthenticated` to open it |
 | `security.allow_unauthenticated` | `false` | Open admin (demo/dev only) |
 | `security.access_checker` | `null` | Optional custom `QrCodeAccessCheckerInterface` service id |

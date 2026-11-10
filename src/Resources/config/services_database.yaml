@@ -20,7 +20,10 @@ services:
 
   Nowo\QrCodeBundle\Form\QrCodeProfileConfigType: ~
 
-  Nowo\QrCodeBundle\EventSubscriber\ClosedEntityManagerSubscriber: ~
+  # 1.11.2: resets only the bundle's own entity manager (rule 6), never a host one.
+  Nowo\QrCodeBundle\EventSubscriber\ClosedEntityManagerSubscriber:
+    arguments:
+      $entityManagerName: '%nowo_qr_code.doctrine.entity_manager%'
 
   # UiKit page contract (REQ-UI-003): layout / per-page template resolution and the page view models.
   Nowo\QrCodeBundle\Ui\QrCodePages:
