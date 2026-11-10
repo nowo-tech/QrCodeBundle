@@ -51,6 +51,23 @@ final class NowoQrCodeExtensionDatabaseTest extends TestCase
         self::assertInstanceOf(Reference::class, $resolverArgs['$profileRepository'] ?? $resolverArgs[3] ?? null);
     }
 
+    public function testDedicatedEntityManagerIsInjectedIntoTheAdmin(): void
+    {
+        $container = $this->baseContainer();
+        (new NowoQrCodeExtension())->load([[
+            'use_database_config' => true,
+            'doctrine'            => ['entity_manager' => 'bundle'],
+            'security'            => ['allow_unauthenticated' => true],
+        ]], $container);
+
+        self::assertSame('bundle', $container->getParameter('nowo_qr_code.doctrine.entity_manager'));
+        foreach ([QrCodeProfileAdminService::class, QrCodeProfileAdminController::class] as $id) {
+            $argument = $container->getDefinition($id)->getArgument('$entityManager');
+            self::assertInstanceOf(Reference::class, $argument);
+            self::assertSame('doctrine.orm.bundle_entity_manager', (string) $argument);
+        }
+    }
+
     public function testRegistersConfigurableAccessCheckerWithoutSecurityService(): void
     {
         $container = $this->baseContainer();
