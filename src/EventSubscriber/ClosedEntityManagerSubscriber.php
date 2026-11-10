@@ -25,7 +25,7 @@ use function is_string;
  *
  * On every main request this subscriber resets the bundle's manager (the one that manages
  * {@see QrCodeProfileConfig}) when closed, and detaches only {@see QrCodeProfileConfig} instances from it so the next
- * admin load / import sees fresh rows. Since 1.11.2 no other manager of the host, closed or open, is touched.
+ * admin load / import sees fresh rows. Since 1.12.0 no other manager of the host, closed or open, is touched.
  */
 final readonly class ClosedEntityManagerSubscriber implements EventSubscriberInterface
 {

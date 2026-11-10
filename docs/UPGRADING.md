@@ -3,7 +3,7 @@
 ## Table of contents
 
 - [Unreleased](#unreleased)
-  - [To 1.11.2](#to-1112)
+  - [To 1.12.0](#to-1120)
 - [To 1.11.1](#to-1111)
 - [To 1.11.0](#to-1110)
   - [Template contract](#template-contract)
@@ -50,14 +50,16 @@
 
 ## Unreleased
 
-### To 1.11.2
+### To 1.12.0
 
 From **1.11.1**: `composer update nowo-tech/qr-code-bundle`. No configuration change is needed.
 
 - The bundle no longer resets a closed host entity manager at the start of a request; it resets (and clears stale
   profile rows from) only the manager of `QrCodeProfileConfig`.
-- Optional: `nowo_qr_code.doctrine.entity_manager: <name>` pins that manager (default `null`: resolved with
-  `ManagerRegistry::getManagerForClass()`). Admin writes still use the default manager in 1.11.x.
+- Optional: `nowo_qr_code.doctrine.entity_manager: <name>` moves `QrCodeProfileConfig` to a dedicated manager (it must
+  exist under `doctrine.orm.entity_managers`, with its own connection; create the profile table there). The entity is
+  then mapped on that manager only, also when the default manager uses `auto_mapping`, and the admin writes through
+  it. Default `null`: the default manager, as before.
 
 ## To 1.11.1
 

@@ -20,7 +20,7 @@ services:
 
   Nowo\QrCodeBundle\Form\QrCodeProfileConfigType: ~
 
-  # 1.11.2: resets only the bundle's own entity manager (rule 6), never a host one.
+  # 1.12.0: resets only the bundle's own entity manager (rule 6), never a host one.
   Nowo\QrCodeBundle\EventSubscriber\ClosedEntityManagerSubscriber:
     arguments:
       $entityManagerName: '%nowo_qr_code.doctrine.entity_manager%'

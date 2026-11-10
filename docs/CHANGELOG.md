@@ -39,7 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-Target 1.11.2.
+Target 1.12.0 (minor: a new public configuration key and a behaviour change on hosts with several entity managers).
 
 ### Fixed
 
@@ -49,7 +49,10 @@ Target 1.11.2.
 
 ### Added
 
-- `nowo_qr_code.doctrine.entity_manager` (default `null`: resolved with `getManagerForClass(QrCodeProfileConfig)`).
+- `nowo_qr_code.doctrine.entity_manager` (default `null` = the default manager): a dedicated entity manager for
+  `QrCodeProfileConfig`. The entity is mapped on that manager only (removed from the others, including
+  `auto_mapping`), the admin service and controller read and write through it, and the closed-manager recovery resets
+  it. The build fails when the manager does not exist. Audit LD-QR-M1.
 
 ## [1.11.1] - 2026-10-30
 
