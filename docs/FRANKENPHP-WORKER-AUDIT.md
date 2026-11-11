@@ -78,7 +78,7 @@ Worker demo: `demo/symfony8/docker/frankenphp/Caddyfile` declares a `worker` blo
 
 - **Where:** admin flush failures close the shared EM; list/edit used managed entities.
 - **Worker impact:** under **B**, later writes failed with "EntityManager is closed"; admin pages could show stale rows.
-- **Status:** Resolved — `ClosedEntityManagerSubscriber` on every main request: `resetManager()` when closed, then detach only `QrCodeProfileConfig` from the identity map. `findAllOrderedByName()` also sets `Query::HINT_REFRESH`. Host application entities are not cleared.
+- **Status:** Resolved — `ClosedEntityManagerSubscriber` on every main request: `resetManager()` when closed, then detach only `QrCodeProfileConfig` from the identity map. `findAllOrderedByName()` also sets `Query::HINT_REFRESH`. Host application entities are not cleared. Since 1.12.0 only the manager of `QrCodeProfileConfig` (optionally a dedicated one, `doctrine.entity_manager`) is reset and cleared, never a host manager; kept-alive kernel tests without `kernel.reset`: `tests/Integration/Worker/WorkerClosedManagerRecoveryTest.php`, `tests/Integration/Worker/DddEntityManagerKernelTest.php`.
 
 No other findings. The YAML-only configuration (default, `use_database_config: false`) never touches Doctrine and is fully stateless under both scenarios.
 

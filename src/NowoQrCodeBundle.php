@@ -6,6 +6,7 @@ namespace Nowo\QrCodeBundle;
 
 use Doctrine\Bundle\DoctrineBundle\DependencyInjection\Compiler\DoctrineOrmMappingsPass;
 use Nowo\QrCodeBundle\DependencyInjection\Compiler\CsrfProtectionPass;
+use Nowo\QrCodeBundle\DependencyInjection\Compiler\EntityManagerOptionPass;
 use Nowo\QrCodeBundle\DependencyInjection\Compiler\TwigPathsPass;
 use Nowo\QrCodeBundle\DependencyInjection\NowoQrCodeExtension;
 use Nowo\QrCodeBundle\DependencyInjection\UrlAllowlistValidationPass;
@@ -30,10 +31,14 @@ final class NowoQrCodeBundle extends Bundle
 
         $entityDir = __DIR__ . '/Entity';
         if (class_exists(DoctrineOrmMappingsPass::class) && is_dir($entityDir)) {
+            // 1.12.0: mapped on nowo_qr_code.doctrine.entity_manager when set (else the default manager), and removed
+            // from every other manager (EntityManagerOptionPass, audit LD-QR-M1).
             $container->addCompilerPass(DoctrineOrmMappingsPass::createAttributeMappingDriver(
                 ['Nowo\\QrCodeBundle\\Entity'],
                 [$entityDir],
+                [EntityManagerOptionPass::PARAMETER],
             ));
+            $container->addCompilerPass(new EntityManagerOptionPass());
         }
     }
 

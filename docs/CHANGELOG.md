@@ -39,6 +39,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+Target 1.12.0 (minor: a new public configuration key and a behaviour change on hosts with several entity managers).
+
+### Fixed
+
+- `ClosedEntityManagerSubscriber` reset **every** closed entity manager of the registry on every main request (and
+  detached profile rows from all of them), host managers included. It now resets and clears only the manager of
+  `QrCodeProfileConfig` (rule 6 of the bundle architecture bar). Standard hosts with one default manager see no change.
+
+### Added
+
+- `nowo_qr_code.doctrine.entity_manager` (default `null` = the default manager): a dedicated entity manager for
+  `QrCodeProfileConfig`. The entity is mapped on that manager only (removed from the others, including
+  `auto_mapping`), the admin service and controller read and write through it, and the closed-manager recovery resets
+  it. The build fails when the manager does not exist. Audit LD-QR-M1.
+
 ## [1.11.1] - 2026-10-30
 
 Bundle routes are opt-in again: controllers are no longer autoconfigured, so a host's routing.controllers import does not expose them (REQ-SF-004 rule 7). See [UPGRADING](UPGRADING.md#to-1111).

@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace Nowo\QrCodeBundle\DependencyInjection;
 
 use LogicException;
+use Nowo\QrCodeBundle\Controller\QrCodeProfileAdminController;
 use Nowo\QrCodeBundle\Enum\CssFramework;
 use Nowo\QrCodeBundle\Security\AllowAllQrCodeAccessChecker;
 use Nowo\QrCodeBundle\Security\ConfigurableQrCodeAccessChecker;
 use Nowo\QrCodeBundle\Security\QrCodeAccessCheckerInterface;
+use Nowo\QrCodeBundle\Service\QrCodeProfileAdminService;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
@@ -22,6 +24,7 @@ use function array_key_exists;
 use function class_exists;
 use function is_array;
 use function is_string;
+use function sprintf;
 use function str_starts_with;
 
 /**
@@ -157,6 +160,7 @@ final class NowoQrCodeExtension extends Extension implements PrependExtensionInt
         $container->setParameter('nowo_qr_code.url_allowlist_required', $config['url_allowlist_required']);
         $container->setParameter('nowo_qr_code.use_database_config', $config['use_database_config']);
         $container->setParameter('nowo_qr_code.doctrine.table_prefix', $config['doctrine']['table_prefix']);
+        $container->setParameter('nowo_qr_code.doctrine.entity_manager', $config['doctrine']['entity_manager']);
         $container->setParameter('nowo_qr_code.security.access_roles', $config['security']['access_roles']);
         $container->setParameter('nowo_qr_code.security.access_checker', $config['security']['access_checker']);
         $container->setParameter('nowo_qr_code.security.allow_unauthenticated', $config['security']['allow_unauthenticated']);
@@ -183,6 +187,14 @@ final class NowoQrCodeExtension extends Extension implements PrependExtensionInt
             // Requires doctrine/orm + doctrine/doctrine-bundle (see composer suggest).
             $loader->load('services_database.yaml');
             $this->registerAccessChecker($container, $config['security']);
+
+            $entityManager = $config['doctrine']['entity_manager'];
+            if (is_string($entityManager)) {
+                // 1.12.0 (audit LD-QR-M1): the admin reads and writes profile rows through their own manager.
+                $reference = new Reference(sprintf('doctrine.orm.%s_entity_manager', $entityManager));
+                $container->getDefinition(QrCodeProfileAdminService::class)->setArgument('$entityManager', $reference);
+                $container->getDefinition(QrCodeProfileAdminController::class)->setArgument('$entityManager', $reference);
+            }
 
             $tablePrefix = (string) $config['doctrine']['table_prefix'];
             if ($tablePrefix !== '') {

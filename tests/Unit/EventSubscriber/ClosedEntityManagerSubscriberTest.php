@@ -40,6 +40,8 @@ final class ClosedEntityManagerSubscriberTest extends TestCase
 
         $registry = $this->createMock(ManagerRegistry::class);
         $registry->method('getManagers')->willReturn(['default' => $em, 'other' => $this->createMock(ObjectManager::class)]);
+        $registry->method('getManagerForClass')->willReturn($em);
+        $registry->method('getManager')->willReturn($em);
         $registry->expects(self::once())->method('resetManager')->with('default')
             ->willReturnCallback(static function () use (&$open, $em): EntityManagerInterface {
                 $open = true;
@@ -76,6 +78,8 @@ final class ClosedEntityManagerSubscriberTest extends TestCase
 
         $registry = $this->createMock(ManagerRegistry::class);
         $registry->method('getManagers')->willReturn(['default' => $em]);
+        $registry->method('getManagerForClass')->willReturn($em);
+        $registry->method('getManager')->willReturn($em);
         $registry->expects(self::never())->method('resetManager');
 
         (new ClosedEntityManagerSubscriber($registry))->onKernelRequest($this->event('nowo_qr_code_admin_index'));
@@ -91,6 +95,8 @@ final class ClosedEntityManagerSubscriberTest extends TestCase
 
         $registry = $this->createMock(ManagerRegistry::class);
         $registry->method('getManagers')->willReturn(['default' => $closed]);
+        $registry->method('getManagerForClass')->willReturn($closed);
+        $registry->method('getManager')->willReturn($closed);
         $registry->expects(self::once())->method('resetManager')->with('default')->willReturn($replacement);
 
         (new ClosedEntityManagerSubscriber($registry))->onKernelRequest($this->event());
@@ -111,6 +117,8 @@ final class ClosedEntityManagerSubscriberTest extends TestCase
 
         $registry = $this->createMock(ManagerRegistry::class);
         $registry->method('getManagers')->willReturn(['default' => $em]);
+        $registry->method('getManagerForClass')->willReturn($em);
+        $registry->method('getManager')->willReturn($em);
 
         (new ClosedEntityManagerSubscriber($registry))->onKernelRequest($this->event());
     }
@@ -119,9 +127,30 @@ final class ClosedEntityManagerSubscriberTest extends TestCase
     {
         $registry = $this->createMock(ManagerRegistry::class);
         $registry->expects(self::never())->method('getManagers');
+        $registry->expects(self::never())->method('getManager');
 
         $subscriber = new ClosedEntityManagerSubscriber($registry);
         $subscriber->onKernelRequest($this->event('nowo_qr_code_admin_index', HttpKernelInterface::SUB_REQUEST));
+    }
+
+    public function testWithoutAManagerForProfileConfigsNothingIsReset(): void
+    {
+        $registry = $this->createMock(ManagerRegistry::class);
+        $registry->method('getManagerForClass')->willReturn(null);
+        $registry->expects(self::never())->method('getManager');
+        $registry->expects(self::never())->method('resetManager');
+
+        (new ClosedEntityManagerSubscriber($registry))->onKernelRequest($this->event());
+    }
+
+    public function testConfiguredManagerThatIsNotAnOrmManagerIsIgnored(): void
+    {
+        $registry = $this->createMock(ManagerRegistry::class);
+        $registry->expects(self::never())->method('getManagerForClass');
+        $registry->method('getManager')->with('odm')->willReturn($this->createMock(ObjectManager::class));
+        $registry->expects(self::never())->method('resetManager');
+
+        (new ClosedEntityManagerSubscriber($registry, 'odm'))->onKernelRequest($this->event());
     }
 
     private function event(?string $route = 'nowo_qr_code_admin_index', int $type = HttpKernelInterface::MAIN_REQUEST): RequestEvent
