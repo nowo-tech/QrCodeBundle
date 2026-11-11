@@ -3,6 +3,7 @@
 ## Table of contents
 
 - [Unreleased](#unreleased)
+  - [To 1.13.0](#to-1130)
 - [To 1.12.0](#to-1120)
 - [To 1.11.1](#to-1111)
 - [To 1.11.0](#to-1110)
@@ -49,6 +50,19 @@
 - [[1.0.0] - 2026-07-30](#100---2026-07-30)
 
 ## Unreleased
+
+### To 1.13.0
+
+From **1.12.0**: `composer update nowo-tech/qr-code-bundle`. **Standard hosts: no configuration change.**
+
+- **Profiles from your own service (optional, DDD hosts).** Implement
+  `Nowo\QrCodeBundle\Config\QrCodeProfileProviderInterface` and set `nowo_qr_code.profile_provider` to its service
+  id; keep `use_database_config: false` (the two are exclusive). DoctrineBundle is then not needed.
+- **Hosts without DoctrineBundle** (but with `doctrine/orm` installed by another package) now boot: the
+  `QrCodeProfileConfig` mapping is registered only when DoctrineBundle is configured or `use_database_config` is on.
+- **Deprecated:** the `$profileRepository` argument of `ProfileResolver` (removed in 2.0). Code that builds the
+  resolver itself passes `$profileProvider: new DoctrineQrCodeProfileProvider($repository)` instead. The bundle's own
+  wiring already does.
 
 ## To 1.12.0
 

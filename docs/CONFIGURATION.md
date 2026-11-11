@@ -6,6 +6,7 @@ Root key: `nowo_qr_code`.
 
 - [Profiles (REQ-CFG-001)](#profiles-req-cfg-001)
 - [Database overrides (optional)](#database-overrides-optional)
+  - [Profiles from your own service (1.13)](#profiles-from-your-own-service-113)
   - [Selecting a profile](#selecting-a-profile)
 - [Admin Web UI (layout and CSS)](#admin-web-ui-layout-and-css)
   - [Flat legacy config (BC)](#flat-legacy-config-bc)
@@ -64,6 +65,7 @@ nowo_qr_code:
 | Key | Default | Meaning |
 | --- | --- | --- |
 | `use_database_config` | `false` | When `true`, loads Doctrine services + admin CRUD; requires `doctrine/orm` ^3.7 |
+| `profile_provider` | `null` | Since 1.13.0. Service id of your `Nowo\QrCodeBundle\Config\QrCodeProfileProviderInterface`: its profiles override the YAML ones exactly like database rows do, without Doctrine (see [Profiles from your own service](#profiles-from-your-own-service-113)). Exclusive with `use_database_config`. |
 | `doctrine.table_prefix` | `''` | Prefixed onto table `qr_code_profile` |
 | `doctrine.entity_manager` | `null` | Since 1.12.0. Dedicated entity manager for `QrCodeProfileConfig`. The entity is mapped on that manager only (removed from every other one, including `auto_mapping`), the admin reads and writes through it, and on every main request the bundle resets it when a failed flush left it closed (FrankenPHP worker mode without kernel reset) and detaches stale profile rows from it. Other managers of the host, closed or open, are never touched. The build fails when the manager does not exist. `null`: the default manager, as before. |
 | `security.access_roles` | `[ROLE_ADMIN]` | Roles allowed to use `/admin/qr-code-profiles`. Empty list = **deny everyone** (fail-closed); use `allow_unauthenticated` to open it |
@@ -97,6 +99,26 @@ security:
 | Flag on, no DB row for name | YAML profile |
 | Flag on, DB row with same name | **DB wins** (full replace) |
 | Flag on, DB-only name | DB profile |
+
+### Profiles from your own service (1.13)
+
+`profile_provider` names a host service implementing `QrCodeProfileProviderInterface` (`find(string $name):
+?QrCodeProfile`, `names(): list<string>`). It takes the place of the database rows in the merge rules above (a profile
+it returns fully replaces the YAML one; `null` falls back to YAML), so per-tenant or settings-store profiles need no
+Doctrine and no bundle table. It is called on every render: resolve per call, keep no request state in the service
+(FrankenPHP worker mode). `use_database_config` must stay `false` (the two are exclusive), so there is no admin UI.
+
+```yaml
+nowo_qr_code:
+    profile_provider: App\Infrastructure\Qr\TenantQrProfiles
+    default_profile: default
+    profiles:
+        default: { size: 300, margin: 10, url_allowlist: ['example.com'] }   # fallback
+```
+
+Since 1.13 the `QrCodeProfileConfig` entity is mapped only when DoctrineBundle is configured or `use_database_config`
+is on, so a host without DoctrineBundle boots even when `doctrine/orm` is installed (before, the mapping pass failed
+with "Could not find the manager name parameter").
 
 ### Selecting a profile
 

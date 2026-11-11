@@ -21,6 +21,7 @@ use function implode;
 use function is_array;
 use function is_string;
 use function sprintf;
+use function trim;
 
 /**
  * Configuration definition for QR Code Bundle (`nowo_qr_code`).
@@ -63,6 +64,10 @@ final class Configuration implements ConfigurationInterface
                 ->booleanNode('url_allowlist_required')
                     ->defaultFalse()
                     ->info('When true, container compilation fails if the default profile url_allowlist is empty (production hardening).')
+                ->end()
+                ->scalarNode('profile_provider')
+                    ->info('Service id of your Nowo\\QrCodeBundle\\Config\\QrCodeProfileProviderInterface (1.13): its profiles override the YAML ones, without Doctrine. Exclusive with use_database_config.')
+                    ->defaultNull()
                 ->end()
                 ->booleanNode('use_database_config')
                     ->info('When true, Doctrine rows with the same profile name fully override YAML profiles; enables admin CRUD and requires doctrine/orm')
@@ -211,6 +216,9 @@ final class Configuration implements ConfigurationInterface
                 ->always(static function (array $v): array {
                     if (!isset($v['profiles'][$v['default_profile']])) {
                         throw new InvalidConfigurationException(sprintf('default_profile "%s" must exist under profiles.', $v['default_profile']));
+                    }
+                    if (is_string($v['profile_provider'] ?? null) && trim($v['profile_provider']) !== '' && ($v['use_database_config'] ?? false) === true) {
+                        throw new InvalidConfigurationException('nowo_qr_code.profile_provider and use_database_config are exclusive: the provider replaces the bundle\'s profile table (and its admin UI).');
                     }
 
                     return $v;

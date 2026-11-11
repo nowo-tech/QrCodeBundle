@@ -10,6 +10,7 @@ services:
       $defaultProfile: '%nowo_qr_code.default_profile%'
       $useDatabaseConfig: '%nowo_qr_code.use_database_config%'
       $profileRepository: null
+      $profileProvider: null
 
   Nowo\QrCodeBundle\Service\QrCodeService:
     arguments:

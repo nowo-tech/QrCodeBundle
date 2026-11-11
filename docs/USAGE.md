@@ -3,6 +3,7 @@
 ## Table of contents
 
 - [Service](#service)
+- [Using it from a DDD / hexagonal application](#using-it-from-a-ddd--hexagonal-application)
 - [Database profiles (optional)](#database-profiles-optional)
 - [Translations](#translations)
 - [Low-level renderer](#low-level-renderer)
@@ -38,6 +39,85 @@ final class TicketController
 ```
 
 Omit the profile argument (or pass `null`) to use `default_profile`. An unknown profile name throws `InvalidQrProfileException`.
+
+## Using it from a DDD / hexagonal application
+
+QrCodeBundle is a **presentation / infrastructure** component: it turns a string into a PNG data URI. It has no
+relation to your entities; its only table (`qr_code_profile`) is optional and holds rendering profiles.
+
+**Two ways to configure the profiles**
+
+- **Standard path (default).** YAML `profiles`, optionally overridden by database rows edited in the admin UI
+  (`use_database_config: true`, Doctrine ORM).
+- **DDD path (opt-in, 1.13).** Your own `Nowo\QrCodeBundle\Config\QrCodeProfileProviderInterface` service as
+  `profile_provider`: profiles from your settings store or per tenant, overriding YAML, without Doctrine (DoctrineBundle
+  need not be registered).
+
+```php
+namespace App\Infrastructure\Qr;
+
+use Nowo\QrCodeBundle\Config\QrCodeProfile;
+use Nowo\QrCodeBundle\Config\QrCodeProfileProviderInterface;
+use Nowo\QrCodeBundle\Enum\QrErrorCorrection;
+
+final readonly class TenantQrProfiles implements QrCodeProfileProviderInterface
+{
+    public function __construct(private TenantSettings $settings) {} // your port
+
+    public function find(string $name): ?QrCodeProfile
+    {
+        $qr = $this->settings->current()->qr($name); // resolved per call: no state between requests
+
+        return $qr === null ? null : new QrCodeProfile($name, $qr->size, $qr->margin, QrErrorCorrection::Medium, $qr->allowedHosts);
+    }
+
+    public function names(): array
+    {
+        return $this->settings->current()->qrProfileNames();
+    }
+}
+```
+
+```yaml
+# config/packages/nowo_qr_code.yaml
+nowo_qr_code:
+    profile_provider: App\Infrastructure\Qr\TenantQrProfiles   # exclusive with use_database_config
+```
+
+**Keep QR generation out of the domain**
+
+- If an application service needs a QR image (ticket, pass, invoice), define your own port, for example
+  `QrImageGenerator::forTicketUrl(string): string`, and implement it in infrastructure with `QrCodeService`.
+- Use `createDataUriForUrl()` for URLs so the profile's `url_allowlist` applies; catch `InvalidQrUrlException` and
+  `InvalidQrProfileException` in the adapter.
+- In templates, call `qr_code_data_uri()` / `qr_code_for_url()` or `<twig:NowoQrCode>` with values your view model
+  already prepared; do not pass entities.
+- Admin access is decided by your own `QrCodeAccessCheckerInterface` implementation (`security.access_checker`).
+
+```php
+namespace App\Infrastructure\Qr;
+
+use App\Application\Ticket\QrImageGenerator;   // your port
+use Nowo\QrCodeBundle\Service\QrCodeService;
+
+final readonly class BundleQrImageGenerator implements QrImageGenerator
+{
+    public function __construct(private QrCodeService $qr) {}
+
+    public function forTicketUrl(string $url): string
+    {
+        return $this->qr->createDataUriForUrl($url, 'wallet');
+    }
+}
+```
+
+**Known limitations**
+
+- `QrCodeService` is final with no interface; wrap it in your own port (as above) to keep test doubles simple.
+- Output is a PNG data URI only; decode it if you need raw bytes.
+- No events are dispatched when database profiles change.
+- With DoctrineBundle configured, `QrCodeProfileConfig` stays mapped even when `use_database_config` is off (BC: an
+  unmapped table would show up as a DROP in schema diffs); 2.0 maps it only with `use_database_config`.
 
 ## Database profiles (optional)
 

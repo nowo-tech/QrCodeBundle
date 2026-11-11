@@ -15,16 +15,19 @@ use function sort;
 use function sprintf;
 
 /**
- * Resolves named QR profiles from YAML with optional Doctrine overrides.
+ * Resolves named QR profiles from YAML, overridden by a profile source.
  *
- * When use_database_config is true and a DB row shares a profile name, the DB row
- * fully replaces the YAML profile. DB-only names are also resolvable.
+ * The source is {@see QrCodeProfileProviderInterface}: the bundle's Doctrine rows with use_database_config
+ * ({@see DoctrineQrCodeProfileProvider}), or the host's `profile_provider` (1.13). A profile of the source fully
+ * replaces the YAML profile with the same name; names only the source knows are also resolvable.
  *
- * Nothing is memoized: every call reads the current database row (no identity map), so admin edits
- * made in any worker apply to the next render without a kernel reset.
+ * Nothing is memoized: every call asks the source again, so edits made in any worker apply to the next render without
+ * a kernel reset.
  */
 final readonly class ProfileResolver
 {
+    private ?QrCodeProfileProviderInterface $source;
+
     /**
      * @param array<string, array{
      *     size: int,
@@ -32,28 +35,32 @@ final readonly class ProfileResolver
      *     error_correction: string,
      *     url_allowlist: list<string>
      * }> $profiles
+     * @param QrCodeProfileConfigRepository|null $profileRepository deprecated since 1.13 (removed in 2.0): pass
+     *                                                              `$profileProvider` (a {@see DoctrineQrCodeProfileProvider})
+     * @param QrCodeProfileProviderInterface|null $profileProvider the profile source (1.13); wins over $profileRepository
      */
     public function __construct(
         private array $profiles,
         private string $defaultProfile,
         private bool $useDatabaseConfig = false,
-        private ?QrCodeProfileConfigRepository $profileRepository = null,
+        ?QrCodeProfileConfigRepository $profileRepository = null,
+        ?QrCodeProfileProviderInterface $profileProvider = null,
     ) {
+        $this->source = $profileProvider
+            ?? ($useDatabaseConfig && $profileRepository instanceof QrCodeProfileConfigRepository ? new DoctrineQrCodeProfileProvider($profileRepository) : null);
     }
 
     public function resolve(?string $profile = null): QrCodeProfile
     {
         $name = $profile ?? $this->defaultProfile;
 
-        if ($this->useDatabaseConfig && $this->profileRepository instanceof QrCodeProfileConfigRepository) {
-            $stored = $this->profileRepository->findProfileArrayByName($name);
-            if ($stored !== null) {
-                return QrCodeProfile::fromArray($name, $stored);
-            }
+        $found = $this->source?->find($name);
+        if ($found instanceof QrCodeProfile) {
+            return $found;
         }
 
         if (!isset($this->profiles[$name])) {
-            throw new InvalidQrProfileException(sprintf('Profile "%s" is not defined in nowo_qr_code.profiles%s.', $name, $this->useDatabaseConfig ? ' or the database' : ''));
+            throw new InvalidQrProfileException(sprintf('Profile "%s" is not defined in nowo_qr_code.profiles%s.', $name, $this->useDatabaseConfig ? ' or the database' : ($this->source instanceof QrCodeProfileProviderInterface ? ' or the profile provider' : '')));
         }
 
         return QrCodeProfile::fromArray($name, $this->profiles[$name]);
@@ -71,8 +78,8 @@ final readonly class ProfileResolver
     {
         $names = array_keys($this->profiles);
 
-        if ($this->useDatabaseConfig && $this->profileRepository instanceof QrCodeProfileConfigRepository) {
-            $names = array_merge($names, $this->profileRepository->findAllNames());
+        if ($this->source instanceof QrCodeProfileProviderInterface) {
+            $names = array_merge($names, $this->source->names());
         }
 
         $names = array_values(array_unique($names));

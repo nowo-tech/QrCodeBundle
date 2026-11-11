@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Table of contents
 
 - [[Unreleased]](#unreleased)
+  - [Target 1.13.0](#target-1130)
 - [[1.12.0] - 2026-11-11](#1120---2026-11-11)
 - [[1.11.1] - 2026-10-30](#1111---2026-10-30)
 - [[1.11.0] - 2026-10-30](#1110---2026-10-30)
@@ -39,6 +40,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [[1.0.0] - 2026-07-30](#100---2026-07-30)
 
 ## [Unreleased]
+
+### Target 1.13.0
+
+Architecture bar W2 (standard Symfony by default, strict DDD opt-in): rule 8 (configuration through provider ports,
+no ORM just for configuration).
+
+#### Added
+
+- `Config\QrCodeProfileProviderInterface` (`find()`, `names()`): the source of profiles that override the YAML ones.
+  `Config\DoctrineQrCodeProfileProvider` reads the bundle's table (`use_database_config`, unchanged behaviour); the
+  new `profile_provider` option points at a host service instead (per tenant, settings store), without Doctrine.
+  `profile_provider` and `use_database_config` are exclusive.
+- USAGE section "Using it from a DDD / hexagonal application" (both paths).
+
+#### Fixed
+
+- A host without DoctrineBundle but with `doctrine/orm` installed failed to compile ("Could not find the manager name
+  parameter"): the `QrCodeProfileConfig` mapping is now registered only when DoctrineBundle is configured or
+  `use_database_config` is on. Standard hosts (DoctrineBundle registered) keep the mapping as before.
+
+#### Deprecated
+
+- `ProfileResolver`'s `$profileRepository` argument (removed in 2.0): pass `$profileProvider` (a
+  `DoctrineQrCodeProfileProvider`).
+
+#### Tests
+
+- `tests/Integration/Ddd/HostProfileProviderKernelTest.php`: no DoctrineBundle, profiles per tenant from a host
+  provider; a kept-alive kernel serving 1,200 requests for two tenants through `http_kernel` without the services
+  resetter (each request gets its tenant's size and URL allow-list, flat memory).
+
 
 ## [1.12.0] - 2026-11-11
 

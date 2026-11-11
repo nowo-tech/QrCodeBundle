@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Nowo\QrCodeBundle\Tests\Unit\Config;
 
+use Nowo\QrCodeBundle\Config\DoctrineQrCodeProfileProvider;
 use Nowo\QrCodeBundle\Config\ProfileResolver;
+use Nowo\QrCodeBundle\Config\QrCodeProfile;
+use Nowo\QrCodeBundle\Config\QrCodeProfileProviderInterface;
 use Nowo\QrCodeBundle\Entity\QrCodeProfileConfig;
 use Nowo\QrCodeBundle\Enum\QrErrorCorrection;
 use Nowo\QrCodeBundle\Exception\InvalidQrProfileException;
@@ -156,6 +159,50 @@ final class ProfileResolverTest extends TestCase
                 'url_allowlist'    => ['example.com'],
             ],
         ];
+    }
+
+    public function testHostProviderOverridesYamlAndFallsBack(): void
+    {
+        $provider = new class implements QrCodeProfileProviderInterface {
+            public function find(string $name): ?QrCodeProfile
+            {
+                return $name === 'compact' || $name === 'tenant'
+                    ? new QrCodeProfile($name, 99, 1, QrErrorCorrection::Quartile, ['tenant.example'])
+                    : null;
+            }
+
+            public function names(): array
+            {
+                return ['tenant', 'compact'];
+            }
+        };
+        $resolver = new ProfileResolver($this->yamlProfiles(), 'default', false, null, $provider);
+
+        self::assertSame(99, $resolver->resolve('compact')->size);
+        self::assertSame(['tenant.example'], $resolver->resolve('tenant')->urlAllowlist);
+        self::assertSame(300, $resolver->resolve()->size, 'unknown to the provider: YAML');
+        self::assertSame(['compact', 'default', 'tenant'], $resolver->getProfileNames());
+        self::assertFalse($resolver->usesDatabaseConfig());
+
+        $this->expectException(InvalidQrProfileException::class);
+        $this->expectExceptionMessage('Profile "missing" is not defined in nowo_qr_code.profiles or the profile provider.');
+        $resolver->resolve('missing');
+    }
+
+    public function testDoctrineProviderReadsTheRepository(): void
+    {
+        $repo = $this->createMock(QrCodeProfileConfigRepository::class);
+        $repo->method('findProfileArrayByName')->willReturnCallback(
+            static fn (string $name): ?array => $name === 'db' ? ['size' => 150, 'margin' => 3, 'error_correction' => 'low', 'url_allowlist' => []] : null,
+        );
+        $repo->method('findAllNames')->willReturn(['db']);
+        $resolver = new ProfileResolver($this->yamlProfiles(), 'default', true, null, new DoctrineQrCodeProfileProvider($repo));
+
+        self::assertSame(150, $resolver->resolve('db')->size);
+        self::assertSame(['compact', 'db', 'default'], $resolver->getProfileNames());
+
+        $this->expectExceptionMessage('or the database.');
+        $resolver->resolve('missing');
     }
 
     private function resolver(): ProfileResolver

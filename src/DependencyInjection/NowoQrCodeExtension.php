@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Nowo\QrCodeBundle\DependencyInjection;
 
 use LogicException;
+use Nowo\QrCodeBundle\Config\ProfileResolver;
 use Nowo\QrCodeBundle\Controller\QrCodeProfileAdminController;
 use Nowo\QrCodeBundle\Enum\CssFramework;
 use Nowo\QrCodeBundle\Security\AllowAllQrCodeAccessChecker;
@@ -26,6 +27,7 @@ use function is_array;
 use function is_string;
 use function sprintf;
 use function str_starts_with;
+use function trim;
 
 /**
  * Dependency injection extension for the QR Code bundle.
@@ -139,6 +141,9 @@ final class NowoQrCodeExtension extends Extension implements PrependExtensionInt
         return is_string($value) ? CssFramework::from($value)->normalized()->value : null;
     }
 
+    /** Defined when the bundle entity is mapped (1.13): Symfony's mapping pass is skipped otherwise. */
+    public const MAPPING_ENABLED_PARAMETER = 'nowo_qr_code.doctrine.mapping_enabled';
+
     public function load(array $configs, ContainerBuilder $container): void
     {
         $configuration = new Configuration();
@@ -174,6 +179,18 @@ final class NowoQrCodeExtension extends Extension implements PrependExtensionInt
 
         if (class_exists(AsTwigComponent::class)) {
             $loader->load('services_twig_component.yaml');
+        }
+
+        // 1.13 (rule 8): the bundle entity is mapped only when Doctrine ORM is configured (standard hosts: unchanged)
+        // or the profile table is used; a host without DoctrineBundle boots even with doctrine/orm installed.
+        if ($config['use_database_config'] || $container->hasExtension('doctrine')) {
+            $container->setParameter(self::MAPPING_ENABLED_PARAMETER, true);
+        }
+
+        $profileProvider = $config['profile_provider'];
+        if (is_string($profileProvider) && trim($profileProvider) !== '') {
+            // 1.13 (rule 8): profiles from the host's port, no Doctrine.
+            $container->getDefinition(ProfileResolver::class)->setArgument('$profileProvider', new Reference($profileProvider));
         }
 
         if ($config['use_database_config']) {
