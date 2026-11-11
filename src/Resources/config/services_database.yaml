@@ -6,12 +6,16 @@ services:
 
   Nowo\QrCodeBundle\Repository\QrCodeProfileConfigRepository: ~
 
+  # 1.13: the bundle rows are one QrCodeProfileProviderInterface (the host's profile_provider is another).
+  Nowo\QrCodeBundle\Config\DoctrineQrCodeProfileProvider: ~
+
   Nowo\QrCodeBundle\Config\ProfileResolver:
     arguments:
       $profiles: '%nowo_qr_code.profiles%'
       $defaultProfile: '%nowo_qr_code.default_profile%'
       $useDatabaseConfig: '%nowo_qr_code.use_database_config%'
-      $profileRepository: '@Nowo\QrCodeBundle\Repository\QrCodeProfileConfigRepository'
+      $profileRepository: null
+      $profileProvider: '@Nowo\QrCodeBundle\Config\DoctrineQrCodeProfileProvider'
 
   Nowo\QrCodeBundle\Service\QrCodeProfileAdminService:
     arguments:

@@ -186,6 +186,16 @@ final class ConfigurationTest extends TestCase
         ]]);
     }
 
+    public function testProfileProviderAndDatabaseConfigAreExclusive(): void
+    {
+        self::assertSame('app.qr_profiles', $this->processor->processConfiguration($this->configuration, [['profile_provider' => 'app.qr_profiles']])['profile_provider']);
+
+        $this->expectException(InvalidConfigurationException::class);
+        $this->expectExceptionMessage('profile_provider and use_database_config are exclusive');
+
+        $this->processor->processConfiguration($this->configuration, [['profile_provider' => 'app.qr_profiles', 'use_database_config' => true]]);
+    }
+
     public function testSizeMustBeWithinBounds(): void
     {
         $this->expectException(InvalidConfigurationException::class);

@@ -37,6 +37,8 @@ final class NowoQrCodeBundle extends Bundle
                 ['Nowo\\QrCodeBundle\\Entity'],
                 [$entityDir],
                 [EntityManagerOptionPass::PARAMETER],
+                // 1.13: only when Doctrine ORM is configured or the profile table is used (rule 8).
+                NowoQrCodeExtension::MAPPING_ENABLED_PARAMETER,
             ));
             $container->addCompilerPass(new EntityManagerOptionPass());
         }

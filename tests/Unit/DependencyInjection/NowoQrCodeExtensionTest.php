@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Nowo\QrCodeBundle\Tests\Unit\DependencyInjection;
 
+use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use LogicException;
 use Nowo\QrCodeBundle\Config\ProfileResolver;
 use Nowo\QrCodeBundle\DependencyInjection\NowoQrCodeExtension;
@@ -15,6 +16,7 @@ use PHPUnit\Framework\TestCase;
 use ReflectionProperty;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
+use Symfony\Component\DependencyInjection\Reference;
 
 final class NowoQrCodeExtensionTest extends TestCase
 {
@@ -47,6 +49,39 @@ final class NowoQrCodeExtensionTest extends TestCase
         $this->assertNull($container->getParameter('nowo_qr_code.web_ui.layout_template'));
         $this->assertSame([], $container->getParameter('nowo_qr_code.web_ui.templates'));
         $this->assertNull($container->getParameter('nowo_qr_code.web_ui.css_framework'));
+    }
+
+    public function testProfileProviderAndMappingSwitch(): void
+    {
+        $container = new ContainerBuilder();
+        $this->extension->load([['profile_provider' => 'app.qr_profiles']], $container);
+
+        $argument = $container->getDefinition(ProfileResolver::class)->getArgument('$profileProvider');
+        $this->assertInstanceOf(Reference::class, $argument);
+        $this->assertSame('app.qr_profiles', (string) $argument);
+        $this->assertFalse($container->getDefinition(ProfileResolver::class)->getArgument('$yamlFallback'), 'host provider: fail closed');
+        $this->assertFalse($container->hasParameter(NowoQrCodeExtension::MAPPING_ENABLED_PARAMETER), 'no Doctrine: the entity is not mapped');
+
+        $withDoctrine = new ContainerBuilder();
+        $withDoctrine->registerExtension(new class extends Extension {
+            public function load(array $configs, ContainerBuilder $container): void
+            {
+            }
+
+            public function getAlias(): string
+            {
+                return 'doctrine';
+            }
+        });
+        $this->extension->load([], $withDoctrine);
+        $this->assertNull($withDoctrine->getDefinition(ProfileResolver::class)->getArgument('$profileProvider'));
+        $this->assertTrue($withDoctrine->getParameter(NowoQrCodeExtension::MAPPING_ENABLED_PARAMETER), 'standard host: mapped as before');
+
+        // In a kernel load() runs in a container that holds only this extension: DoctrineBundle is seen in kernel.bundles.
+        $kernelHost = new ContainerBuilder();
+        $kernelHost->setParameter('kernel.bundles', ['DoctrineBundle' => DoctrineBundle::class]);
+        $this->extension->load([], $kernelHost);
+        $this->assertTrue($kernelHost->getParameter(NowoQrCodeExtension::MAPPING_ENABLED_PARAMETER), 'standard host with use_database_config off: mapped as before');
     }
 
     /**

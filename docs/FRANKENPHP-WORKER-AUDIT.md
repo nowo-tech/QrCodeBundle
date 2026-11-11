@@ -52,7 +52,8 @@ Worker demo: `demo/symfony8/docker/frankenphp/Caddyfile` declares a `worker` blo
 
 | Service | Shared | Mutable state | Scenario A | Scenario B |
 |---------|--------|---------------|------------|------------|
-| `Nowo\QrCodeBundle\Config\ProfileResolver` | yes | none (`final readonly`); optional repository dependency | ✅ | ✅ (W-01) |
+| `Nowo\QrCodeBundle\Config\ProfileResolver` | yes | none (`final readonly`); optional profile source (1.13: `QrCodeProfileProviderInterface`, asked on every call) | ✅ | ✅ (W-01) |
+| `Nowo\QrCodeBundle\Config\DoctrineQrCodeProfileProvider` (1.13) | yes | none (`final readonly`, array hydration per call) | ✅ | ✅ |
 | `Nowo\QrCodeBundle\Service\QrCodeService` | yes | none (`final readonly`); builds `QrCodeDataUriRenderer` and `QrUrlPolicy` per call | ✅ | ✅ |
 | `Nowo\QrCodeBundle\Twig\QrCodeExtension` | yes | none (`readonly` service dependency) | ✅ | ✅ |
 | `Nowo\QrCodeBundle\Twig\Component\QrCode` (`NowoQrCode`) | **no** (UX `TwigComponentPass` sets `setShared(false)`) | public props set in `mount()`, but a new instance per render | ✅ | ✅ |
@@ -88,6 +89,9 @@ No other findings. The YAML-only configuration (default, `use_database_config: f
 - With `use_database_config: true`, the bundle is correct under A and B without relying on Doctrine's `kernel.reset`.
 - Custom `security.access_checker` services must stay stateless (or implement `ResetInterface`); do not cache the current user or the decision in a property.
 - Do not decorate `QrCodeService` or `ProfileResolver` with an in-memory profile cache unless it is reset per request or invalidated on admin changes.
+- A host `profile_provider` (1.13) is a shared service: resolve the profile per call (e.g. from the current request's
+  tenant) and keep no request state in it. `tests/Integration/Ddd/HostProfileProviderKernelTest.php` serves 1,200
+  requests for two tenants through `http_kernel` without the services resetter.
 
 ## Re-audit triggers
 

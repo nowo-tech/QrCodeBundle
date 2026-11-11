@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Nowo\QrCodeBundle\Tests\Unit\DependencyInjection;
 
 use LogicException;
+use Nowo\QrCodeBundle\Config\DoctrineQrCodeProfileProvider;
 use Nowo\QrCodeBundle\Config\ProfileResolver;
 use Nowo\QrCodeBundle\Controller\QrCodeProfileAdminController;
 use Nowo\QrCodeBundle\DependencyInjection\NowoQrCodeExtension;
@@ -48,7 +49,11 @@ final class NowoQrCodeExtensionDatabaseTest extends TestCase
         );
 
         $resolverArgs = $container->getDefinition(ProfileResolver::class)->getArguments();
-        self::assertInstanceOf(Reference::class, $resolverArgs['$profileRepository'] ?? $resolverArgs[3] ?? null);
+        // 1.13: the rows reach the resolver through the provider port; the repository argument is deprecated.
+        self::assertNull($resolverArgs['$profileRepository']);
+        self::assertInstanceOf(Reference::class, $resolverArgs['$profileProvider']);
+        self::assertSame(DoctrineQrCodeProfileProvider::class, (string) $resolverArgs['$profileProvider']);
+        self::assertTrue($container->hasDefinition(DoctrineQrCodeProfileProvider::class));
     }
 
     public function testDedicatedEntityManagerIsInjectedIntoTheAdmin(): void

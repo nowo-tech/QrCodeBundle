@@ -11,6 +11,13 @@ use Nowo\QrCodeBundle\Enum\QrErrorCorrection;
  */
 final readonly class QrCodeProfile
 {
+    /** Bounds of `size` and `margin` (the YAML tree and the admin form use the same; 1.13 checks every source). */
+    public const MIN_SIZE = 64;
+
+    public const MAX_SIZE = 1024;
+
+    public const MAX_MARGIN = 64;
+
     /**
      * @param list<string> $urlAllowlist
      */
