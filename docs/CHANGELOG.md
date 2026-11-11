@@ -97,12 +97,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 QR profiles from a host provider port without Doctrine; provider-only mode fails closed; size and margin limits on every source. See [UPGRADING](https://github.com/nowo-tech/QrCodeBundle/blob/v1.13.0/docs/UPGRADING.md#to-1130).
 
-### Target 1.13.0
-
 Architecture bar W2 (standard Symfony by default, strict DDD opt-in): rule 8 (configuration through provider ports,
 no ORM just for configuration).
 
-#### Added
+### Added
 
 - `Config\QrCodeProfileProviderInterface` (`find()`, `names()`): the source of profiles that override the YAML ones.
   `Config\DoctrineQrCodeProfileProvider` reads the bundle's table (`use_database_config`, unchanged behaviour); the
@@ -115,18 +113,18 @@ no ORM just for configuration).
   image (audit LR-Q-L2).
 - USAGE section "Using it from a DDD / hexagonal application" (both paths).
 
-#### Fixed
+### Fixed
 
 - A host without DoctrineBundle but with `doctrine/orm` installed failed to compile ("Could not find the manager name
   parameter"): the `QrCodeProfileConfig` mapping is now registered only when DoctrineBundle is configured or
   `use_database_config` is on. Standard hosts (DoctrineBundle registered) keep the mapping as before.
 
-#### Deprecated
+### Deprecated
 
 - `ProfileResolver`'s `$profileRepository` argument (removed in 2.0): pass `$profileProvider` (a
   `DoctrineQrCodeProfileProvider`).
 
-#### Tests
+### Tests
 
 - `tests/Integration/Ddd/HostProfileProviderKernelTest.php`: no DoctrineBundle, profiles per tenant from a host
   provider; a kept-alive kernel serving 1,200 requests for two tenants through `http_kernel` without the services
