@@ -51,7 +51,12 @@ no ORM just for configuration).
 - `Config\QrCodeProfileProviderInterface` (`find()`, `names()`): the source of profiles that override the YAML ones.
   `Config\DoctrineQrCodeProfileProvider` reads the bundle's table (`use_database_config`, unchanged behaviour); the
   new `profile_provider` option points at a host service instead (per tenant, settings store), without Doctrine.
-  `profile_provider` and `use_database_config` are exclusive.
+  `profile_provider` and `use_database_config` are exclusive. A host provider is the only profile source and fails
+  closed: a name it returns `null` for throws `InvalidQrProfileException` (no YAML fallback whose allow-list could be
+  wider; audit LR-Q-L1).
+- Profiles from a source (host provider or database rows) are checked against the YAML bounds (size 64–1024, margin
+  0–64; `QrCodeProfile::MIN_SIZE` / `MAX_SIZE` / `MAX_MARGIN`): out of bounds throws instead of asking GD for a huge
+  image (audit LR-Q-L2).
 - USAGE section "Using it from a DDD / hexagonal application" (both paths).
 
 #### Fixed

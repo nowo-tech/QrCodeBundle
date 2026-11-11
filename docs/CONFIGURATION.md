@@ -103,9 +103,12 @@ security:
 ### Profiles from your own service (1.13)
 
 `profile_provider` names a host service implementing `QrCodeProfileProviderInterface` (`find(string $name):
-?QrCodeProfile`, `names(): list<string>`). It takes the place of the database rows in the merge rules above (a profile
-it returns fully replaces the YAML one; `null` falls back to YAML), so per-tenant or settings-store profiles need no
-Doctrine and no bundle table. It is called on every render: resolve per call, keep no request state in the service
+?QrCodeProfile`, `names(): list<string>`). Unlike database rows it does **not** merge with YAML: it is the only
+profile source, and it **fails closed** — a name it returns `null` for (an unknown tenant, a lookup that failed
+softly) throws `InvalidQrProfileException` instead of falling back to a YAML profile whose allow-list may be wider
+(audit LR-Q-L1). The YAML `profiles` stay required by the configuration tree but are not used at runtime. Every profile
+it returns must respect the YAML bounds (`size` 64–1024, `margin` 0–64), or the render throws (audit LR-Q-L2; the same
+check applies to database rows). Per-tenant or settings-store profiles need no Doctrine and no bundle table. It is called on every render: resolve per call, keep no request state in the service
 (FrankenPHP worker mode). `use_database_config` must stay `false` (the two are exclusive), so there is no admin UI.
 
 ```yaml
@@ -113,7 +116,7 @@ nowo_qr_code:
     profile_provider: App\Infrastructure\Qr\TenantQrProfiles
     default_profile: default
     profiles:
-        default: { size: 300, margin: 10, url_allowlist: ['example.com'] }   # fallback
+        default: { size: 300, margin: 10, url_allowlist: ['example.com'] }   # required by the tree, unused at runtime
 ```
 
 Since 1.13 the `QrCodeProfileConfig` entity is mapped only when DoctrineBundle is configured or `use_database_config`

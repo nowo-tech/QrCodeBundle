@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Nowo\QrCodeBundle\Tests\Integration\Ddd;
 
 use Nowo\QrCodeBundle\Config\ProfileResolver;
+use Nowo\QrCodeBundle\Exception\InvalidQrProfileException;
 use Nowo\QrCodeBundle\Service\QrCodeService;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -44,10 +45,12 @@ final class HostProfileProviderKernelTest extends TestCase
         self::assertSame(['default'], $resolver->getProfileNames());
         self::assertFalse($resolver->usesDatabaseConfig());
 
-        // Outside a request the provider knows no tenant: the YAML profile applies.
+        // Outside a request the provider knows no tenant: fail closed, never the YAML profile (audit LR-Q-L1).
         $service = $container->get(QrCodeService::class);
         self::assertInstanceOf(QrCodeService::class, $service);
-        self::assertStringStartsWith('data:image/png;base64,', $service->createDataUriForUrl('https://yaml.example/a'));
+        $this->expectException(InvalidQrProfileException::class);
+        $this->expectExceptionMessage('not defined by the profile provider');
+        $service->createDataUriForUrl('https://yaml.example/a');
     }
 
     public function testKeptAliveKernelResolvesTheProfileOfEachRequest(): void

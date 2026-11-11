@@ -190,7 +190,10 @@ final class NowoQrCodeExtension extends Extension implements PrependExtensionInt
         $profileProvider = $config['profile_provider'];
         if (is_string($profileProvider) && trim($profileProvider) !== '') {
             // 1.13 (rule 8): profiles from the host's port, no Doctrine.
-            $container->getDefinition(ProfileResolver::class)->setArgument('$profileProvider', new Reference($profileProvider));
+            // Fail closed (audit LR-Q-L1): a name the provider does not return never falls back to a YAML profile.
+            $container->getDefinition(ProfileResolver::class)
+                ->setArgument('$profileProvider', new Reference($profileProvider))
+                ->setArgument('$yamlFallback', false);
         }
 
         if ($config['use_database_config']) {

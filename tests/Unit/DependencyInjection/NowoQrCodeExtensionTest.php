@@ -59,6 +59,7 @@ final class NowoQrCodeExtensionTest extends TestCase
         $argument = $container->getDefinition(ProfileResolver::class)->getArgument('$profileProvider');
         $this->assertInstanceOf(Reference::class, $argument);
         $this->assertSame('app.qr_profiles', (string) $argument);
+        $this->assertFalse($container->getDefinition(ProfileResolver::class)->getArgument('$yamlFallback'), 'host provider: fail closed');
         $this->assertFalse($container->hasParameter(NowoQrCodeExtension::MAPPING_ENABLED_PARAMETER), 'no Doctrine: the entity is not mapped');
 
         $withDoctrine = new ContainerBuilder();

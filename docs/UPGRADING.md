@@ -57,7 +57,10 @@ From **1.12.0**: `composer update nowo-tech/qr-code-bundle`. **Standard hosts: n
 
 - **Profiles from your own service (optional, DDD hosts).** Implement
   `Nowo\QrCodeBundle\Config\QrCodeProfileProviderInterface` and set `nowo_qr_code.profile_provider` to its service
-  id; keep `use_database_config: false` (the two are exclusive). DoctrineBundle is then not needed.
+  id; keep `use_database_config: false` (the two are exclusive). DoctrineBundle is then not needed. The provider is
+  the only source: return a profile for every name you render (a `null` throws; there is no YAML fallback).
+- **Database rows out of bounds** (`size` outside 64–1024 or `margin` outside 0–64, only possible when edited outside
+  the admin form) now throw `InvalidQrProfileException` when rendered.
 - **Hosts without DoctrineBundle** (but with `doctrine/orm` installed by another package) now boot: the
   `QrCodeProfileConfig` mapping is registered only when DoctrineBundle is configured or `use_database_config` is on.
 - **Deprecated:** the `$profileRepository` argument of `ProfileResolver` (removed in 2.0). Code that builds the

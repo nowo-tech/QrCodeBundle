@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Nowo\QrCodeBundle\Tests\Unit\Config;
 
+use Closure;
 use Nowo\QrCodeBundle\Config\DoctrineQrCodeProfileProvider;
 use Nowo\QrCodeBundle\Config\ProfileResolver;
 use Nowo\QrCodeBundle\Config\QrCodeProfile;
@@ -14,6 +15,7 @@ use Nowo\QrCodeBundle\Exception\InvalidQrProfileException;
 use Nowo\QrCodeBundle\Exception\InvalidQrUrlException;
 use Nowo\QrCodeBundle\Repository\QrCodeProfileConfigRepository;
 use Nowo\QrCodeBundle\Service\QrCodeService;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 final class ProfileResolverTest extends TestCase
@@ -189,6 +191,43 @@ final class ProfileResolverTest extends TestCase
         $resolver->resolve('missing');
     }
 
+    public function testHostProviderWithoutYamlFallbackFailsClosed(): void
+    {
+        $provider = $this->provider(static fn (string $name): ?QrCodeProfile => $name === 'tenant'
+            ? new QrCodeProfile('tenant', 200, 2, QrErrorCorrection::Medium, ['tenant.example'])
+            : null);
+        $resolver = new ProfileResolver($this->yamlProfiles(), 'default', false, null, $provider, false);
+
+        self::assertSame(200, $resolver->resolve('tenant')->size);
+        self::assertSame(['tenant'], $resolver->getProfileNames(), 'YAML names are not reachable');
+
+        $this->expectException(InvalidQrProfileException::class);
+        $this->expectExceptionMessage('Profile "default" is not defined by the profile provider');
+        $resolver->resolve();
+    }
+
+    /**
+     * @return iterable<string, array{int, int}>
+     */
+    public static function outOfBounds(): iterable
+    {
+        yield 'huge size' => [20000, 4];
+        yield 'tiny size' => [20, 4];
+        yield 'negative margin' => [300, -1];
+        yield 'huge margin' => [300, 65];
+    }
+
+    #[DataProvider('outOfBounds')]
+    public function testProviderProfilesAreCheckedAgainstTheYamlBounds(int $size, int $margin): void
+    {
+        $provider = $this->provider(static fn (string $name): QrCodeProfile => new QrCodeProfile($name, $size, $margin, QrErrorCorrection::Medium, []));
+        $resolver = new ProfileResolver($this->yamlProfiles(), 'default', false, null, $provider, false);
+
+        $this->expectException(InvalidQrProfileException::class);
+        $this->expectExceptionMessage('allowed: size 64-1024, margin 0-64');
+        $resolver->resolve('tenant');
+    }
+
     public function testDoctrineProviderReadsTheRepository(): void
     {
         $repo = $this->createMock(QrCodeProfileConfigRepository::class);
@@ -203,6 +242,28 @@ final class ProfileResolverTest extends TestCase
 
         $this->expectExceptionMessage('or the database.');
         $resolver->resolve('missing');
+    }
+
+    /**
+     * @param Closure(string): ?QrCodeProfile $find
+     */
+    private function provider(Closure $find): QrCodeProfileProviderInterface
+    {
+        return new class($find) implements QrCodeProfileProviderInterface {
+            public function __construct(private readonly Closure $find)
+            {
+            }
+
+            public function find(string $name): ?QrCodeProfile
+            {
+                return ($this->find)($name);
+            }
+
+            public function names(): array
+            {
+                return ['tenant'];
+            }
+        };
     }
 
     private function resolver(): ProfileResolver

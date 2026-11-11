@@ -50,8 +50,10 @@ relation to your entities; its only table (`qr_code_profile`) is optional and ho
 - **Standard path (default).** YAML `profiles`, optionally overridden by database rows edited in the admin UI
   (`use_database_config: true`, Doctrine ORM).
 - **DDD path (opt-in, 1.13).** Your own `Nowo\QrCodeBundle\Config\QrCodeProfileProviderInterface` service as
-  `profile_provider`: profiles from your settings store or per tenant, overriding YAML, without Doctrine (DoctrineBundle
-  need not be registered).
+  `profile_provider`: profiles from your settings store or per tenant, without Doctrine (DoctrineBundle need not be
+  registered). It is the only source and fails closed: a name it returns `null` for throws (no YAML fallback), and
+  sizes / margins outside 64–1024 / 0–64 are refused. Throw on lookup errors rather than returning `null` for a tenant
+  you do know.
 
 ```php
 namespace App\Infrastructure\Qr;
