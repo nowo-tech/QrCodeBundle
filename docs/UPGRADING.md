@@ -3,7 +3,7 @@
 ## Table of contents
 
 - [Unreleased](#unreleased)
-  - [To 1.12.0](#to-1120)
+- [To 1.12.0](#to-1120)
 - [To 1.11.1](#to-1111)
 - [To 1.11.0](#to-1110)
   - [Template contract](#template-contract)
@@ -50,7 +50,7 @@
 
 ## Unreleased
 
-### To 1.12.0
+## To 1.12.0
 
 From **1.11.1**: `composer update nowo-tech/qr-code-bundle`. No configuration change is needed.
 

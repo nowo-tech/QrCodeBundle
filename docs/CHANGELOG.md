@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Table of contents
 
 - [[Unreleased]](#unreleased)
+- [[1.12.0] - 2026-11-11](#1120---2026-11-11)
 - [[1.11.1] - 2026-10-30](#1111---2026-10-30)
 - [[1.11.0] - 2026-10-30](#1110---2026-10-30)
 - [[1.10.0] - 2026-10-28](#1100---2026-10-28)
@@ -39,7 +40,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-Target 1.12.0 (minor: a new public configuration key and a behaviour change on hosts with several entity managers).
+## [1.12.0] - 2026-11-11
+
+New doctrine.entity_manager maps QrCode profiles on a dedicated entity manager; recovery never touches host managers. See [UPGRADING](https://github.com/nowo-tech/QrCodeBundle/blob/v1.12.0/docs/UPGRADING.md#to-1120).
+
 
 ### Fixed
 
@@ -53,6 +57,8 @@ Target 1.12.0 (minor: a new public configuration key and a behaviour change on h
   `QrCodeProfileConfig`. The entity is mapped on that manager only (removed from the others, including
   `auto_mapping`), the admin service and controller read and write through it, and the closed-manager recovery resets
   it. The build fails when the manager does not exist. Audit LD-QR-M1.
+
+[1.12.0]: https://github.com/nowo-tech/QrCodeBundle/releases/tag/v1.12.0
 
 ## [1.11.1] - 2026-10-30
 
