@@ -71,6 +71,10 @@ final class HostProviderTestKernel extends Kernel
     protected function configureContainer(ContainerConfigurator $container): void
     {
         $container->extension('framework', ['secret' => 'ddd-test', 'test' => true, 'http_method_override' => false, 'router' => ['utf8' => true]]);
+        $container->extension('twig_component', [
+            'anonymous_template_directory' => 'components/',
+            'defaults'                     => ['Nowo\\QrCodeBundle\\Twig\\Component\\' => 'components/'],
+        ]);
         $container->extension('nowo_qr_code', [
             'profile_provider' => TenantQrProfiles::class,
             'profiles'         => ['default' => ['size' => 300, 'margin' => 10, 'url_allowlist' => ['yaml.example']]],
