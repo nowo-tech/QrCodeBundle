@@ -3,7 +3,7 @@
 ## Table of contents
 
 - [Unreleased](#unreleased)
-  - [To 1.13.0](#to-1130)
+- [To 1.13.0](#to-1130)
 - [To 1.12.0](#to-1120)
 - [To 1.11.1](#to-1111)
 - [To 1.11.0](#to-1110)
@@ -51,7 +51,7 @@
 
 ## Unreleased
 
-### To 1.13.0
+## To 1.13.0
 
 From **1.12.0**: `composer update nowo-tech/qr-code-bundle`. **Standard hosts: no configuration change.**
 
