@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Nowo\QrCodeBundle\Tests\Unit\DependencyInjection;
 
+use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use LogicException;
 use Nowo\QrCodeBundle\Config\ProfileResolver;
 use Nowo\QrCodeBundle\DependencyInjection\NowoQrCodeExtension;
@@ -74,6 +75,12 @@ final class NowoQrCodeExtensionTest extends TestCase
         $this->extension->load([], $withDoctrine);
         $this->assertNull($withDoctrine->getDefinition(ProfileResolver::class)->getArgument('$profileProvider'));
         $this->assertTrue($withDoctrine->getParameter(NowoQrCodeExtension::MAPPING_ENABLED_PARAMETER), 'standard host: mapped as before');
+
+        // In a kernel load() runs in a container that holds only this extension: DoctrineBundle is seen in kernel.bundles.
+        $kernelHost = new ContainerBuilder();
+        $kernelHost->setParameter('kernel.bundles', ['DoctrineBundle' => DoctrineBundle::class]);
+        $this->extension->load([], $kernelHost);
+        $this->assertTrue($kernelHost->getParameter(NowoQrCodeExtension::MAPPING_ENABLED_PARAMETER), 'standard host with use_database_config off: mapped as before');
     }
 
     /**

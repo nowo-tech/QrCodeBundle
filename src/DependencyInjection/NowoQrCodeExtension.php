@@ -183,7 +183,7 @@ final class NowoQrCodeExtension extends Extension implements PrependExtensionInt
 
         // 1.13 (rule 8): the bundle entity is mapped only when Doctrine ORM is configured (standard hosts: unchanged)
         // or the profile table is used; a host without DoctrineBundle boots even with doctrine/orm installed.
-        if ($config['use_database_config'] || $container->hasExtension('doctrine')) {
+        if ($config['use_database_config'] || $this->hasDoctrineBundle($container)) {
             $container->setParameter(self::MAPPING_ENABLED_PARAMETER, true);
         }
 
@@ -220,6 +220,16 @@ final class NowoQrCodeExtension extends Extension implements PrependExtensionInt
                 $container->setDefinition(TablePrefixListener::class, $definition);
             }
         }
+    }
+
+    /**
+     * DoctrineBundle is registered (`kernel.bundles`; load() runs in a container holding only this extension).
+     */
+    private function hasDoctrineBundle(ContainerBuilder $container): bool
+    {
+        $bundles = $container->hasParameter('kernel.bundles') ? $container->getParameter('kernel.bundles') : [];
+
+        return (is_array($bundles) && isset($bundles['DoctrineBundle'])) || $container->hasExtension('doctrine');
     }
 
     public function getAlias(): string
