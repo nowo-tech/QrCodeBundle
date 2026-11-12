@@ -1,4 +1,4 @@
 twig:
     default_path: '%kernel.project_dir%/templates'
-    # The host owns the form theme (REQ-UI-003): Bootstrap 5, matching nowo_ui_kit.css_framework.
-    form_themes: ['bootstrap_5_layout.html.twig']
+    # The host owns the form theme (REQ-UI-003): UiKit's semantic form theme.
+    form_themes: ['@NowoUiKit/form/nowo_ui_layout.html.twig']

@@ -93,6 +93,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Demo uses the UiKit base style (REQ-DEMO-014)
+
 ## [1.13.0] - 2026-11-11
 
 QR profiles from a host provider port without Doctrine; provider-only mode fails closed; size and margin limits on every source. See [UPGRADING](https://github.com/nowo-tech/QrCodeBundle/blob/v1.13.0/docs/UPGRADING.md#to-1130).
