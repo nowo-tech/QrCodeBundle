@@ -8,13 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Table of contents
 
 - [[Unreleased]](#unreleased)
+  - [Fixed](#fixed)
 - [[1.13.0] - 2026-11-11](#1130---2026-11-11)
   - [Target 1.13.0](#target-1130)
 - [[1.12.0] - 2026-11-11](#1120---2026-11-11)
-  - [Fixed](#fixed-1)
+  - [Fixed](#fixed-2)
   - [Added](#added-1)
 - [[1.11.1] - 2026-10-30](#1111---2026-10-30)
-  - [Fixed](#fixed-2)
+  - [Fixed](#fixed-3)
 - [[1.11.0] - 2026-10-30](#1110---2026-10-30)
   - [Changed](#changed)
   - [Added](#added-2)
@@ -37,27 +38,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [[1.7.2] - 2026-10-18](#172---2026-10-18)
   - [Changed](#changed-4)
 - [[1.7.1] - 2026-10-13](#171---2026-10-13)
-  - [Fixed](#fixed-3)
+  - [Fixed](#fixed-4)
 - [[1.7.0] - 2026-10-13](#170---2026-10-13)
   - [Changed](#changed-5)
-  - [Fixed](#fixed-4)
+  - [Fixed](#fixed-5)
 - [[1.6.0] - 2026-10-13](#160---2026-10-13)
   - [Security](#security-4)
-  - [Fixed](#fixed-5)
+  - [Fixed](#fixed-6)
 - [[1.5.1] - 2026-10-13](#151---2026-10-13)
   - [Changed](#changed-6)
   - [Dependencies](#dependencies)
 - [[1.5.0] - 2026-10-09](#150---2026-10-09)
   - [Changed](#changed-7)
-  - [Fixed](#fixed-6)
+  - [Fixed](#fixed-7)
 - [[1.4.10] - 2026-09-27](#1410---2026-09-27)
   - [Added](#added-4)
   - [Changed](#changed-8)
 - [[1.4.9] - 2026-09-25](#149---2026-09-25)
-  - [Fixed](#fixed-7)
+  - [Fixed](#fixed-8)
   - [Changed](#changed-9)
 - [[1.4.8] - 2026-09-03](#148---2026-09-03)
-  - [Fixed](#fixed-8)
+  - [Fixed](#fixed-9)
   - [Changed](#changed-10)
 - [[1.4.7] - 2026-08-24](#147---2026-08-24)
   - [Changed](#changed-11)
@@ -66,7 +67,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - [Security](#security-5)
 - [[1.4.5] - 2026-08-19](#145---2026-08-19)
   - [Security](#security-6)
-  - [Fixed](#fixed-9)
+  - [Fixed](#fixed-10)
 - [[1.4.4] - 2026-08-19](#144---2026-08-19)
   - [Security](#security-7)
 - [[1.4.3] - 2026-08-19](#143---2026-08-19)
@@ -74,7 +75,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [[1.4.2] - 2026-08-18](#142---2026-08-18)
   - [Changed](#changed-12)
 - [[1.4.1] - 2026-08-07](#141---2026-08-07)
-  - [Fixed](#fixed-10)
+  - [Fixed](#fixed-11)
 - [[1.4.0] - 2026-08-04](#140---2026-08-04)
   - [Changed](#changed-13)
   - [Added](#added-5)
@@ -92,6 +93,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - [Added](#added-9)
 
 ## [Unreleased]
+
+### Fixed
+
+- DoctrineBundle 3.4: bundle entities resolved to the default manager when a dedicated manager is configured.
+  DoctrineBundle 3.4 `auto_discover_entities` (on by default for a manager without `mappings` and `auto_mapping`, with
+  Symfony 7.3+ and doctrine/orm 3.6+) gives that manager's metadata driver chain a default attribute driver, which
+  claims every `#[ORM\Entity]` class. With `doctrine.entity_manager` set, `getManagerForClass(QrCodeProfileConfig)`
+  then answered the host's default manager, and `QrCodeProfileConfigRepository` queried its database ("no such
+  table"). `EntityManagerOptionPass` now also registers a driver that maps nothing for the bundle entity namespace on
+  every other manager (`ExcludedEntityNamespaceDriver`, only the public `addDriver()` of the
+  `doctrine.orm.<manager>_metadata_driver` chain), so the entity resolves to the configured manager on DoctrineBundle
+  2.x, 3.3 and 3.4+. Affected in practice: 1.12.0 to 1.13.0 (every release with `doctrine.entity_manager`; all allow
+  `doctrine/doctrine-bundle` `^3.0`) with DoctrineBundle 3.4.0 or later.
 
 ### Changed
 
