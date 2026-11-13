@@ -99,6 +99,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Interface (REQ-ARCH-001 rule 1):** `Service\QrCodeServiceInterface` (`createDataUri()`, `createDataUriForUrl()`). `QrCodeService` implements it, the interface is aliased in the container, and the Twig extension and the `NowoQrCode` component depend on the interface, so a host can replace the alias. Strictly additive; the class service id and defaults are unchanged.
+
 ## [1.13.1] - 2026-11-13
 
 ### Fixed

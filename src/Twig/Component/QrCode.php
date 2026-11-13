@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Nowo\QrCodeBundle\Twig\Component;
 
 use InvalidArgumentException;
-use Nowo\QrCodeBundle\Service\QrCodeService;
+use Nowo\QrCodeBundle\Service\QrCodeServiceInterface;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 
 use function sprintf;
@@ -28,13 +28,13 @@ final class QrCode
     public string $class = '';
 
     public function __construct(
-        private readonly QrCodeService $qrCodeService,
+        private readonly QrCodeServiceInterface $qrCodeService,
     ) {
     }
 
     /**
      * @param string|null $content Arbitrary payload (used when not encoding a policy-checked URL)
-     * @param string|null $url http(s) URL to encode with {@see QrCodeService::createDataUriForUrl()}
+     * @param string|null $url http(s) URL to encode with {@see QrCodeServiceInterface::createDataUriForUrl()}
      * @param string|null $profile Named profile; null uses {@code default_profile}
      * @param bool $forUrl Force URL policy path using {@code $url} or {@code $content}
      */

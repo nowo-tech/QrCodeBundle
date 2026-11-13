@@ -3,6 +3,7 @@
 ## Table of contents
 
 - [Unreleased](#unreleased)
+- [To 1.14.0](#to-1140)
 - [To 1.13.1](#to-1131)
 - [To 1.13.0](#to-1130)
 - [To 1.12.0](#to-1120)
@@ -51,6 +52,10 @@
 - [[1.0.0] - 2026-07-30](#100---2026-07-30)
 
 ## Unreleased
+
+## To 1.14.0
+
+From **1.13.1**: no action. `QrCodeServiceInterface` is new and additive; the `QrCodeService` class id still works. Type-hint the interface in your own code to be able to swap it (override the alias).
 
 ## To 1.13.1
 

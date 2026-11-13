@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Nowo\QrCodeBundle\Twig;
 
-use Nowo\QrCodeBundle\Service\QrCodeService;
+use Nowo\QrCodeBundle\Service\QrCodeServiceInterface;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 
@@ -14,7 +14,7 @@ use Twig\TwigFunction;
 final class QrCodeExtension extends AbstractExtension
 {
     public function __construct(
-        private readonly QrCodeService $qrCodeService,
+        private readonly QrCodeServiceInterface $qrCodeService,
     ) {
     }
 
