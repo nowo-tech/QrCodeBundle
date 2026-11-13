@@ -8,22 +8,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Table of contents
 
 - [[Unreleased]](#unreleased)
+- [[1.14.0] - 2026-11-13](#1140---2026-11-13)
+  - [Added](#added)
 - [[1.13.1] - 2026-11-13](#1131---2026-11-13)
   - [Fixed](#fixed)
   - [Changed](#changed)
 - [[1.13.0] - 2026-11-11](#1130---2026-11-11)
-  - [Added](#added)
+  - [Added](#added-1)
   - [Fixed](#fixed-1)
   - [Deprecated](#deprecated)
   - [Tests](#tests)
 - [[1.12.0] - 2026-11-11](#1120---2026-11-11)
   - [Fixed](#fixed-2)
-  - [Added](#added-1)
+  - [Added](#added-2)
 - [[1.11.1] - 2026-10-30](#1111---2026-10-30)
   - [Fixed](#fixed-3)
 - [[1.11.0] - 2026-10-30](#1110---2026-10-30)
   - [Changed](#changed-1)
-  - [Added](#added-2)
+  - [Added](#added-3)
   - [Deprecated](#deprecated-1)
   - [Removed](#removed)
   - [Security](#security)
@@ -36,7 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [[1.8.1] - 2026-10-24](#181---2026-10-24)
   - [Changed](#changed-2)
 - [[1.8.0] - 2026-10-22](#180---2026-10-22)
-  - [Added](#added-3)
+  - [Added](#added-4)
   - [Changed](#changed-3)
   - [Changed](#changed-4)
   - [Documentation](#documentation)
@@ -57,7 +59,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - [Changed](#changed-8)
   - [Fixed](#fixed-7)
 - [[1.4.10] - 2026-09-27](#1410---2026-09-27)
-  - [Added](#added-4)
+  - [Added](#added-5)
   - [Changed](#changed-9)
 - [[1.4.9] - 2026-09-25](#149---2026-09-25)
   - [Fixed](#fixed-8)
@@ -83,25 +85,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - [Fixed](#fixed-11)
 - [[1.4.0] - 2026-08-04](#140---2026-08-04)
   - [Changed](#changed-14)
-  - [Added](#added-5)
+  - [Added](#added-6)
   - [Changed](#changed-15)
 - [[1.3.0] - 2026-08-03](#130---2026-08-03)
-  - [Added](#added-6)
+  - [Added](#added-7)
   - [Changed](#changed-16)
   - [Documentation](#documentation-1)
 - [[1.2.0] - 2026-07-30](#120---2026-07-30)
-  - [Added](#added-7)
-- [[1.1.0] - 2026-07-30](#110---2026-07-30)
   - [Added](#added-8)
+- [[1.1.0] - 2026-07-30](#110---2026-07-30)
+  - [Added](#added-9)
   - [Changed](#changed-17)
 - [[1.0.0] - 2026-07-30](#100---2026-07-30)
-  - [Added](#added-9)
+  - [Added](#added-10)
 
 ## [Unreleased]
+
+## [1.14.0] - 2026-11-13
 
 ### Added
 
 - **Interface (REQ-ARCH-001 rule 1):** `Service\QrCodeServiceInterface` (`createDataUri()`, `createDataUriForUrl()`). `QrCodeService` implements it, the interface is aliased in the container, and the Twig extension and the `NowoQrCode` component depend on the interface, so a host can replace the alias. Strictly additive; the class service id and defaults are unchanged.
+
+[1.14.0]: https://github.com/nowo-tech/QrCodeBundle/releases/tag/v1.14.0
 
 ## [1.13.1] - 2026-11-13
 
