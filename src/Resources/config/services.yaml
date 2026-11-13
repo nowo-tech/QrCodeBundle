@@ -17,6 +17,10 @@ services:
       $profileResolver: '@Nowo\QrCodeBundle\Config\ProfileResolver'
       $urlAllowlistRequired: '%nowo_qr_code.url_allowlist_required%'
 
+  # REQ-ARCH-001 rule 1: the Twig extension and component depend on the interface; a host replaces the alias to
+  # render QR codes differently. The class id stays valid.
+  Nowo\QrCodeBundle\Service\QrCodeServiceInterface: '@Nowo\QrCodeBundle\Service\QrCodeService'
+
   Nowo\QrCodeBundle\Twig\QrCodeExtension: ~
 
   # Imports the admin routes only in database mode (otherwise 404 instead of a 500 on /admin/qr-code-profiles).

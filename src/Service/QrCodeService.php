@@ -13,7 +13,7 @@ use Nowo\QrCodeBundle\Security\QrUrlPolicy;
 /**
  * High-level API to create PNG QR codes as data URIs (profile-aware).
  */
-final readonly class QrCodeService
+final readonly class QrCodeService implements QrCodeServiceInterface
 {
     /**
      * @param bool $urlAllowlistRequired `url_allowlist_required`: every profile used for URLs (YAML or database) must

@@ -15,12 +15,12 @@
 ## Service
 
 ```php
-use Nowo\QrCodeBundle\Service\QrCodeService;
+use Nowo\QrCodeBundle\Service\QrCodeServiceInterface;
 
 final class TicketController
 {
     public function __construct(
-        private readonly QrCodeService $qrCodeService,
+        private readonly QrCodeServiceInterface $qrCodeService,
     ) {
     }
 
@@ -37,6 +37,8 @@ final class TicketController
     }
 }
 ```
+
+`QrCodeServiceInterface` is aliased to the shipped `QrCodeService` (the class id still works). Type-hint the interface so a test double or a replacement can be plugged by overriding the alias.
 
 Omit the profile argument (or pass `null`) to use `default_profile`. An unknown profile name throws `InvalidQrProfileException`.
 
@@ -89,7 +91,7 @@ nowo_qr_code:
 **Keep QR generation out of the domain**
 
 - If an application service needs a QR image (ticket, pass, invoice), define your own port, for example
-  `QrImageGenerator::forTicketUrl(string): string`, and implement it in infrastructure with `QrCodeService`.
+  `QrImageGenerator::forTicketUrl(string): string`, and implement it in infrastructure with `QrCodeServiceInterface`.
 - Use `createDataUriForUrl()` for URLs so the profile's `url_allowlist` applies; catch `InvalidQrUrlException` and
   `InvalidQrProfileException` in the adapter.
 - In templates, call `qr_code_data_uri()` / `qr_code_for_url()` or `<twig:NowoQrCode>` with values your view model
@@ -100,11 +102,11 @@ nowo_qr_code:
 namespace App\Infrastructure\Qr;
 
 use App\Application\Ticket\QrImageGenerator;   // your port
-use Nowo\QrCodeBundle\Service\QrCodeService;
+use Nowo\QrCodeBundle\Service\QrCodeServiceInterface;
 
 final readonly class BundleQrImageGenerator implements QrImageGenerator
 {
-    public function __construct(private QrCodeService $qr) {}
+    public function __construct(private QrCodeServiceInterface $qr) {}
 
     public function forTicketUrl(string $url): string
     {
@@ -115,7 +117,7 @@ final readonly class BundleQrImageGenerator implements QrImageGenerator
 
 **Known limitations**
 
-- `QrCodeService` is final with no interface; wrap it in your own port (as above) to keep test doubles simple.
+- `QrCodeService` stays `final`; type-hint `QrCodeServiceInterface` (aliased) for test doubles and replacements. Wrapping it in your own port (as above) keeps your domain free of the bundle.
 - Output is a PNG data URI only; decode it if you need raw bytes.
 - No events are dispatched when database profiles change.
 - With DoctrineBundle configured, `QrCodeProfileConfig` stays mapped even when `use_database_config` is off (BC: an
