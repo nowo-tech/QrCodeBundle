@@ -101,6 +101,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Documentation
+
+- REQ compliance sweep 2026-11-16: Spec Kit baseline maps the 1.12-1.14 units (profile provider port + Doctrine provider, `QrCodeServiceInterface`, `UrlAllowlistPattern`, `EntityManagerOptionPass`, `ExcludedEntityNamespaceDriver`, `AdminRouteLoader`; FR-CFG-004, FR-SVC-002, FR-DB-003, FR-ADM-004), inventory 51/51 (REQ-SPECKIT-001/003); Dependabot also tracks the demo Playwright `e2e/` npm dependencies (REQ-GH-002).
+
 ## [1.14.0] - 2026-11-13
 
 ### Added

@@ -83,12 +83,14 @@ As an operator, I manage QR profiles at `/admin/qr-code-profiles` so YAML defaul
 - **FR-CFG-001**: `Configuration` MUST define `default_profile` + `profiles` (size, margin, error_correction enum, url_allowlist) and validate the default key.
 - **FR-CFG-002**: Flat legacy root keys MUST normalize into `profiles.<default_profile>`; Extension MUST publish profile parameters.
 - **FR-CFG-003**: `ProfileResolver` MUST resolve by name (null → default) and throw `InvalidQrProfileException` for unknown names.
+- **FR-CFG-004**: `QrCodeProfileProviderInterface` (1.13) is the port for a named profile source that overrides the YAML `profiles`; the bundle ships `DoctrineQrCodeProfileProvider`, which reads the current `QrCodeProfileConfig` row on every call so admin edits apply in every worker.
 
 ### Rendering
 
 - **FR-QR-001**: `QrCodeDataUriRenderer` MUST render PNG data URIs via `endroid/qr-code` Builder + PngWriter.
 - **FR-QR-002**: `QrErrorCorrection` enum MUST map to endroid `ErrorCorrectionLevel` cases.
 - **FR-SVC-001**: `QrCodeService` MUST expose `createDataUri` / `createDataUriForUrl` with optional `$profile`.
+- **FR-SVC-002**: `QrCodeServiceInterface` (1.14) is the port integrators type-hint; the bundle aliases it to `QrCodeService` (REQ-ARCH-001).
 
 ### Security
 
@@ -106,6 +108,7 @@ As an operator, I manage QR profiles at `/admin/qr-code-profiles` so YAML defaul
 ### Entity & database (optional)
 
 - **FR-DB-001**: When `use_database_config: true`, Extension MUST load Doctrine services and apply table prefix listener.
+- **FR-DB-003**: `doctrine.entity_manager` MUST name an existing entity manager that maps the bundle entities (`EntityManagerOptionPass`, build fails otherwise); `ExcludedEntityNamespaceDriver` keeps the bundle entity namespace unmapped on every other entity manager.
 - **FR-DB-002**: Doctrine queries MUST order with `SortDirection` (doctrine/orm deprecation #11313); the package MUST declare `conflict: doctrine/orm <3.7` so optional Doctrine installs cannot resolve an ORM without `SortDirection`.
 - **FR-DB-002**: `QrCodeProfileConfig` entity + repository MUST store per-profile size, margin, ECC, and allowlist overrides; `ProfileResolver` MUST prefer DB rows when enabled.
 - **FR-WRK-001**: With `use_database_config: true`, the bundle MUST remain correct under FrankenPHP worker mode when the kernel is not reset between requests: DB profile resolution MUST bypass the Doctrine identity map for rendering; closed EntityManagers MUST be recovered on main requests; managed `QrCodeProfileConfig` rows MUST NOT leak stale admin state into the next request.
@@ -115,6 +118,7 @@ As an operator, I manage QR profiles at `/admin/qr-code-profiles` so YAML defaul
 - **FR-ADM-001**: `/admin/qr-code-profiles` MUST provide list/create/edit/delete with Twig admin views and `QrCodeProfileAdminService` seed/import helpers.
 - **FR-ADM-002** (REQ-UI-003): the admin pages MUST extend the UiKit list / form scaffolds, fed by UiKit view models built in `QrCodePageFactory`, inside `nowo_ui_kit.layouts.admin` (or `web_ui.layout_template`; a 1.x layout is wrapped in a deprecated bridge); deletes MUST use the UiKit confirm contract (no inline `confirm()`); labels MUST be `NowoQrCodeBundle` translation keys (7 locales); a `PageContractTestCase` test MUST cover every page; `docs/TEMPLATES.md` MUST list pages, scaffolds, view models and data blocks.
 - **FR-ADM-003** (REQ-SEC-005): with `use_database_config: true` the container MUST refuse to compile without CSRF protection (token manager + form CSRF extension enabled).
+- **FR-ADM-004**: `AdminRouteLoader` MUST import the admin routes only when `use_database_config` is true, so a YAML-only install exposes no admin route.
 
 ### Twig
 
