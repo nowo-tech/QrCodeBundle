@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Nowo\QrCodeBundle\DependencyInjection\Compiler;
 
 use Nowo\QrCodeBundle\Doctrine\ExcludedEntityNamespaceDriver;
+use Nowo\QrCodeBundle\Persistence\QrCodeProfileWriteUnit;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -30,6 +31,9 @@ use function str_starts_with;
  * claim the entities either (DoctrineBundle 3.4 `auto_discover_entities`, on by default for a manager without
  * `mappings` and `auto_mapping`). Only the public `addDriver()` of the `doctrine.orm.<manager>_metadata_driver` chain is
  * used, the extension point DoctrineBundle documents for other metadata drivers.
+ *
+ * 1.15 (REQ-RUNTIME-003 rule 2): a configured manager other than the host's default is the bundle's own, so the
+ * {@see QrCodeProfileWriteUnit} may reset it after a failure; the host's default manager never is.
  */
 final class EntityManagerOptionPass implements CompilerPassInterface
 {
@@ -80,6 +84,11 @@ final class EntityManagerOptionPass implements CompilerPassInterface
             if ($manager === $name && !$maps) {
                 throw new InvalidConfigurationException(sprintf('The Doctrine entity manager "%s" (nowo_qr_code.doctrine.entity_manager) does not map %s.', $name, implode(', ', self::ENTITY_NAMESPACES)));
             }
+        }
+
+        $default = $container->hasParameter('doctrine.default_entity_manager') ? $container->getParameter('doctrine.default_entity_manager') : 'default';
+        if ($name !== $default && $container->hasDefinition(QrCodeProfileWriteUnit::class)) {
+            $container->getDefinition(QrCodeProfileWriteUnit::class)->setArgument('$ownManager', true);
         }
     }
 

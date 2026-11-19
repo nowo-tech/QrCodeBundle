@@ -4,10 +4,16 @@ declare(strict_types=1);
 
 namespace Nowo\QrCodeBundle\Tests\Unit\Controller;
 
+use Doctrine\DBAL\Driver\AbstractException;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
+use Doctrine\DBAL\LockMode;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\OptimisticLockException;
 use LogicException;
 use Nowo\QrCodeBundle\Controller\QrCodeProfileAdminController;
 use Nowo\QrCodeBundle\Entity\QrCodeProfileConfig;
+use Nowo\QrCodeBundle\EventListener\QrCodeProfileConflictListener;
+use Nowo\QrCodeBundle\Persistence\QrCodeProfileWriteUnit;
 use Nowo\QrCodeBundle\Repository\QrCodeProfileConfigRepository;
 use Nowo\QrCodeBundle\Security\QrCodeAccessCheckerInterface;
 use Nowo\QrCodeBundle\Service\QrCodeProfileAdminService;
@@ -244,6 +250,71 @@ final class QrCodeProfileAdminControllerTest extends TestCase
         self::assertSame(['Profile created.'], $this->session->getFlashBag()->get('success'));
     }
 
+    public function testAnEditOpenedOnAnOlderVersionAnswersTheFormWith409Stale(): void
+    {
+        $profile = (new QrCodeProfileConfig())->setName('custom');
+        (new ReflectionProperty(QrCodeProfileConfig::class, 'id'))->setValue($profile, 7);
+        $this->entityManager->expects(self::once())->method('lock')->with($profile, LockMode::OPTIMISTIC, 3)
+            ->willThrowException(OptimisticLockException::lockFailedVersionMismatch($profile, 3, 4));
+        $this->entityManager->expects(self::never())->method('flush');
+        $form = $this->versionedFormStub('3');
+        $form->expects(self::once())->method('addError');
+
+        $response = $this->createController(true, [], $form)->edit(new Request(), $profile);
+
+        self::assertSame(409, $response->getStatusCode());
+        self::assertSame(QrCodeProfileConflictListener::STALE_PROFILE, $response->headers->get(QrCodeProfileConflictListener::ERROR_CODE_HEADER));
+        self::assertFalse($response->headers->has('X-Conflict-Code'), 'a domain refusal, not a lock conflict');
+        self::assertSame([], $this->session->getFlashBag()->get('success'));
+    }
+
+    public function testAnEditWithTheCurrentVersionLocksItAndSaves(): void
+    {
+        $profile = (new QrCodeProfileConfig())->setName('custom');
+        (new ReflectionProperty(QrCodeProfileConfig::class, 'id'))->setValue($profile, 7);
+        $this->entityManager->expects(self::once())->method('lock')->with($profile, LockMode::OPTIMISTIC, 1);
+        $this->entityManager->expects(self::once())->method('flush');
+
+        $response = $this->createController(true, [], $this->versionedFormStub('1'))->edit(new Request(), $profile);
+
+        self::assertInstanceOf(RedirectResponse::class, $response);
+    }
+
+    public function testAFormWithoutAUsableVersionIsNotLocked(): void
+    {
+        $this->entityManager->expects(self::never())->method('lock');
+        $this->entityManager->expects(self::once())->method('flush');
+
+        $this->createController(true, [], $this->versionedFormStub(null))->edit(new Request(), (new QrCodeProfileConfig())->setName('custom'));
+
+        self::assertSame(['Profile updated.'], $this->session->getFlashBag()->get('success'));
+    }
+
+    public function testANameSavedAtTheSameTimeAnswersTheFormWith409DuplicateName(): void
+    {
+        $this->entityManager->method('flush')->willThrowException(new UniqueConstraintViolationException(new class('Duplicate entry', '23000', 1062) extends AbstractException {
+        }, null));
+        $form = $this->versionedFormStub(null);
+        $form->expects(self::once())->method('addError');
+
+        $response = $this->createController(true, [], $form)->new(new Request());
+
+        self::assertSame(409, $response->getStatusCode());
+        self::assertSame(QrCodeProfileConflictListener::DUPLICATE_NAME, $response->headers->get(QrCodeProfileConflictListener::ERROR_CODE_HEADER));
+    }
+
+    public function testTheInjectedWriteUnitIsUsed(): void
+    {
+        $manager = $this->createMock(EntityManagerInterface::class);
+        $manager->expects(self::once())->method('remove');
+        $manager->expects(self::once())->method('flush');
+        $this->entityManager->expects(self::never())->method('flush');
+
+        $this->createController(true, writeUnit: new QrCodeProfileWriteUnit($manager))->delete(new Request(request: ['_token' => 'ok']), (new QrCodeProfileConfig())->setName('custom'));
+
+        self::assertSame(['Profile "custom" deleted.'], $this->session->getFlashBag()->get('success'));
+    }
+
     public function testFlashesFallBackToTheKeysWithoutTranslator(): void
     {
         $this->createController(false, translate: false)->importYaml(new Request(request: ['_token' => 'bad']));
@@ -311,17 +382,36 @@ final class QrCodeProfileAdminControllerTest extends TestCase
     }
 
     /**
+     * A valid submitted form whose hidden `version` field holds $version.
+     *
+     * @return FormInterface<mixed>&MockObject
+     */
+    private function versionedFormStub(?string $version): FormInterface
+    {
+        $field = $this->createStub(FormInterface::class);
+        $field->method('getData')->willReturn($version);
+        $form = $this->createMock(FormInterface::class);
+        $form->method('isSubmitted')->willReturn(true);
+        $form->method('isValid')->willReturn(true);
+        $form->method('has')->willReturnCallback(static fn (string $name): bool => $name === 'version');
+        $form->method('get')->willReturn($field);
+        $form->method('createView')->willReturn(new FormView());
+
+        return $form;
+    }
+
+    /**
      * @param array<string, array{size: int, margin: int, error_correction: string, url_allowlist: list<string>}> $yamlProfiles
      * @param FormInterface<mixed>|null $form
      */
-    private function createController(bool $csrfValid, array $yamlProfiles = [], ?FormInterface $form = null, bool $translate = true): QrCodeProfileAdminController
+    private function createController(bool $csrfValid, array $yamlProfiles = [], ?FormInterface $form = null, bool $translate = true, ?QrCodeProfileWriteUnit $writeUnit = null): QrCodeProfileAdminController
     {
         $accessChecker = $this->createStub(QrCodeAccessCheckerInterface::class);
         $accessChecker->method('canAccess')->willReturn(true);
 
         $repository = $this->createStub(QrCodeProfileConfigRepository::class);
 
-        $controller = new QrCodeProfileAdminController($repository, $this->entityManager, new QrCodeProfileAdminService($repository, $this->entityManager, $yamlProfiles, 'default'), $accessChecker, true, translator: $translate ? $this->translator() : null);
+        $controller = new QrCodeProfileAdminController($repository, $this->entityManager, new QrCodeProfileAdminService($repository, $this->entityManager, $yamlProfiles, 'default'), $accessChecker, true, formFactory: Forms::createFormFactoryBuilder()->addExtension(new CsrfExtension(new CsrfTokenManager()))->getFormFactory(), translator: $translate ? $this->translator() : null, writeUnit: $writeUnit);
 
         $request = new Request();
         $request->setSession($this->session);

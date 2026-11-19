@@ -14,7 +14,35 @@ services:
     environment:
       - COMPOSER_ALLOW_SUPERUSER=1
       - XDEBUG_MODE=coverage
+      # REQ-RUNTIME-003: real-database concurrency tests (make test-with-db starts the "databases" profile).
+      - QR_MYSQL_URL=mysql://root@mysql:3306/qr_code?serverVersion=8.4.0&charset=utf8mb4
+      - QR_MARIADB_URL=mysql://root@mariadb:3306/qr_code?serverVersion=11.4.0-MariaDB&charset=utf8mb4
+      - QR_POSTGRES_URL=pgsql://postgres@postgres:5432/qr_code?serverVersion=16
     command: ["tail", "-f", "/dev/null"]
+    networks:
+      - qr-code-bundle-network
+
+  mysql:
+    image: mysql:8.4
+    profiles: [databases]
+    environment: { MYSQL_ALLOW_EMPTY_PASSWORD: 'yes', MYSQL_DATABASE: qr_code }
+    healthcheck: { test: ['CMD', 'mysqladmin', 'ping', '-h', '127.0.0.1'], interval: 5s, retries: 30 }
+    networks:
+      - qr-code-bundle-network
+
+  mariadb:
+    image: mariadb:11.4
+    profiles: [databases]
+    environment: { MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: 'yes', MARIADB_DATABASE: qr_code }
+    healthcheck: { test: ['CMD', 'healthcheck.sh', '--connect', '--innodb_initialized'], interval: 5s, retries: 30 }
+    networks:
+      - qr-code-bundle-network
+
+  postgres:
+    image: postgres:16-alpine
+    profiles: [databases]
+    environment: { POSTGRES_HOST_AUTH_METHOD: trust, POSTGRES_DB: qr_code }
+    healthcheck: { test: ['CMD', 'pg_isready', '-U', 'postgres'], interval: 5s, retries: 30 }
     networks:
       - qr-code-bundle-network
 

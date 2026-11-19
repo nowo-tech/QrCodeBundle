@@ -4,11 +4,16 @@ declare(strict_types=1);
 
 namespace Nowo\QrCodeBundle\Controller;
 
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
+use Doctrine\DBAL\LockMode;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\OptimisticLockException;
 use LogicException;
 use Nowo\QrCodeBundle\Entity\QrCodeProfileConfig;
 use Nowo\QrCodeBundle\Enum\QrErrorCorrection;
+use Nowo\QrCodeBundle\EventListener\QrCodeProfileConflictListener;
 use Nowo\QrCodeBundle\Form\QrCodeProfileConfigType;
+use Nowo\QrCodeBundle\Persistence\QrCodeProfileWriteUnit;
 use Nowo\QrCodeBundle\Repository\QrCodeProfileConfigRepository;
 use Nowo\QrCodeBundle\Security\QrCodeAccessCheckerInterface;
 use Nowo\QrCodeBundle\Service\QrCodeProfileAdminService;
@@ -17,7 +22,9 @@ use Nowo\QrCodeBundle\Ui\QrCodePages;
 use Nowo\UiKitBundle\View\Pagination;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -28,12 +35,20 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 use function ceil;
+use function ctype_digit;
+use function is_string;
 use function max;
 use function min;
 use function strtr;
 
 /**
  * CRUD admin for database-backed QR profiles.
+ *
+ * Every write runs in one {@see QrCodeProfileWriteUnit} (1.15, REQ-RUNTIME-003). A save that loses a race answers the
+ * form again with the domain error and 409 + `X-Error-Code` (never a `CONFLICT_*` code): a name another admin saved at
+ * the same time ({@see QrCodeProfileConflictListener::DUPLICATE_NAME}), or a profile changed since the form was opened
+ * ({@see QrCodeProfileConflictListener::STALE_PROFILE}, optimistic `version`). Lock conflicts reach
+ * {@see QrCodeProfileConflictListener} (409 + CONFLICT_001 / CONFLICT_002).
  */
 #[Route(path: '/admin/qr-code-profiles', name: 'nowo_qr_code_admin_')]
 final class QrCodeProfileAdminController extends AbstractController
@@ -48,6 +63,7 @@ final class QrCodeProfileAdminController extends AbstractController
         private readonly ?FormFactoryInterface $formFactory = null,
         private readonly ?QrCodePageFactory $pageFactory = null,
         private readonly ?TranslatorInterface $translator = null,
+        private readonly ?QrCodeProfileWriteUnit $writeUnit = null,
     ) {
     }
 
@@ -138,8 +154,9 @@ final class QrCodeProfileAdminController extends AbstractController
             return $this->redirectToRoute('nowo_qr_code_admin_index');
         }
 
-        $this->entityManager->remove($profile);
-        $this->entityManager->flush();
+        $this->writeUnit()->run(static function (EntityManagerInterface $manager) use ($profile): void {
+            $manager->remove($profile);
+        });
         $this->addFlash('success', $this->trans('nowo_qr_code.admin.flash.deleted', ['%name%' => $profile->getName()]));
 
         return $this->redirectToRoute('nowo_qr_code_admin_index');
@@ -150,12 +167,29 @@ final class QrCodeProfileAdminController extends AbstractController
         $form = $this->createForm(QrCodeProfileConfigType::class, $profile);
         $form->handleRequest($request);
 
+        $status  = $form->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK;
+        $headers = [];
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->entityManager->persist($profile);
-            $this->entityManager->flush();
-            $this->addFlash('success', $this->trans($isNew ? 'nowo_qr_code.admin.flash.created' : 'nowo_qr_code.admin.flash.updated'));
+            $expectedVersion = $isNew ? null : $this->submittedVersion($form);
 
-            return $this->redirectToRoute('nowo_qr_code_admin_index');
+            try {
+                $this->writeUnit()->run(static function (EntityManagerInterface $manager) use ($profile, $expectedVersion): void {
+                    if ($expectedVersion !== null) {
+                        // Opened on an older version: refuse before writing (OptimisticLockException).
+                        $manager->lock($profile, LockMode::OPTIMISTIC, $expectedVersion);
+                    }
+                    $manager->persist($profile);
+                });
+                $this->addFlash('success', $this->trans($isNew ? 'nowo_qr_code.admin.flash.created' : 'nowo_qr_code.admin.flash.updated'));
+
+                return $this->redirectToRoute('nowo_qr_code_admin_index');
+            } catch (UniqueConstraintViolationException|OptimisticLockException $race) {
+                // An expected race (REQ-RUNTIME-003 rule 4), not a lock conflict: the domain answer on the form.
+                $code = QrCodeProfileConflictListener::domainCode($race);
+                $form->addError(new FormError($this->trans($code === QrCodeProfileConflictListener::DUPLICATE_NAME ? 'nowo_qr_code.admin.form.errors.duplicate_name' : 'nowo_qr_code.admin.form.errors.stale')));
+                $status  = Response::HTTP_CONFLICT;
+                $headers = [QrCodeProfileConflictListener::ERROR_CODE_HEADER => (string) $code];
+            }
         }
 
         $pages = $this->pages();
@@ -165,7 +199,27 @@ final class QrCodeProfileAdminController extends AbstractController
             'profile'             => $profile,
             'is_new'              => $isNew,
             'use_database_config' => $this->useDatabaseConfig,
-        ]), new Response(status: $form->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK));
+        ]), new Response(status: $status, headers: $headers));
+    }
+
+    /**
+     * The version the edit form was opened with (hidden `version` field); null when the form does not carry one.
+     *
+     * @param FormInterface<mixed> $form
+     */
+    private function submittedVersion(FormInterface $form): ?int
+    {
+        $version = $form->has('version') ? $form->get('version')->getData() : null;
+
+        return is_string($version) && ctype_digit($version) ? (int) $version : null;
+    }
+
+    /**
+     * The injected write unit, else one on the injected manager (the host's: never cleared or reset while open).
+     */
+    private function writeUnit(): QrCodeProfileWriteUnit
+    {
+        return $this->writeUnit ?? new QrCodeProfileWriteUnit($this->entityManager);
     }
 
     private function deleteForm(QrCodeProfileConfig $profile): FormView

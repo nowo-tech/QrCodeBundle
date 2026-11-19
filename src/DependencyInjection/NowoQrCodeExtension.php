@@ -7,18 +7,26 @@ namespace Nowo\QrCodeBundle\DependencyInjection;
 use LogicException;
 use Nowo\QrCodeBundle\Config\ProfileResolver;
 use Nowo\QrCodeBundle\Controller\QrCodeProfileAdminController;
+use Nowo\QrCodeBundle\DependencyInjection\Compiler\CommitTrackingPass;
 use Nowo\QrCodeBundle\Enum\CssFramework;
+use Nowo\QrCodeBundle\EventListener\QrCodeProfileConflictListener;
+use Nowo\QrCodeBundle\Persistence\QrCodeProfileWriteUnit;
 use Nowo\QrCodeBundle\Security\AllowAllQrCodeAccessChecker;
 use Nowo\QrCodeBundle\Security\ConfigurableQrCodeAccessChecker;
 use Nowo\QrCodeBundle\Security\QrCodeAccessCheckerInterface;
 use Nowo\QrCodeBundle\Service\QrCodeProfileAdminService;
+use Nowo\TransactionDoctrine\Symfony\Conflict\ConflictResponsePolicy;
+use Nowo\TransactionDoctrine\WriteUnit\CommitLedger;
+use Nowo\TransactionDoctrine\WriteUnit\Dbal\CommitTrackingMiddleware;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 
 use function array_key_exists;
@@ -141,6 +149,15 @@ final class NowoQrCodeExtension extends Extension implements PrependExtensionInt
         return is_string($value) ? CssFramework::from($value)->normalized()->value : null;
     }
 
+    /** 1.15: real commits counted by {@see self::COMMIT_TRACKING_MIDDLEWARE}, read by the conflict answer. */
+    public const COMMIT_LEDGER_SERVICE = 'nowo_qr_code.commit_ledger';
+
+    /** 1.15: transaction-doctrine's commit-tracking DBAL middleware (scoped by {@see CommitTrackingPass}). */
+    public const COMMIT_TRACKING_MIDDLEWARE = 'nowo_qr_code.commit_tracking_middleware';
+
+    /** 1.15: container parameter holding `conflict_response.commit_tracking` (bundle, all or off). */
+    public const COMMIT_TRACKING_PARAMETER = 'nowo_qr_code.conflict_response.commit_tracking';
+
     /** Defined when the bundle entity is mapped (1.13): Symfony's mapping pass is skipped otherwise. */
     public const MAPPING_ENABLED_PARAMETER = 'nowo_qr_code.doctrine.mapping_enabled';
 
@@ -214,7 +231,10 @@ final class NowoQrCodeExtension extends Extension implements PrependExtensionInt
                 $reference = new Reference(sprintf('doctrine.orm.%s_entity_manager', $entityManager));
                 $container->getDefinition(QrCodeProfileAdminService::class)->setArgument('$entityManager', $reference);
                 $container->getDefinition(QrCodeProfileAdminController::class)->setArgument('$entityManager', $reference);
+                $container->getDefinition(QrCodeProfileWriteUnit::class)->setArgument('$entityManager', $reference);
             }
+
+            $this->registerConflictAnswer($container, $config['conflict_response']);
 
             $tablePrefix = (string) $config['doctrine']['table_prefix'];
             if ($tablePrefix !== '') {
@@ -223,6 +243,43 @@ final class NowoQrCodeExtension extends Extension implements PrependExtensionInt
                 $container->setDefinition(TablePrefixListener::class, $definition);
             }
         }
+    }
+
+    /**
+     * 1.15 (REQ-RUNTIME-003 rule 6): 409 (or 503) + CONFLICT_001 / CONFLICT_002 instead of a 500 for lock conflicts on
+     * the profile admin. Unset options follow transaction-doctrine's policy service when its bundle is registered.
+     *
+     * Commit tracking (`conflict_response.commit_tracking`): `bundle` (default) and `all` register transaction-doctrine's
+     * commit-tracking middleware; {@see CommitTrackingPass} scopes it to the bundle's connection (`bundle`), or drops it
+     * and reuses transaction-doctrine's own ledger when that bundle's `commit_detection` is on. `off` registers neither
+     * the ledger nor the middleware.
+     *
+     * @param array{status: int|null, retry_after: int|null, commit_tracking: string} $conflictResponse
+     */
+    private function registerConflictAnswer(ContainerBuilder $container, array $conflictResponse): void
+    {
+        $container->setParameter(self::COMMIT_TRACKING_PARAMETER, $conflictResponse['commit_tracking']);
+        $tracking = $conflictResponse['commit_tracking'] !== 'off';
+        if ($tracking) {
+            $container->setDefinition(self::COMMIT_LEDGER_SERVICE, new Definition(CommitLedger::class));
+            $container->setDefinition(self::COMMIT_TRACKING_MIDDLEWARE, (new Definition(CommitTrackingMiddleware::class, [new Reference(self::COMMIT_LEDGER_SERVICE)]))
+                ->addTag('doctrine.middleware'));
+        }
+
+        $policy = $conflictResponse['status'] === null && $conflictResponse['retry_after'] === null
+            ? new Reference(ConflictResponsePolicy::class, ContainerInterface::NULL_ON_INVALID_REFERENCE)
+            : new Definition(ConflictResponsePolicy::class, [
+                $conflictResponse['status'] ?? ConflictResponsePolicy::STATUS_CONFLICT,
+                $conflictResponse['retry_after'] ?? ConflictResponsePolicy::DEFAULT_RETRY_AFTER,
+            ]);
+
+        $container->setDefinition(QrCodeProfileConflictListener::class, (new Definition(QrCodeProfileConflictListener::class, [
+            $policy,
+            $tracking ? new Reference(self::COMMIT_LEDGER_SERVICE) : null,
+            new Reference('request_stack', ContainerInterface::NULL_ON_INVALID_REFERENCE),
+        ]))
+            ->addTag('kernel.event_listener', ['event' => KernelEvents::REQUEST, 'method' => 'onRequest', 'priority' => QrCodeProfileConflictListener::REQUEST_PRIORITY])
+            ->addTag('kernel.event_listener', ['event' => KernelEvents::EXCEPTION, 'method' => 'onException', 'priority' => QrCodeProfileConflictListener::PRIORITY]));
     }
 
     /**

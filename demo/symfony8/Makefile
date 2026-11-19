@@ -55,7 +55,7 @@ link-bundle: ensure-up
 	$(DOCKER_COMPOSE) exec php sh -c "rm -rf vendor/nowo-tech/qr-code-bundle && ln -sfn /var/qr-code-bundle vendor/nowo-tech/qr-code-bundle && php bin/console cache:clear"
 
 update-bundle: ensure-up
-	$(DOCKER_COMPOSE) exec php composer update nowo-tech/qr-code-bundle --no-interaction
+	$(DOCKER_COMPOSE) exec php composer update nowo-tech/qr-code-bundle -w --no-interaction
 	$(DOCKER_COMPOSE) exec php sh -c "php bin/console cache:clear --env=dev"
 
 verify:

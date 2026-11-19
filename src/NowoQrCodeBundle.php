@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace Nowo\QrCodeBundle;
 
 use Doctrine\Bundle\DoctrineBundle\DependencyInjection\Compiler\DoctrineOrmMappingsPass;
+use Nowo\QrCodeBundle\DependencyInjection\Compiler\CommitTrackingPass;
 use Nowo\QrCodeBundle\DependencyInjection\Compiler\CsrfProtectionPass;
 use Nowo\QrCodeBundle\DependencyInjection\Compiler\EntityManagerOptionPass;
 use Nowo\QrCodeBundle\DependencyInjection\Compiler\TwigPathsPass;
 use Nowo\QrCodeBundle\DependencyInjection\NowoQrCodeExtension;
 use Nowo\QrCodeBundle\DependencyInjection\UrlAllowlistValidationPass;
+use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
@@ -28,6 +30,8 @@ final class NowoQrCodeBundle extends Bundle
         $container->addCompilerPass(new TwigPathsPass());
         $container->addCompilerPass(new UrlAllowlistValidationPass());
         $container->addCompilerPass(new CsrfProtectionPass());
+        // 1.15 (REQ-RUNTIME-003): scope the commit-tracking middleware before DoctrineBundle's MiddlewaresPass (priority 0).
+        $container->addCompilerPass(new CommitTrackingPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION, 5);
 
         $entityDir = __DIR__ . '/Entity';
         if (class_exists(DoctrineOrmMappingsPass::class) && is_dir($entityDir)) {

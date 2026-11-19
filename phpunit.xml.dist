@@ -18,6 +18,13 @@
         </testsuite>
     </testsuites>
 
+    <groups>
+        <!-- REQ-RUNTIME-003: real-database concurrency tests, run by `make test-with-db` and the CI "Real databases" job (group "database"). -->
+        <exclude>
+            <group>database</group>
+        </exclude>
+    </groups>
+
     <source>
         <include>
             <directory>src</directory>

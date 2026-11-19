@@ -6,6 +6,7 @@ namespace Nowo\QrCodeBundle\Tests\Unit\DependencyInjection\Compiler;
 
 use Nowo\QrCodeBundle\DependencyInjection\Compiler\EntityManagerOptionPass;
 use Nowo\QrCodeBundle\Doctrine\ExcludedEntityNamespaceDriver;
+use Nowo\QrCodeBundle\Persistence\QrCodeProfileWriteUnit;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -28,6 +29,27 @@ final class EntityManagerOptionPassTest extends TestCase
         (new EntityManagerOptionPass())->process($container);
 
         self::assertCount(1, $container->getDefinition('doctrine.orm.default_metadata_driver')->getMethodCalls());
+    }
+
+    /**
+     * 1.15 (REQ-RUNTIME-003 rule 2): only a configured manager other than the host's default is the bundle's own.
+     */
+    public function testOnlyANonDefaultConfiguredManagerIsTheBundlesOwn(): void
+    {
+        foreach (['bundle' => true, 'default' => false] as $option => $own) {
+            $container = $this->container($option, ['default' => [self::ENTITIES], 'bundle' => [self::ENTITIES]]);
+            $container->register(QrCodeProfileWriteUnit::class)->setArgument('$ownManager', false);
+
+            (new EntityManagerOptionPass())->process($container);
+
+            self::assertSame($own, $container->getDefinition(QrCodeProfileWriteUnit::class)->getArgument('$ownManager'), $option);
+        }
+
+        $container = $this->container('bundle', ['default' => [self::ENTITIES], 'bundle' => [self::ENTITIES]]);
+        $container->setParameter('doctrine.default_entity_manager', 'bundle');
+        $container->register(QrCodeProfileWriteUnit::class)->setArgument('$ownManager', false);
+        (new EntityManagerOptionPass())->process($container);
+        self::assertFalse($container->getDefinition(QrCodeProfileWriteUnit::class)->getArgument('$ownManager'), 'the host default, whatever its name');
     }
 
     public function testUnknownManagerFailsTheBuild(): void

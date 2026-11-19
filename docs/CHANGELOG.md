@@ -101,6 +101,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Concurrency (REQ-RUNTIME-003):** every admin write (create, edit, delete, YAML import) runs in one `Persistence\QrCodeProfileWriteUnit`: one transaction on the manager of `QrCodeProfileConfig`, through nowo-tech/transaction-doctrine's runner (now required: `nowo-tech/transaction-contract` ^1.0, `nowo-tech/transaction-doctrine` ^1.6). On the host's manager an open manager is never cleared or reset, and pending host changes refuse the write (`LogicException`); a dedicated `doctrine.entity_manager` is reset after a storage failure.
+- **Optimistic lock:** `QrCodeProfileConfig::$version` (`#[ORM\Version]`, column `version INT DEFAULT 1 NOT NULL`); the edit form carries the version it was opened with in a hidden, unmapped `version` field.
+- **Conflict answer:** `EventListener\QrCodeProfileConflictListener` answers a deadlock, lock wait timeout or serialization failure on the admin routes with 409 + `X-Conflict-Code: CONFLICT_001` + `Retry-After` (nothing committed) or 409 + `CONFLICT_002` without `Retry-After` (part of the request committed, from transaction-doctrine's request watermark and the bundle's own commit mark). New options `conflict_response.status` (409 or 503), `retry_after` and `commit_tracking` (`bundle` default: only the bundle's connection is wrapped; transaction-doctrine's `CommitLedger` is reused when its `commit_detection` is on).
+- `docs/CONCURRENCY.md` (write paths, codes, host options, residual risks); CI job "Real databases (MySQL 8.4, MariaDB 11.4, PostgreSQL 16)" on DBAL 3 and 4 with two-connection race tests (`make test-with-db`), and the "Dependency floor (nowo-tech/transaction-* lowest, demo lock)" job with `.scripts/check-demo-lock.py`.
+
+### Fixed
+
+- Two admins creating the same profile name at once no longer answer a 500: the second gets the form again with 409 and `X-Error-Code: QR_CODE_PROFILE_DUPLICATE_NAME` (the YAML import gets the same code on the error page). Contention only: the unique key always kept one row.
+- Two admins editing one profile no longer silently overwrite each other (last writer won): a save of a profile changed since its form was opened answers the form again with 409 and `X-Error-Code: QR_CODE_PROFILE_STALE`.
+- The YAML import reads the rows inside its transaction and writes all profiles or none.
+- Profile lookups by name compare the name byte for byte after the read (REQ-RUNTIME-003 rule 5): on a case-insensitive MySQL / MariaDB collation, `Compact` no longer resolves the `compact` row.
+
 ### Documentation
 
 - REQ compliance sweep 2026-11-16: Spec Kit baseline maps the 1.12-1.14 units (profile provider port + Doctrine provider, `QrCodeServiceInterface`, `UrlAllowlistPattern`, `EntityManagerOptionPass`, `ExcludedEntityNamespaceDriver`, `AdminRouteLoader`; FR-CFG-004, FR-SVC-002, FR-DB-003, FR-ADM-004), inventory 51/51 (REQ-SPECKIT-001/003); Dependabot also tracks the demo Playwright `e2e/` npm dependencies (REQ-GH-002).

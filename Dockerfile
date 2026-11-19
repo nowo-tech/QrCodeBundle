@@ -13,11 +13,12 @@ RUN apk add --no-cache \
     zip \
     freetype-dev \
     libjpeg-turbo-dev \
-    libpng-dev
+    libpng-dev \
+    postgresql-dev
 
 # Install PHP extensions
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) zip gd
+    && docker-php-ext-install -j$(nproc) zip gd pdo_mysql pdo_pgsql
 
 # Install pcov for code coverage
 RUN pecl install pcov && docker-php-ext-enable pcov

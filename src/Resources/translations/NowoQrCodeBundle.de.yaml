@@ -37,6 +37,9 @@ nowo_qr_code:
             cancel: "Abbrechen"
             db_config_off: "use_database_config ist false: Aktivieren Sie es, damit Datenbankprofile YAML zur Laufzeit überschreiben."
             edit_title: "QR-Profil bearbeiten"
+            errors:
+                duplicate_name: "Ein QR-Profil mit diesem Namen existiert bereits (vielleicht gleichzeitig gespeichert). Wähle einen anderen Namen."
+                stale: "Dieses Profil wurde seit dem Öffnen von jemand anderem geändert. Lade die Seite neu und wende deine Änderung erneut an."
             fields:
                 error_correction:
                     label: "Fehlerkorrektur"
