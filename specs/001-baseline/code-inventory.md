@@ -17,7 +17,8 @@ This file proves that **every production source artifact** under `src/` is refer
 | `DependencyInjection/UrlAllowlistValidationPass.php` | Compile-time allowlist gate | FR-SEC-004 |
 | `DependencyInjection/Compiler/TwigPathsPass.php` | Twig namespace + overrides | FR-TWIG-001, FR-TWIG-002 |
 | `DependencyInjection/Compiler/CsrfProtectionPass.php` | Fail-closed CSRF gate for the admin | FR-ADM-003 |
-| `DependencyInjection/Compiler/EntityManagerOptionPass.php` | Validates `doctrine.entity_manager` at build time (1.12.0) | FR-DB-003 |
+| `DependencyInjection/Compiler/EntityManagerOptionPass.php` | Validates `doctrine.entity_manager` at build time (1.12.0); marks a dedicated manager as the bundle's own (1.15) | FR-DB-003, FR-DB-004 |
+| `DependencyInjection/Compiler/CommitTrackingPass.php` | Scopes the commit-tracking middleware to the bundle's connection, reuses transaction-doctrine's ledger (1.15) | FR-DB-005 |
 
 ## Configuration & profiles
 
@@ -58,6 +59,8 @@ This file proves that **every production source artifact** under `src/` is refer
 | `Repository/QrCodeProfileConfigRepository.php` | Profile lookup | FR-DB-002, FR-WRK-001 |
 | `EventSubscriber/ClosedEntityManagerSubscriber.php` | Worker EM hygiene (DB mode) | FR-WRK-001 |
 | `Doctrine/ExcludedEntityNamespaceDriver.php` | Empty metadata driver: bundle entities stay off the other entity managers | FR-DB-003 |
+| `Persistence/QrCodeProfileWriteUnit.php` | One transaction per admin write (REQ-RUNTIME-003, 1.15) | FR-DB-004 |
+| `EventListener/QrCodeProfileConflictListener.php` | 409 + CONFLICT_001 / CONFLICT_002, domain 409 codes (REQ-RUNTIME-003, 1.15) | FR-DB-005 |
 
 ## Admin CRUD
 
@@ -105,16 +108,16 @@ This file proves that **every production source artifact** under `src/` is refer
 
 | Category | Files | Mapped |
 | --- | ---: | ---: |
-| Bundle & DI | 8 | 8 |
+| Bundle & DI | 9 | 9 |
 | Configuration & profiles | 4 | 4 |
 | Rendering & public API | 5 | 5 |
 | Security & URL policy | 7 | 7 |
-| Entity & persistence | 4 | 4 |
+| Entity & persistence | 6 | 6 |
 | Admin CRUD | 6 | 6 |
 | Twig & UX component | 2 | 2 |
 | Symfony config | 4 | 4 |
 | Twig views | 4 | 4 |
 | Translations | 7 | 7 |
-| **Total production sources** | **51** | **51** |
+| **Total production sources** | **54** | **54** |
 
-Audit: `git ls-files src | wc -l` → 51 (2026-11-16).
+Audit: `git ls-files src | wc -l` → 54 (2026-11-19).

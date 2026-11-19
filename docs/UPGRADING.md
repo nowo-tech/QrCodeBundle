@@ -53,6 +53,26 @@
 
 ## Unreleased
 
+Only for `use_database_config: true` (hosts with YAML profiles or a `profile_provider` have nothing to do):
+
+1. **Schema:** `qr_code_profile` gets an optimistic-lock column. Generate a migration (`doctrine:migrations:diff`) or run
+   `doctrine:schema:update`; the SQL is `ALTER TABLE qr_code_profile ADD version INT DEFAULT 1 NOT NULL` (with your
+   `table_prefix`). Existing rows start at version 1.
+2. **Dependencies:** `nowo-tech/transaction-contract` ^1.0 and `nowo-tech/transaction-doctrine` ^1.6 are now required
+   (they bring `doctrine/dbal`). Run `composer update nowo-tech/qr-code-bundle -w`.
+3. **Pending host changes:** on the host's default entity manager, an admin write now refuses to start with a
+   `LogicException` when that manager has unflushed changes on entities other than the QR profiles (the same rule as
+   transaction-doctrine's `DoctrineTransactionRunner::forHostEntityManager()`): the bundle no longer flushes the host's
+   work. Flush or clear your own changes before calling the admin service, or set a dedicated
+   `doctrine.entity_manager`.
+4. **Conflicts:** a lock conflict on the admin routes answers 409 + `X-Conflict-Code: CONFLICT_001` / `CONFLICT_002`
+   instead of a 500. Set `nowo_qr_code.conflict_response.status: 503` to answer 503 instead. A duplicate name or a
+   stale edit answers 409 with `X-Error-Code` (`QR_CODE_PROFILE_DUPLICATE_NAME`, `QR_CODE_PROFILE_STALE`).
+5. **Templates:** the edit form has a new hidden `version` field. A host template that renders the fields one by one
+   must also render `form.version` (or `form_rest(form)`), otherwise the stale-edit check is skipped for that form.
+
+See [CONCURRENCY.md](CONCURRENCY.md).
+
 ## To 1.14.0
 
 From **1.13.1**: no action. `QrCodeServiceInterface` is new and additive; the `QrCodeService` class id still works. Type-hint the interface in your own code to be able to swap it (override the alias).

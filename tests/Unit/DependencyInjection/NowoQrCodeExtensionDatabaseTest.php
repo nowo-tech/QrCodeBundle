@@ -10,15 +10,21 @@ use Nowo\QrCodeBundle\Config\ProfileResolver;
 use Nowo\QrCodeBundle\Controller\QrCodeProfileAdminController;
 use Nowo\QrCodeBundle\DependencyInjection\NowoQrCodeExtension;
 use Nowo\QrCodeBundle\DependencyInjection\TablePrefixListener;
+use Nowo\QrCodeBundle\EventListener\QrCodeProfileConflictListener;
 use Nowo\QrCodeBundle\EventSubscriber\ClosedEntityManagerSubscriber;
+use Nowo\QrCodeBundle\Persistence\QrCodeProfileWriteUnit;
 use Nowo\QrCodeBundle\Repository\QrCodeProfileConfigRepository;
 use Nowo\QrCodeBundle\Security\AllowAllQrCodeAccessChecker;
 use Nowo\QrCodeBundle\Security\ConfigurableQrCodeAccessChecker;
 use Nowo\QrCodeBundle\Security\QrCodeAccessCheckerInterface;
 use Nowo\QrCodeBundle\Service\QrCodeProfileAdminService;
+use Nowo\TransactionDoctrine\Symfony\Conflict\ConflictResponsePolicy;
+use Nowo\TransactionDoctrine\WriteUnit\Dbal\CommitTrackingMiddleware;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
 use Symfony\Component\DependencyInjection\Reference;
@@ -66,11 +72,64 @@ final class NowoQrCodeExtensionDatabaseTest extends TestCase
         ]], $container);
 
         self::assertSame('bundle', $container->getParameter('nowo_qr_code.doctrine.entity_manager'));
-        foreach ([QrCodeProfileAdminService::class, QrCodeProfileAdminController::class] as $id) {
+        foreach ([QrCodeProfileAdminService::class, QrCodeProfileAdminController::class, QrCodeProfileWriteUnit::class] as $id) {
             $argument = $container->getDefinition($id)->getArgument('$entityManager');
             self::assertInstanceOf(Reference::class, $argument);
             self::assertSame('doctrine.orm.bundle_entity_manager', (string) $argument);
         }
+    }
+
+    /**
+     * 1.15 (REQ-RUNTIME-003): the conflict answer follows transaction-doctrine's policy service by default (optional
+     * reference), the bundle's options win when set; the commit-tracking middleware is tagged for every connection
+     * here and scoped by CommitTrackingPass.
+     */
+    public function testTheConflictAnswerAndTheWriteUnitAreRegistered(): void
+    {
+        $base = ['use_database_config' => true, 'security' => ['allow_unauthenticated' => true]];
+
+        $container = $this->baseContainer();
+        (new NowoQrCodeExtension())->load([$base], $container);
+
+        $listener = $container->getDefinition(QrCodeProfileConflictListener::class);
+        $policy   = $listener->getArgument(0);
+        self::assertInstanceOf(Reference::class, $policy);
+        self::assertSame(ConflictResponsePolicy::class, (string) $policy);
+        self::assertSame(ContainerInterface::NULL_ON_INVALID_REFERENCE, $policy->getInvalidBehavior());
+        self::assertSame(NowoQrCodeExtension::COMMIT_LEDGER_SERVICE, (string) $listener->getArgument(1));
+        self::assertSame([
+            ['event' => 'kernel.request', 'method' => 'onRequest', 'priority' => QrCodeProfileConflictListener::REQUEST_PRIORITY],
+            ['event' => 'kernel.exception', 'method' => 'onException', 'priority' => QrCodeProfileConflictListener::PRIORITY],
+        ], $listener->getTag('kernel.event_listener'));
+
+        $middleware = $container->getDefinition(NowoQrCodeExtension::COMMIT_TRACKING_MIDDLEWARE);
+        self::assertSame(CommitTrackingMiddleware::class, $middleware->getClass());
+        self::assertSame([[]], $middleware->getTag('doctrine.middleware'), 'scoped by CommitTrackingPass');
+        self::assertSame('bundle', $container->getParameter(NowoQrCodeExtension::COMMIT_TRACKING_PARAMETER));
+        self::assertFalse($container->getDefinition(QrCodeProfileWriteUnit::class)->getArgument('$ownManager'), 'the host manager by default');
+
+        $container = $this->baseContainer();
+        (new NowoQrCodeExtension())->load([$base + ['conflict_response' => ['commit_tracking' => 'off']]], $container);
+        self::assertFalse($container->hasDefinition(NowoQrCodeExtension::COMMIT_TRACKING_MIDDLEWARE), 'off: no middleware');
+        self::assertFalse($container->hasDefinition(NowoQrCodeExtension::COMMIT_LEDGER_SERVICE));
+        self::assertNull($container->getDefinition(QrCodeProfileConflictListener::class)->getArgument(1));
+
+        $container = $this->baseContainer();
+        (new NowoQrCodeExtension())->load([$base + ['conflict_response' => ['status' => 503]]], $container);
+        $policy = $container->getDefinition(QrCodeProfileConflictListener::class)->getArgument(0);
+        self::assertInstanceOf(Definition::class, $policy);
+        self::assertSame([503, ConflictResponsePolicy::DEFAULT_RETRY_AFTER], $policy->getArguments());
+
+        $container = $this->baseContainer();
+        (new NowoQrCodeExtension())->load([$base + ['conflict_response' => ['retry_after' => 5]]], $container);
+        $policy = $container->getDefinition(QrCodeProfileConflictListener::class)->getArgument(0);
+        self::assertInstanceOf(Definition::class, $policy);
+        self::assertSame([ConflictResponsePolicy::STATUS_CONFLICT, 5], $policy->getArguments());
+
+        $container = $this->baseContainer();
+        (new NowoQrCodeExtension())->load([[]], $container);
+        self::assertFalse($container->hasDefinition(QrCodeProfileConflictListener::class), 'no profile table: no write path, no answer');
+        self::assertFalse($container->hasDefinition(NowoQrCodeExtension::COMMIT_TRACKING_MIDDLEWARE));
     }
 
     public function testRegistersConfigurableAccessCheckerWithoutSecurityService(): void

@@ -48,6 +48,30 @@ final class ConfigurationTest extends TestCase
         $this->assertNull($config['web_ui']['css_framework']);
     }
 
+    public function testConflictResponseDefaultsToNullAndAccepts409Or503(): void
+    {
+        $config = $this->processor->processConfiguration($this->configuration, []);
+        self::assertSame(['status' => null, 'retry_after' => null, 'commit_tracking' => 'bundle'], $config['conflict_response']);
+
+        $config = $this->processor->processConfiguration($this->configuration, [['conflict_response' => ['status' => 503, 'retry_after' => 3, 'commit_tracking' => 'off']]]);
+        self::assertSame(['status' => 503, 'retry_after' => 3, 'commit_tracking' => 'off'], $config['conflict_response']);
+    }
+
+    public function testConflictResponseRejectsOtherStatuses(): void
+    {
+        $this->expectException(InvalidConfigurationException::class);
+        $this->expectExceptionMessage('must be 409 or 503');
+
+        $this->processor->processConfiguration($this->configuration, [['conflict_response' => ['status' => 500]]]);
+    }
+
+    public function testCommitTrackingRejectsUnknownModes(): void
+    {
+        $this->expectException(InvalidConfigurationException::class);
+
+        $this->processor->processConfiguration($this->configuration, [['conflict_response' => ['commit_tracking' => 'host']]]);
+    }
+
     public function testTheRemoved1xDefaultLayoutMapsToTheUiKitLayout(): void
     {
         $config = $this->processor->processConfiguration($this->configuration, [[

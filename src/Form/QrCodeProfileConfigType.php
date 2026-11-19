@@ -11,6 +11,7 @@ use Nowo\QrCodeBundle\Enum\QrErrorCorrection;
 use Nowo\QrCodeBundle\Security\UrlAllowlistPattern;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\CallbackTransformer;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -90,6 +91,14 @@ final class QrCodeProfileConfigType extends AbstractType
                 })],
             ]);
         });
+
+        // 1.15 (REQ-RUNTIME-003 rule 4): the version the form was opened with; the controller refuses a save of an older
+        // one (optimistic lock). Not mapped: the client never sets the stored version.
+        $profile = $options['data'] ?? null;
+        $builder->add('version', HiddenType::class, [
+            'mapped' => false,
+            'data'   => $profile instanceof QrCodeProfileConfig && $profile->getId() !== null ? (string) $profile->getVersion() : null,
+        ]);
 
         $builder->get('urlAllowlist')->addModelTransformer(new CallbackTransformer(
             static fn (?array $patterns): string => $patterns === null || $patterns === [] ? '' : implode("\n", $patterns),

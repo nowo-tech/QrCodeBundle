@@ -37,6 +37,9 @@ nowo_qr_code:
             cancel: "Cancel"
             db_config_off: "use_database_config is false: enable it so that database profiles override YAML at runtime."
             edit_title: "Edit QR profile"
+            errors:
+                duplicate_name: "A QR profile with this name already exists (possibly saved at the same time). Choose another name."
+                stale: "This profile was changed by someone else since you opened it. Reload the page and apply your change again."
             fields:
                 error_correction:
                     label: "Error correction"

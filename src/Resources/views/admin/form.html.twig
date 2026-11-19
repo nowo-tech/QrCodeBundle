@@ -3,7 +3,7 @@
   QrCodePageFactory::form(): header new_title / edit_title (intro = profile name on edit) with a back link to the list;
   form = QrCodeProfileConfigType; submit nowo_qr_code.admin.form.save; cancel = list; on edit the delete zone (POST +
   CSRF FormView behind a Confirm)). Also: profile, is_new, use_database_config.
-  Data block filled: nowo_ui_form_body (database-config notice, then the REQ-TWIG-003 child loop).
+  Data block filled: nowo_ui_form_body (database-config notice, the form-level errors, then the REQ-TWIG-003 child loop).
 #}
 {% extends '@NowoUiKit/page/form.html.twig' %}
 {% trans_default_domain 'NowoQrCodeBundle' %}
@@ -11,6 +11,10 @@
 {% block nowo_ui_form_body %}
     {% if not use_database_config|default(false) %}
         <div class="{{ nowo_ui_class('flash_warning', page.bundle) }}" role="status" data-testid="qr-code-db-config-off">{{ 'nowo_qr_code.admin.form.db_config_off'|trans }}</div>
+    {% endif %}
+    {# 1.15 (REQ-RUNTIME-003): a save that lost a race (duplicate name, stale version) carries its error on the form. #}
+    {% if form is not null %}
+        {{ form_errors(form) }}
     {% endif %}
     {{ parent() }}
 {% endblock %}

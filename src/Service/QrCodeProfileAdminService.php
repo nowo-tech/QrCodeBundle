@@ -7,6 +7,7 @@ namespace Nowo\QrCodeBundle\Service;
 use Doctrine\ORM\EntityManagerInterface;
 use Nowo\QrCodeBundle\Entity\QrCodeProfileConfig;
 use Nowo\QrCodeBundle\Enum\QrErrorCorrection;
+use Nowo\QrCodeBundle\Persistence\QrCodeProfileWriteUnit;
 use Nowo\QrCodeBundle\Repository\QrCodeProfileConfigRepository;
 
 use function array_keys;
@@ -30,6 +31,7 @@ final readonly class QrCodeProfileAdminService
         private EntityManagerInterface $entityManager,
         private array $profiles,
         private string $defaultProfile,
+        private ?QrCodeProfileWriteUnit $writeUnit = null,
     ) {
     }
 
@@ -54,7 +56,9 @@ final readonly class QrCodeProfileAdminService
     }
 
     /**
-     * Upserts every YAML profile into the database.
+     * Upserts every YAML profile into the database, in one write unit (1.15, REQ-RUNTIME-003 rule 1): the rows are
+     * read inside the transaction, and all profiles are written or none. A profile created or edited by another admin
+     * at the same time makes the import fail whole (unique name, optimistic `version`); it can be run again.
      *
      * @return int Number of profiles created or updated
      */
@@ -64,26 +68,26 @@ final readonly class QrCodeProfileAdminService
             return 0;
         }
 
-        $byName = [];
-        foreach ($this->repository->findAllOrderedByName() as $row) {
-            $byName[$row->getName()] = $row;
-        }
+        return ($this->writeUnit ?? new QrCodeProfileWriteUnit($this->entityManager))->run(function (EntityManagerInterface $manager): int {
+            $byName = [];
+            foreach ($this->repository->findAllOrderedByName() as $row) {
+                $byName[$row->getName()] = $row;
+            }
 
-        $touched = 0;
-        foreach ($this->profiles as $name => $definition) {
-            $row = $byName[$name] ?? (new QrCodeProfileConfig())->setName((string) $name);
-            $row
-                ->setSize((int) $definition['size'])
-                ->setMargin((int) $definition['margin'])
-                ->setErrorCorrection((string) ($definition['error_correction'] ?? QrErrorCorrection::High->value))
-                ->setUrlAllowlist($definition['url_allowlist'] ?? []);
+            $touched = 0;
+            foreach ($this->profiles as $name => $definition) {
+                $row = $byName[$name] ?? (new QrCodeProfileConfig())->setName((string) $name);
+                $row
+                    ->setSize((int) $definition['size'])
+                    ->setMargin((int) $definition['margin'])
+                    ->setErrorCorrection((string) ($definition['error_correction'] ?? QrErrorCorrection::High->value))
+                    ->setUrlAllowlist($definition['url_allowlist'] ?? []);
 
-            $this->entityManager->persist($row);
-            ++$touched;
-        }
+                $manager->persist($row);
+                ++$touched;
+            }
 
-        $this->entityManager->flush();
-
-        return $touched;
+            return $touched;
+        });
     }
 }

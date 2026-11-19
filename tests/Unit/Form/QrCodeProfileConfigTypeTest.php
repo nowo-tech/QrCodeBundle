@@ -11,6 +11,7 @@ use Nowo\QrCodeBundle\Enum\QrErrorCorrection;
 use Nowo\QrCodeBundle\Form\QrCodeProfileConfigType;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use ReflectionProperty;
 use Symfony\Component\Form\Extension\Core\CoreExtension;
 use Symfony\Component\Form\Extension\Validator\ValidatorExtension;
 use Symfony\Component\Form\FormFactoryInterface;
@@ -53,6 +54,21 @@ final class QrCodeProfileConfigTypeTest extends TestCase
         self::assertSame(4, $entity->getMargin());
         self::assertSame('medium', $entity->getErrorCorrection());
         self::assertSame(['example.com', 'cdn.example.com'], $entity->getUrlAllowlist());
+    }
+
+    public function testTheEditFormCarriesTheVersionItWasOpenedWithUnmapped(): void
+    {
+        $entity = (new QrCodeProfileConfig())->setName('wallet');
+        self::assertNull($this->factory->create(QrCodeProfileConfigType::class, $entity)->get('version')->getData(), 'a new profile has no version to check');
+
+        (new ReflectionProperty(QrCodeProfileConfig::class, 'id'))->setValue($entity, 7);
+        (new ReflectionProperty(QrCodeProfileConfig::class, 'version'))->setValue($entity, 3);
+        $form = $this->factory->create(QrCodeProfileConfigType::class, $entity);
+        self::assertSame('3', $form->get('version')->getData());
+
+        $form->submit(['name' => 'wallet', 'size' => 256, 'margin' => 4, 'errorCorrection' => 'low', 'urlAllowlist' => '', 'version' => '2']);
+        self::assertSame('2', $form->get('version')->getData(), 'the submitted version reaches the controller');
+        self::assertSame(3, $entity->getVersion(), 'never the stored version');
     }
 
     /**

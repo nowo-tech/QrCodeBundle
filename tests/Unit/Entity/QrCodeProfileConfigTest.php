@@ -23,6 +23,7 @@ final class QrCodeProfileConfigTest extends TestCase
             ->setUrlAllowlist(['example.com', 'cdn.example.com']);
 
         self::assertNull($entity->getId());
+        self::assertSame(1, $entity->getVersion(), 'a new row starts at version 1 (REQ-RUNTIME-003 optimistic lock)');
         self::assertSame('wallet', $entity->getName());
         self::assertSame([
             'size'             => 256,

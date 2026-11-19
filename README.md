@@ -110,6 +110,7 @@ The screenshots at the top come from this demo. Refresh them with `make -C demo/
 - [PSR evaluation (REQ-CS-007)](docs/PSR.md)
 - [FrankenPHP demos](docs/DEMO-FRANKENPHP.md)
 - [FrankenPHP worker audit](docs/FRANKENPHP-WORKER-AUDIT.md)
+- [Concurrency (REQ-RUNTIME-003)](docs/CONCURRENCY.md)
 - [GitHub CI](docs/GITHUB_CI.md)
 
 ## Tests and coverage

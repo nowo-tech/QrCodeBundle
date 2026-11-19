@@ -41,9 +41,23 @@ class QrCodeProfileConfig
     #[ORM\Column(type: Types::JSON)]
     private array $urlAllowlist = [];
 
+    /**
+     * 1.15 (REQ-RUNTIME-003 rule 4): optimistic lock. Doctrine bumps it on every update and refuses an update whose
+     * row moved on since it was read (OptimisticLockException); the admin form carries the version it was opened with.
+     */
+    #[ORM\Version]
+    #[ORM\Column(type: Types::INTEGER, options: ['default' => 1])]
+    /* @phpstan-ignore property.onlyRead (Doctrine assigns the version via reflection) */
+    private int $version = 1;
+
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getVersion(): int
+    {
+        return $this->version;
     }
 
     public function getName(): string

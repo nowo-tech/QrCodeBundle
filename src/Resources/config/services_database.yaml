@@ -17,6 +17,15 @@ services:
       $profileRepository: null
       $profileProvider: '@Nowo\QrCodeBundle\Config\DoctrineQrCodeProfileProvider'
 
+  # 1.15 (REQ-RUNTIME-003 rule 1): one transaction per admin write. $ownManager is set by EntityManagerOptionPass when
+  # doctrine.entity_manager names a manager other than the host's default.
+  Nowo\QrCodeBundle\Persistence\QrCodeProfileWriteUnit:
+    arguments:
+      $registry: '@doctrine'
+      $managerName: '%nowo_qr_code.doctrine.entity_manager%'
+      $ownManager: false
+      $logger: '@?logger'
+
   Nowo\QrCodeBundle\Service\QrCodeProfileAdminService:
     arguments:
       $profiles: '%nowo_qr_code.profiles%'

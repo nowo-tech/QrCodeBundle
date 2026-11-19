@@ -21,31 +21,43 @@ class QrCodeProfileConfigRepository extends ServiceEntityRepository
         parent::__construct($registry, QrCodeProfileConfig::class);
     }
 
+    /**
+     * The row named exactly $name (1.15, REQ-RUNTIME-003 rule 5): a case- or accent-insensitive collation (MySQL /
+     * MariaDB defaults) never makes `Compact` find `compact`.
+     */
     public function findOneByName(string $name): ?QrCodeProfileConfig
     {
-        return $this->findOneBy(['name' => $name]);
+        $row = $this->findOneBy(['name' => $name]);
+
+        return $row instanceof QrCodeProfileConfig && $row->getName() === $name ? $row : null;
     }
 
     /**
      * Profile values for {@see QrCodeProfile::fromArray()}, read with array hydration.
      *
      * Bypasses the identity map so that a long-running worker never renders with a managed entity
-     * loaded in an earlier request (stale `url_allowlist`, size, …) after another worker edited it.
+     * loaded in an earlier request (stale `url_allowlist`, size, …) after another worker edited it. The name is
+     * compared byte for byte after the read (1.15, REQ-RUNTIME-003 rule 5), whatever the column collation.
      *
      * @return array{size: int, margin: int, error_correction: string, url_allowlist: list<string>}|null
      */
     public function findProfileArrayByName(string $name): ?array
     {
-        /** @var list<array{size: int, margin: int, error_correction: string, url_allowlist: list<string>}> $rows */
+        /** @var list<array{name: string, size: int, margin: int, error_correction: string, url_allowlist: list<string>}> $rows */
         $rows = $this->createQueryBuilder('p')
-            ->select('p.size AS size', 'p.margin AS margin', 'p.errorCorrection AS error_correction', 'p.urlAllowlist AS url_allowlist')
+            ->select('p.name AS name', 'p.size AS size', 'p.margin AS margin', 'p.errorCorrection AS error_correction', 'p.urlAllowlist AS url_allowlist')
             ->andWhere('p.name = :name')
             ->setParameter('name', $name)
             ->setMaxResults(1)
             ->getQuery()
             ->getArrayResult();
 
-        return $rows[0] ?? null;
+        $row = $rows[0] ?? null;
+        if ($row === null || $row['name'] !== $name) {
+            return null;
+        }
+
+        return ['size' => $row['size'], 'margin' => $row['margin'], 'error_correction' => $row['error_correction'], 'url_allowlist' => $row['url_allowlist']];
     }
 
     /**

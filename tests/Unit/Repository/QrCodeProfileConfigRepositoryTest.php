@@ -92,12 +92,13 @@ final class QrCodeProfileConfigRepositoryTest extends TestCase
 
             public function findOneBy(array $criteria, ?array $orderBy = null): ?object
             {
-                return $criteria === ['name' => 'compact'] ? $this->entity : null;
+                return $criteria === ['name' => 'compact'] || $criteria === ['name' => 'COMPACT'] ? $this->entity : null;
             }
         };
 
         self::assertSame($entity, $repo->findOneByName('compact'));
         self::assertNull($repo->findOneByName('other'));
+        self::assertNull($repo->findOneByName('COMPACT'), 'a case-insensitive match is refused (rule 5)');
     }
 
     private function repositoryWithQueryBuilder(QueryBuilder $qb): QrCodeProfileConfigRepository
@@ -124,7 +125,15 @@ final class QrCodeProfileConfigRepositoryTest extends TestCase
     {
         $row = ['size' => 200, 'margin' => 4, 'error_correction' => 'low', 'url_allowlist' => ['example.com']];
 
-        self::assertSame($row, $this->repository([$row])->findProfileArrayByName('compact'));
+        self::assertSame($row, $this->repository([['name' => 'compact'] + $row])->findProfileArrayByName('compact'));
+    }
+
+    public function testFindProfileArrayByNameIgnoresARowOfAnotherCase(): void
+    {
+        // A case-insensitive collation returns `Compact` for `compact`: the byte-exact re-check refuses it (rule 5).
+        $row = ['name' => 'Compact', 'size' => 200, 'margin' => 4, 'error_correction' => 'low', 'url_allowlist' => []];
+
+        self::assertNull($this->repository([$row])->findProfileArrayByName('compact'));
     }
 
     public function testFindProfileArrayByNameReturnsNullWhenMissing(): void
@@ -147,7 +156,7 @@ final class QrCodeProfileConfigRepositoryTest extends TestCase
 
         $qb = $this->createMock(QueryBuilder::class);
         $qb->expects(self::once())->method('select')
-            ->with('p.size AS size', 'p.margin AS margin', 'p.errorCorrection AS error_correction', 'p.urlAllowlist AS url_allowlist')
+            ->with('p.name AS name', 'p.size AS size', 'p.margin AS margin', 'p.errorCorrection AS error_correction', 'p.urlAllowlist AS url_allowlist')
             ->willReturnSelf();
         $qb->method('andWhere')->with('p.name = :name')->willReturnSelf();
         $qb->method('setParameter')->with('name', 'compact')->willReturnSelf();
