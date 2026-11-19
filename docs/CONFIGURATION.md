@@ -219,7 +219,7 @@ submitted: they must compile and may not nest quantifiers (catastrophic backtrac
 
 > **Changed in 1.11.0 (security):** `#…#` regexes used to be tried against the host **and then the full URL**, so
 > `#good\.com#` allowed `https://evil.tld/?x=good.com`. They now match the host only; use `url#^…#` for full-URL
-> regexes. See [UPGRADING](UPGRADING.md#unreleased).
+> regexes. See [UPGRADING](UPGRADING.md#to-1150).
 
 Only `http` and `https` schemes are accepted. Schemes such as `javascript:` and `data:` are always rejected.
 

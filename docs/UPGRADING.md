@@ -3,6 +3,7 @@
 ## Table of contents
 
 - [Unreleased](#unreleased)
+- [To 1.15.0](#to-1150)
 - [To 1.14.0](#to-1140)
 - [To 1.13.1](#to-1131)
 - [To 1.13.0](#to-1130)
@@ -52,6 +53,14 @@
 - [[1.0.0] - 2026-07-30](#100---2026-07-30)
 
 ## Unreleased
+
+## To 1.15.0
+
+From **1.14.0**:
+
+```bash
+composer update nowo-tech/qr-code-bundle
+```
 
 Only for `use_database_config: true` (hosts with YAML profiles or a `profile_provider` have nothing to do):
 
