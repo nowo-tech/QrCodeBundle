@@ -64,12 +64,29 @@ Only for `use_database_config: true` (hosts with YAML profiles or a `profile_pro
    `LogicException` when that manager has unflushed changes on entities other than the QR profiles (the same rule as
    transaction-doctrine's `DoctrineTransactionRunner::forHostEntityManager()`): the bundle no longer flushes the host's
    work. Flush or clear your own changes before calling the admin service, or set a dedicated
-   `doctrine.entity_manager`.
+   `doctrine.entity_manager`. Entities of nowo-tech/doctrine-encrypt-bundle on the host's manager always count as
+   pending (they are decrypted in place after loading), so with them every admin write on that manager throws this
+   `LogicException`: set a dedicated `doctrine.entity_manager` for the QR profiles (audit UJ-QR-2).
 4. **Conflicts:** a lock conflict on the admin routes answers 409 + `X-Conflict-Code: CONFLICT_001` / `CONFLICT_002`
    instead of a 500. Set `nowo_qr_code.conflict_response.status: 503` to answer 503 instead. A duplicate name or a
    stale edit answers 409 with `X-Error-Code` (`QR_CODE_PROFILE_DUPLICATE_NAME`, `QR_CODE_PROFILE_STALE`).
 5. **Templates:** the edit form has a new hidden `version` field. A host template that renders the fields one by one
    must also render `form.version` (or `form_rest(form)`), otherwise the stale-edit check is skipped for that form.
+6. **Commit tracking (audit UJ-QR-1):** `conflict_response.commit_tracking` decides which connections get
+   transaction-doctrine's commit-tracking DBAL middleware (it counts commits for `CONFLICT_002`):
+   - `bundle` (default): only the connection of the bundle's entity manager (`doctrine.entity_manager`, else the
+     default one). Without a dedicated manager this is usually the host's default connection, so the host's own
+     queries on it go through the middleware too;
+   - `all`: every Doctrine connection;
+   - `off`: none.
+   When transaction-doctrine's `commit_detection` is on, its ledger is reused and the bundle wraps nothing. On DBAL 3,
+   `Connection::commit()` of a wrapped connection returns `null` instead of `true`: hosts that check that return value
+   set `commit_tracking: off` or enable transaction-doctrine's `commit_detection`.
+7. **Exact profile names (BC, audit UJ-QR-3):** profile names are now matched byte for byte on every database. Before,
+   MySQL / MariaDB matched them case-insensitively (column collation), so `Compact` found the `compact` row. Check that
+   the names your templates and code pass match the stored rows exactly
+   (`SELECT name FROM <table_prefix>qr_code_profile`); otherwise the YAML profile of that name is used, or
+   `InvalidQrProfileException` is thrown when there is none.
 
 See [CONCURRENCY.md](CONCURRENCY.md).
 
