@@ -8,63 +8,77 @@
 {% endblock %}
 
 {% block body %}
-    <h2>Twig functions</h2>
-    <div class="nowo-ui-cards">
-        <figure class="nowo-ui-card" data-testid="qr-cell">
-            <div class="nowo-ui-card__body">
-                <img src="{{ qr_code_data_uri('EVENT-42') }}" alt="default profile QR">
-                <figcaption class="nowo-ui-muted"><code>qr_code_data_uri('EVENT-42')</code></figcaption>
-            </div>
-        </figure>
-        <figure class="nowo-ui-card" data-testid="qr-cell">
-            <div class="nowo-ui-card__body">
-                <img src="{{ qr_code_data_uri('EVENT-42', 'compact') }}" alt="compact profile QR">
-                <figcaption class="nowo-ui-muted"><code>…('EVENT-42', 'compact')</code></figcaption>
-            </div>
-        </figure>
-        <figure class="nowo-ui-card" data-testid="qr-cell">
-            <div class="nowo-ui-card__body">
-                <img src="{{ qr_code_for_url(sample_url, 'compact') }}" alt="URL QR compact">
-                <figcaption class="nowo-ui-muted"><code>qr_code_for_url(url, 'compact')</code></figcaption>
-            </div>
-        </figure>
-    </div>
+    {% embed '@NowoUiKit/demo_platform/_section.html.twig' with {title: 'Twig functions', kind: 'table'} %}
+        {% block section_body %}
+            <table class="nowo-ui-data-table">
+                <thead>
+                    <tr><th scope="col">QR code</th><th scope="col">Call</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td data-testid="qr-cell"><img src="{{ qr_code_data_uri('EVENT-42') }}" alt="default profile QR"></td>
+                        <td><code class="nowo-ui-code">qr_code_data_uri('EVENT-42')</code></td>
+                    </tr>
+                    <tr>
+                        <td data-testid="qr-cell"><img src="{{ qr_code_data_uri('EVENT-42', 'compact') }}" alt="compact profile QR"></td>
+                        <td><code class="nowo-ui-code">qr_code_data_uri('EVENT-42', 'compact')</code></td>
+                    </tr>
+                    <tr>
+                        <td data-testid="qr-cell"><img src="{{ qr_code_for_url(sample_url, 'compact') }}" alt="URL QR compact"></td>
+                        <td><code class="nowo-ui-code">qr_code_for_url(url, 'compact')</code></td>
+                    </tr>
+                </tbody>
+            </table>
+        {% endblock %}
+    {% endembed %}
 
-    <h2>Twig UX component</h2>
-    <div class="nowo-ui-cards">
-        <figure class="nowo-ui-card" data-testid="qr-cell">
-            <div class="nowo-ui-card__body">
-                <twig:NowoQrCode content="Hello" class="qr" />
-                <figcaption class="nowo-ui-muted"><code>&lt;twig:NowoQrCode content="Hello" /&gt;</code></figcaption>
-            </div>
-        </figure>
-        <figure class="nowo-ui-card" data-testid="qr-cell">
-            <div class="nowo-ui-card__body">
-                <twig:NowoQrCode url="{{ sample_url }}" profile="compact" />
-                <figcaption class="nowo-ui-muted"><code>url + profile="compact"</code></figcaption>
-            </div>
-        </figure>
-    </div>
+    {% embed '@NowoUiKit/demo_platform/_section.html.twig' with {title: 'Twig UX component', kind: 'table'} %}
+        {% block section_body %}
+            <table class="nowo-ui-data-table">
+                <thead>
+                    <tr><th scope="col">QR code</th><th scope="col">Call</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td data-testid="qr-cell"><twig:NowoQrCode content="Hello" class="qr" /></td>
+                        <td><code class="nowo-ui-code">&lt;twig:NowoQrCode content="Hello" /&gt;</code></td>
+                    </tr>
+                    <tr>
+                        <td data-testid="qr-cell"><twig:NowoQrCode url="{{ sample_url }}" profile="compact" /></td>
+                        <td><code class="nowo-ui-code">url + profile="compact"</code></td>
+                    </tr>
+                </tbody>
+            </table>
+        {% endblock %}
+    {% endembed %}
 
-    <h2>PHP <code>QrCodeService</code></h2>
-    <div class="nowo-ui-cards">
-        <figure class="nowo-ui-card" data-testid="qr-cell">
-            <div class="nowo-ui-card__body">
-                <img src="{{ php_data_uri }}" alt="PHP createDataUri">
-                <figcaption class="nowo-ui-muted"><code>createDataUri(…)</code></figcaption>
-            </div>
-        </figure>
-        <figure class="nowo-ui-card" data-testid="qr-cell">
-            <div class="nowo-ui-card__body">
-                <img src="{{ php_url_uri }}" alt="PHP createDataUriForUrl">
-                <figcaption class="nowo-ui-muted"><code>createDataUriForUrl(…, 'compact')</code></figcaption>
-            </div>
-        </figure>
-    </div>
+    {% embed '@NowoUiKit/demo_platform/_section.html.twig' with {title: 'PHP QrCodeService', kind: 'table'} %}
+        {% block section_body %}
+            <table class="nowo-ui-data-table">
+                <thead>
+                    <tr><th scope="col">QR code</th><th scope="col">Call</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td data-testid="qr-cell"><img src="{{ php_data_uri }}" alt="PHP createDataUri"></td>
+                        <td><code class="nowo-ui-code">createDataUri(…)</code></td>
+                    </tr>
+                    <tr>
+                        <td data-testid="qr-cell"><img src="{{ php_url_uri }}" alt="PHP createDataUriForUrl"></td>
+                        <td><code class="nowo-ui-code">createDataUriForUrl(…, 'compact')</code></td>
+                    </tr>
+                </tbody>
+            </table>
+        {% endblock %}
+    {% endembed %}
 
-    <p class="nowo-ui-muted">
-        Config: <code>config/packages/nowo_qr_code.yaml</code>.
-        Admin CRUD (<code>/admin/qr-code-profiles</code>) needs <code>use_database_config: true</code> + Doctrine — not enabled in this lightweight demo.
-        See <a class="nowo-ui-link" href="https://github.com/nowo-tech/QrCodeBundle/blob/main/docs/CONFIGURATION.md">CONFIGURATION.md</a>.
-    </p>
+    {% embed '@NowoUiKit/demo_platform/_section.html.twig' with {title: 'Configuration', kind: 'detail'} %}
+        {% block section_body %}
+            <p>
+                Profiles live in <code class="nowo-ui-code">config/packages/nowo_qr_code.yaml</code>. In the dev demo they are also stored in the database
+                (seeded by <code class="nowo-ui-code">app:demo:setup</code>) and managed in the profile admin.
+            </p>
+            <p><a class="nowo-ui-btn nowo-ui-btn--outline nowo-ui-btn--sm" href="https://github.com/nowo-tech/QrCodeBundle/blob/main/docs/CONFIGURATION.md">Configuration reference</a></p>
+        {% endblock %}
+    {% endembed %}
 {% endblock %}

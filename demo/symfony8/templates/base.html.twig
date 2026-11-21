@@ -1,22 +1,14 @@
-{#- REQ-DEMO-014: the demo shell is UiKit's admin layout with UiKit's default theme (nowo-ui.css from the bundle's own
-    asset package, no CSS framework, no CDN). It is also the host layout of the QR profile admin pages
-    (nowo_ui_kit.layouts.admin). The header menu lists the demo pages with the active item. -#}
-{% extends '@NowoUiKit/layout/admin.html.twig' %}
-
+{#- REQ-DEMO-014: the demo runs inside UiKit's shared demo platform shell. This file only declares the demo; it is also the
+    host layout of the QR profile admin pages (nowo_ui_kit.layouts). The profile admin exists in the dev / test demo only. -#}
+{% extends '@NowoUiKit/demo_platform/layout.html.twig' %}
+{% set _admin = app.environment != 'prod' ? [{label: 'Profiles admin', route: 'nowo_qr_code_admin_index', active: ['nowo_qr_code_admin_*'], section: 'QR Code', testid: 'nav-admin'}] : [] %}
+{% set nowo_ui_demo_platform = {
+    bundle: 'QR Code',
+    home_route: 'app_demo_index',
+    repository: 'https://github.com/nowo-tech/QrCodeBundle',
+    translation_domain: false,
+    nav: [{label: 'QR codes', route: 'app_demo_index', section: 'QR Code'}]|merge(_admin),
+} %}
 {% block nowo_ui_document_title %}{% block title %}QR Code Bundle Demo{% endblock %}{% endblock %}
-
-{% block nowo_ui_navigation %}
-    {% set _route = app.request.attributes.get('_route')|default('') %}
-    <header class="nowo-ui-header" data-testid="demo-masthead">
-        <a class="nowo-ui-brand" href="{{ path('app_demo_index') }}">QR Code Bundle Demo</a>
-        <nav class="nowo-ui-menu" aria-label="Demo">
-            <a class="nowo-ui-link" href="{{ path('app_demo_index') }}"{% if _route == 'app_demo_index' %} aria-current="page"{% endif %}>QR codes</a>
-            {% if app.environment != 'prod' %}
-                <a class="nowo-ui-link" href="{{ path('nowo_qr_code_admin_index') }}" data-testid="nav-admin"{% if _route starts with 'nowo_qr_code_admin' %} aria-current="page"{% endif %}>Profiles admin</a>
-            {% endif %}
-        </nav>
-        <span class="nowo-ui-badge nowo-ui-badge--neutral">Symfony 8 · FrankenPHP</span>
-    </header>
-{% endblock %}
 
 {% block nowo_ui_content %}{% block body %}{% endblock %}{% endblock %}

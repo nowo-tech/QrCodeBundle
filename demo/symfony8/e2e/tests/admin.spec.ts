@@ -38,7 +38,7 @@ test.describe('QR profile admin', () => {
     await page.getByRole('button', { name: 'Save' }).click();
 
     await expect(page).toHaveURL(new RegExp(`${ADMIN}$`));
-    await expect(page.getByRole('alert').filter({ hasText: 'Profile created.' })).toBeVisible();
+    await expect(page.getByTestId('demo-platform-flashes').filter({ hasText: 'Profile created.' })).toBeVisible();
     await expect(row(page, name)).toContainText('220');
     await expect(row(page, name)).toContainText('shop.example.com');
 
@@ -46,7 +46,7 @@ test.describe('QR profile admin', () => {
     await expect(page.getByRole('heading', { name: 'Edit QR profile', level: 1 })).toBeVisible();
     await fillProfile(page, { size: '240', margin: '6', errorCorrection: 'High (30%)', allowlist: 'shop.example.com' });
     await page.getByRole('button', { name: 'Save' }).click();
-    await expect(page.getByRole('alert').filter({ hasText: 'Profile updated.' })).toBeVisible();
+    await expect(page.getByTestId('demo-platform-flashes').filter({ hasText: 'Profile updated.' })).toBeVisible();
     await expect(row(page, name)).toContainText('240');
 
     await row(page, name).getByRole('button', { name: 'Delete' }).click();
@@ -54,7 +54,7 @@ test.describe('QR profile admin', () => {
     await expect(dialog).toBeVisible();
     await expect(dialog).toContainText(`The profile "${name}" will be deleted.`);
     await dialog.getByRole('button', { name: 'Delete profile' }).click();
-    await expect(page.getByRole('alert').filter({ hasText: `Profile "${name}" deleted.` })).toBeVisible();
+    await expect(page.getByTestId('demo-platform-flashes').filter({ hasText: `Profile "${name}" deleted.` })).toBeVisible();
     await expect(row(page, name)).toHaveCount(0);
   });
 
@@ -72,7 +72,7 @@ test.describe('QR profile admin', () => {
   test('imports the YAML profiles', async ({ page }) => {
     await page.goto(ADMIN);
     await page.getByTestId('qr-code-import-yaml').click();
-    await expect(page.getByRole('alert').filter({ hasText: 'Imported or updated 2 profile(s) from YAML.' })).toBeVisible();
+    await expect(page.getByTestId('demo-platform-flashes').filter({ hasText: 'Imported or updated 2 profile(s) from YAML.' })).toBeVisible();
   });
 
   test('database profiles drive the rendered QR codes', async ({ page }) => {
