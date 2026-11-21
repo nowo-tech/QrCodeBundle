@@ -1,7 +1,7 @@
 import { test, type Page } from '@playwright/test';
 import { mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { expectQrImagesRendered, waitForWebProfiler } from './helpers';
+import { expectQrImagesRendered } from './helpers';
 
 /** REQ-DEMO-013 — README screenshots (captured as PNG, converted to WebP by scripts/to-webp.mjs). */
 const outDir = process.env.SCREENSHOT_DIR
@@ -13,7 +13,8 @@ test.beforeAll(() => {
 });
 
 async function shot(page: Page, name: string): Promise<void> {
-  await waitForWebProfiler(page);
+  // The Symfony toolbar is dev chrome and never part of the README screenshots.
+  await page.addStyleTag({ content: '.sf-toolbar,.sf-minitoolbar,[id^="sfwdt"]{display:none!important}' });
   await page.screenshot({ path: resolve(outDir, `${name}.png`) });
 }
 
